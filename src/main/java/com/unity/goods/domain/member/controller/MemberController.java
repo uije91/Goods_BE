@@ -1,8 +1,12 @@
 package com.unity.goods.domain.member.controller;
 
+import com.unity.goods.domain.member.dto.LoginDto;
 import com.unity.goods.domain.member.dto.SignUpRequest;
 import com.unity.goods.domain.member.dto.SignUpResponse;
 import com.unity.goods.domain.member.service.MemberService;
+import com.unity.goods.domain.model.TokenDto;
+import com.unity.goods.global.util.CookieUtil;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,12 +20,19 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberController {
 
   private final MemberService memberService;
+  private final int COOKIE_EXPIRATION = 30 * 24 * 60 * 60; // 30일
 
   @PostMapping("/signup")
   public ResponseEntity<?> signUpMember(
-      @RequestBody SignUpRequest signUpRequest){
+      @RequestBody SignUpRequest signUpRequest) {
     SignUpResponse signUpResponse = memberService.signUpMember(signUpRequest);
     return ResponseEntity.ok(signUpResponse);
   }
 
+  @PostMapping("/login")
+  public ResponseEntity<?> login(@RequestBody @Valid LoginDto.LoginRequest request) {
+    TokenDto login = memberService.login(request);
+    CookieUtil.addCookie("refresh-token", login.getRefreshToken(), COOKIE_EXPIRATION);
+    return ResponseEntity.ok(login);
+  }
 }
