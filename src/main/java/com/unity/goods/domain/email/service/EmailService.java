@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 public class EmailService {
 
   private final static Long VERIFICATION_EXPIRED_AT = 60 * 3 * 1000L; // 3분
-  private final static String SENDER = "Goods";
+  private final static String FROM = "Goods";
 
   private final RedisService redisService;
   private final MailSender mailSender;
@@ -58,11 +58,11 @@ public class EmailService {
   public SimpleMailMessage createVerificationEmail(String emailAddress, String verificationNumber) {
 
     SimpleMailMessage message = new SimpleMailMessage();
-    message.setFrom(SENDER);
+    message.setFrom(FROM);
     message.setTo(emailAddress);
     message.setSubject(EmailSubjects.SEND_VERIFICATION_CODE.getTitle());
     message.setText(
-        "안녕하세요. 중고거래 마켓 " + SENDER + "입니다.\n\n"
+        "안녕하세요. 중고거래 마켓 " + FROM + "입니다.\n\n"
             + "인증 번호는 [" + verificationNumber + "] 입니다.\n\n"
             + "인증 번호를 입력하고 인증 완료 버튼을 눌러주세요.");
 
