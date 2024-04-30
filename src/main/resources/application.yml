@@ -1,1 +1,31 @@
-spring.application.name=Goods
+spring:
+  # Redis 설정
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  # MySQL 설정
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/goods?characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+    username: root
+    password: 1234
+
+  #JPA 설정
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    generate-ddl: true
+    properties:
+      hibernate:
+        show_sql: true
+    database: mysql
+    defer-datasource-initialization: true
+
+  #JWT 설정
+  jwt:
+    secret: VGhpcyBpcyBhIHByb2plY3QgZnJvbSB0aGUgVW5pdHkgdGVhbS4gVGhlIHNlcnZpY2UgbmFtZSBpcyBnb29kcyBhbmQgaXQgaXMgYSBwbGF0Zm9ybSB0aGF0IHN1cHBvcnRzIHVzZWQgZ29vZHMgdHJhbnNhY3Rpb25zLg
+    access-token-expiration-time: 3600000 # 60분(60*60*1000L) ms
+    refresh-token-expiration-time: 1209600000 # 14일(7*24*60*60*1000L) ms
+
