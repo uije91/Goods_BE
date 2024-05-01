@@ -56,14 +56,14 @@ public class Member {
   @Enumerated(EnumType.STRING)
   private SocialType socialType;
 
-  public static Member fromSignUpRequest(SignUpRequest signUpRequest){
+  public static Member fromSignUpRequest(SignUpRequest signUpRequest, String imageUrl) {
 
     return Member.builder()
         .nickname(signUpRequest.getNickName())
         .email(signUpRequest.getEmail())
         .password(signUpRequest.getPassword())
         .phoneNumber(signUpRequest.getPhoneNumber())
-        .profileImage(signUpRequest.getProfileImageUrl())
+        .profileImage(imageUrl)
         .role(Role.USER)
         .status(ACTIVE)
         .tradePassword(signUpRequest.getTradePassword())

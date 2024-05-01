@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,7 +25,7 @@ public class MemberController {
 
   @PostMapping("/signup")
   public ResponseEntity<?> signUp(
-      @RequestBody @Valid SignUpDto.SignUpRequest signUpRequest) {
+      @RequestBody @Valid @ModelAttribute SignUpDto.SignUpRequest signUpRequest) {
     SignUpDto.SignUpResponse signUpResponse = memberService.signUp(signUpRequest);
     return ResponseEntity.ok(signUpResponse);
   }
@@ -35,7 +36,7 @@ public class MemberController {
     CookieUtil.addCookie("refresh-token", login.getRefreshToken(), COOKIE_EXPIRATION);
     return ResponseEntity.ok()
         //RFC 7235 정의에 따라 인증헤더 형태를 가져야 한다.
-        .header(HttpHeaders.AUTHORIZATION,"Bearer "+login.getAccessToken())
+        .header(HttpHeaders.AUTHORIZATION, "Bearer " + login.getAccessToken())
         .body(login);
   }
 }

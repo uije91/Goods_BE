@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 public class SignUpDto {
 
@@ -13,7 +14,7 @@ public class SignUpDto {
   @Builder
   public static class SignUpRequest {
 
-    private String profileImageUrl;
+    private MultipartFile profileImage;
 
     @Pattern(regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+.[A-Za-z]{2,6}$",
         message = "이메일 형식에 맞지 않습니다.")

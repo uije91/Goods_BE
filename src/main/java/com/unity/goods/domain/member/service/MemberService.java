@@ -15,6 +15,7 @@ import com.unity.goods.domain.model.TokenDto;
 import com.unity.goods.global.exception.ErrorCode;
 import com.unity.goods.global.jwt.JwtTokenProvider;
 import com.unity.goods.global.service.RedisService;
+import com.unity.goods.global.service.S3Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class MemberService {
   private final PasswordEncoder passwordEncoder;
   private final MemberRepository memberRepository;
   private final RedisService redisService;
+  private final S3Service s3Service;
   private final JwtTokenProvider jwtTokenProvider;
   private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
@@ -47,10 +49,17 @@ public class MemberService {
       throw new MemberException(ALREADY_REGISTERED_USER);
     }
 
+    // 이미지 있다면 s3 저장
+    String imageUrl = null;
+    if(signUpRequest.getProfileImage() != null){
+      imageUrl = s3Service.uploadFile(signUpRequest.getProfileImage(),
+          signUpRequest.getEmail());
+    }
+
     // 비밀번호 & 거래 비밀번호 암호화
     signUpRequest.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
     signUpRequest.setTradePassword(passwordEncoder.encode(signUpRequest.getTradePassword()));
-    Member member = Member.fromSignUpRequest(signUpRequest);
+    Member member = Member.fromSignUpRequest(signUpRequest, imageUrl);
     memberRepository.save(member);
 
     return SignUpResponse.fromMember(member);
