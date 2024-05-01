@@ -10,6 +10,7 @@ public class SignUpDto {
 
   @Getter
   @Setter
+  @Builder
   public static class SignUpRequest {
 
     private String profileImageUrl;
