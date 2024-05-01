@@ -1,8 +1,8 @@
 package com.unity.goods.domain.member.service;
 
 import com.unity.goods.domain.member.dto.LoginDto;
-import com.unity.goods.domain.member.dto.SignUpRequest;
-import com.unity.goods.domain.member.dto.SignUpResponse;
+import com.unity.goods.domain.member.dto.SignUpDto.SignUpRequest;
+import com.unity.goods.domain.member.dto.SignUpDto.SignUpResponse;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.exception.MemberException;
 import com.unity.goods.domain.member.repository.MemberRepository;
@@ -33,7 +33,7 @@ public class MemberService {
   private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
 
-  public SignUpResponse signUpMember(SignUpRequest signUpRequest) {
+  public SignUpResponse signUp(SignUpRequest signUpRequest) {
     // 해당 유저가 이메일 인증이 된 사람인지 확인
 
     return null;

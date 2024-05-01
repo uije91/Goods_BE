@@ -1,8 +1,7 @@
 package com.unity.goods.domain.member.controller;
 
 import com.unity.goods.domain.member.dto.LoginDto;
-import com.unity.goods.domain.member.dto.SignUpRequest;
-import com.unity.goods.domain.member.dto.SignUpResponse;
+import com.unity.goods.domain.member.dto.SignUpDto;
 import com.unity.goods.domain.member.service.MemberService;
 import com.unity.goods.domain.model.TokenDto;
 import com.unity.goods.global.util.CookieUtil;
@@ -24,9 +23,9 @@ public class MemberController {
   private final int COOKIE_EXPIRATION = 30 * 24 * 60 * 60; // 30일
 
   @PostMapping("/signup")
-  public ResponseEntity<?> signUpMember(
-      @RequestBody SignUpRequest signUpRequest) {
-    SignUpResponse signUpResponse = memberService.signUpMember(signUpRequest);
+  public ResponseEntity<?> signUp(
+      @RequestBody SignUpDto.SignUpRequest signUpRequest) {
+    SignUpDto.SignUpResponse signUpResponse = memberService.signUp(signUpRequest);
     return ResponseEntity.ok(signUpResponse);
   }
 
