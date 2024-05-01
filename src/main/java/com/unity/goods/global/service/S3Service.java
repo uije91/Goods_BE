@@ -24,6 +24,9 @@ public class S3Service {
   @Value("${cloud.aws.s3.bucket}")
   private String bucket;
 
+  @Value("${cloud.aws.s3.baseUrl}")
+  private String BASE_URL;
+
   private final AmazonS3 amazonS3;
 
   public String uploadFile(MultipartFile multipartFile, String fileHeader) {
@@ -49,12 +52,12 @@ public class S3Service {
   }
 
   public void deleteFile(String uploadedFileName) {
-    // uploadedFileName 에 email 이 들어가 있음.
-    // 전에 "@" 문자를 인지 못하는 문제가 있었던 것 같음
-//    String key = uploadedFileName.replace("%40", "@");
+    // 저장된 url : BASE_URL + email + 원본 이름
+    // 삭제 이름은 email + 원본이어야함
+    String key = uploadedFileName.replace(BASE_URL, "");
 
     try {
-      amazonS3.deleteObject(bucket, uploadedFileName);
+      amazonS3.deleteObject(bucket, key);
       log.info("[deleteFile] : aws S3 파일 삭제 완료");
     } catch (AmazonServiceException e){
       throw new AmazonServiceException(e.getErrorMessage());
