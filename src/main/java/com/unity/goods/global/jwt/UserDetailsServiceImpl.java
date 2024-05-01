@@ -20,8 +20,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         .orElseThrow(() -> new UsernameNotFoundException("이메일 정보가 없습니다."));
 
     if (findMember != null) {
-      UserDetailsImpl userDetails = new UserDetailsImpl(findMember);
-      return userDetails;
+      return new UserDetailsImpl(findMember);
     }
     return null;
   }
