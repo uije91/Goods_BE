@@ -1,7 +1,10 @@
 package com.unity.goods.domain.email.service;
 
 import static com.unity.goods.global.exception.ErrorCode.EMAIL_SEND_ERROR;
+import static com.unity.goods.global.exception.ErrorCode.EMAIL_VERIFICATION_NOT_EXISTS;
+import static com.unity.goods.global.exception.ErrorCode.INCORRECT_VERIFICATION_NUM;
 
+import com.unity.goods.domain.email.dto.EmailVerificationCheckDto.EmailVerificationCheckRequest;
 import com.unity.goods.domain.email.dto.EmailVerificationDto.EmailVerificationRequest;
 import com.unity.goods.domain.email.exception.EmailException;
 import com.unity.goods.domain.email.type.EmailSubjects;
@@ -70,4 +73,19 @@ public class EmailService {
     return message;
   }
 
+  public void checkIsVerified(EmailVerificationCheckRequest checkRequest) {
+
+    // redis에 존재하는지, 조회되는지
+    if(!redisService.existData(checkRequest.getEmail())){
+      throw new EmailException(EMAIL_VERIFICATION_NOT_EXISTS);
+    }
+
+    String redisCode = redisService.getData(checkRequest.getEmail());
+
+    // 입력한 값과 redis에 저장된 값이 같은지
+    if(!checkRequest.getVerificationNumber().equals(redisCode)){
+      throw new EmailException(INCORRECT_VERIFICATION_NUM);
+    }
+
+  }
 }

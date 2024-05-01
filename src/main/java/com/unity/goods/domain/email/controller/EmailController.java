@@ -1,5 +1,6 @@
 package com.unity.goods.domain.email.controller;
 
+import com.unity.goods.domain.email.dto.EmailVerificationCheckDto.EmailVerificationCheckRequest;
 import com.unity.goods.domain.email.dto.EmailVerificationDto.EmailVerificationRequest;
 import com.unity.goods.domain.email.service.EmailService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,13 @@ public class EmailController {
   public ResponseEntity<?> sendVerificationEmail(
       @RequestBody EmailVerificationRequest emailVerificationRequest) {
     emailService.sendVerificationEmail(emailVerificationRequest);
+    return ResponseEntity.ok().build();
+  }
+
+  @PostMapping("/verification/check")
+  public ResponseEntity<?> checkIsVerified(
+      @RequestBody EmailVerificationCheckRequest checkRequest) {
+    emailService.checkIsVerified(checkRequest);
     return ResponseEntity.ok().build();
   }
 
