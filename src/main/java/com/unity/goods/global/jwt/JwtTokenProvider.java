@@ -86,6 +86,11 @@ public class JwtTokenProvider {
     return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
   }
 
+  // 토큰 만료 시간 확인
+  public long getTokenExpirationTime(String token) {
+    return getClaims(token).getExpiration().getTime();
+  }
+
   /**
    * 토큰 검증
    */
@@ -137,4 +142,6 @@ public class JwtTokenProvider {
       return false;
     }
   }
+
+
 }
