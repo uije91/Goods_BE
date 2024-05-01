@@ -1,7 +1,10 @@
 package com.unity.goods.domain.member.entity;
 
+import static com.unity.goods.domain.member.type.SocialType.SERVER;
+import static com.unity.goods.domain.member.type.Status.ACTIVE;
 import static com.unity.goods.domain.member.type.Status.INACTIVE;
 
+import com.unity.goods.domain.member.dto.SignUpDto.SignUpRequest;
 import com.unity.goods.domain.member.type.Role;
 import com.unity.goods.domain.member.type.SocialType;
 import com.unity.goods.domain.member.type.Status;
@@ -52,5 +55,20 @@ public class Member {
 
   @Enumerated(EnumType.STRING)
   private SocialType socialType;
+
+  public static Member fromSignUpRequest(SignUpRequest signUpRequest){
+
+    return Member.builder()
+        .nickname(signUpRequest.getNickName())
+        .email(signUpRequest.getEmail())
+        .password(signUpRequest.getPassword())
+        .phoneNumber(signUpRequest.getPhoneNumber())
+        .profileImage(signUpRequest.getProfileImageUrl())
+        .role(Role.USER)
+        .status(ACTIVE)
+        .tradePassword(signUpRequest.getTradePassword())
+        .socialType(SERVER)
+        .build();
+  }
 
 }

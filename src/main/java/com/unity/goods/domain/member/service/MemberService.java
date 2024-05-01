@@ -1,5 +1,8 @@
 package com.unity.goods.domain.member.service;
 
+import static com.unity.goods.global.exception.ErrorCode.ALREADY_REGISTERED_USER;
+import static com.unity.goods.global.exception.ErrorCode.PASSWORD_NOT_MATCH;
+
 import com.unity.goods.domain.member.dto.LoginDto;
 import com.unity.goods.domain.member.dto.SignUpDto.SignUpRequest;
 import com.unity.goods.domain.member.dto.SignUpDto.SignUpResponse;
@@ -34,9 +37,23 @@ public class MemberService {
 
 
   public SignUpResponse signUp(SignUpRequest signUpRequest) {
-    // 해당 유저가 이메일 인증이 된 사람인지 확인
+    // 비밀번호와 비밀번화 확인 일치 검사 (안전성을 위해 프론트에 이어 한번 더 검사)
+    if (!signUpRequest.getPassword().equals(signUpRequest.getChkPassword())) {
+      throw new MemberException(PASSWORD_NOT_MATCH);
+    }
 
-    return null;
+    // 이미 가입한 회원인지 검사
+    if (memberRepository.existsByEmail(signUpRequest.getEmail())) {
+      throw new MemberException(ALREADY_REGISTERED_USER);
+    }
+
+    // 비밀번호 & 거래 비밀번호 암호화
+    signUpRequest.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
+    signUpRequest.setTradePassword(passwordEncoder.encode(signUpRequest.getTradePassword()));
+    Member member = Member.fromSignUpRequest(signUpRequest);
+    memberRepository.save(member);
+
+    return SignUpResponse.fromMember(member);
   }
 
   // 로그인
@@ -61,7 +78,7 @@ public class MemberService {
     }
 
     if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
-      throw new MemberException(ErrorCode.PASSWORD_NOT_MATCH);
+      throw new MemberException(PASSWORD_NOT_MATCH);
     }
 
     UsernamePasswordAuthenticationToken authenticationToken =
