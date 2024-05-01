@@ -57,7 +57,7 @@ public class MemberService {
     }
 
     if (member.getStatus() == Status.RESIGN) {
-      throw new MemberException(ErrorCode.RESIGN_ACCOUNT);
+      throw new MemberException(ErrorCode.RESIGNED_ACCOUNT);
     }
 
     if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
