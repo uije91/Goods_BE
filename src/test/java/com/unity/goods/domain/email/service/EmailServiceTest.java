@@ -67,7 +67,7 @@ class EmailServiceTest {
     // given
     String testEmail = "fortestseowon@gmail.com";
     String testVerificationNumber = "123456";
-    SimpleMailMessage message = emailService.createVerificationEmail(testEmail,
+    emailService.createVerificationEmail(testEmail,
         testVerificationNumber);
 
     // when
@@ -88,7 +88,7 @@ class EmailServiceTest {
     // given
     String testEmail = "fortestseowon@gmail.com";
     String testVerificationNumber = "123456";
-    SimpleMailMessage message = emailService.createVerificationEmail(testEmail, testVerificationNumber);
+    emailService.createVerificationEmail(testEmail, testVerificationNumber);
 
     long startTime = System.currentTimeMillis();
     long expiryTime = 5000;  // 5 seconds
