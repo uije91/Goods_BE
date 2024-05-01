@@ -15,20 +15,19 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.test.web.servlet.MockMvc;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
 class EmailServiceTest {
 
-  @InjectMocks
+  @Autowired
   private EmailService emailService;
 
-  @Mock
-  private MailSender mailSender;
-
-  @Mock
+  @Autowired
   private RedisService redisService;
 
   @Test
@@ -72,9 +71,7 @@ class EmailServiceTest {
         testVerificationNumber);
 
     // when
-    when(redisService.getData(testEmail)).thenReturn(testVerificationNumber);
     try {
-      mailSender.send(message);
       // 유효시간 1분 설정
       redisService.setDataExpire(testEmail, testVerificationNumber, 1000L * 60);
     } catch (RuntimeException e) {
@@ -97,17 +94,7 @@ class EmailServiceTest {
     long expiryTime = 5000;  // 5 seconds
 
     // when
-    when(redisService.getData(testEmail)).thenAnswer(invocation -> {
-      long currentTime = System.currentTimeMillis();
-      if (currentTime - startTime > expiryTime) {
-        return null;  // Expired
-      } else {
-        return testVerificationNumber;  // Not expired
-      }
-    });
-
     try {
-      mailSender.send(message);
       redisService.setDataExpire(testEmail, testVerificationNumber, 1000L * 5);
     } catch (RuntimeException e) {
       throw new RuntimeException();
