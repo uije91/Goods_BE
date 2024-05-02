@@ -50,10 +50,12 @@ public class MemberController {
 
   @PutMapping("/resign")
   public ResponseEntity<?> resign(
+      @RequestHeader("Authorization") String accessToken,
       @AuthenticationPrincipal UserDetailsImpl member,
       @RequestBody ResignDto.ResignRequest resignRequest
   ){
-    memberService.resign(member.getUsername(), resignRequest);
+    memberService.resign(accessToken, member, resignRequest);
+    CookieUtil.deleteCookie("refresh-token", null);
     return ResponseEntity.ok().build();
   }
 }

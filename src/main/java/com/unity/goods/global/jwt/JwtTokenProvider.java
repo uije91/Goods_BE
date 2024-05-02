@@ -31,6 +31,7 @@ public class JwtTokenProvider {
   @Value("${spring.jwt.refresh-token-expiration-time}")
   private long REFRESH_TOKEN_EXPIRE_TIME;
 
+  private static final String TOKEN_PREFIX = "Bearer ";
   private final Key key;
 
   // 시크릿 키 설정
@@ -88,6 +89,9 @@ public class JwtTokenProvider {
 
   // 토큰 만료 시간 확인
   public long getTokenExpirationTime(String token) {
+    if(token.startsWith(TOKEN_PREFIX)){
+      token = token.substring(TOKEN_PREFIX.length());
+    }
     return getClaims(token).getExpiration().getTime();
   }
 

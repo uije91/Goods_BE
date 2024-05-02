@@ -17,6 +17,7 @@ import com.unity.goods.domain.member.type.Status;
 import com.unity.goods.domain.model.TokenDto;
 import com.unity.goods.global.exception.ErrorCode;
 import com.unity.goods.global.jwt.JwtTokenProvider;
+import com.unity.goods.global.jwt.UserDetailsImpl;
 import com.unity.goods.global.service.RedisService;
 import com.unity.goods.global.service.S3Service;
 import jakarta.transaction.Transactional;
@@ -157,13 +158,24 @@ public class MemberService {
   }
   
   @Transactional
-  public void resign(String member, ResignRequest resignRequest) {
-    Member savedMember = memberRepository.findByEmail(member)
+  public void resign(String accessToken, UserDetailsImpl member, ResignRequest resignRequest) {
+    Member savedMember = memberRepository.findByEmail(member.getUsername())
         .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
 
     if(!passwordEncoder.matches(resignRequest.getPassword(), savedMember.getPassword())){
       throw new MemberException(PASSWORD_NOT_MATCH);
     }
+
+    // Redis 에 저장된 RT 삭제
+    String redisKey = "RT:" + savedMember.getEmail();
+    String refreshTokenInRedis = redisService.getData(redisKey);
+    if (refreshTokenInRedis != null) {
+      redisService.deleteData(redisKey);
+    }
+
+    // AccessToken 을 BlackList 로 저장(사용방지 처리)
+    long expiration = jwtTokenProvider.getTokenExpirationTime(accessToken) - new Date().getTime();
+    redisService.setDataExpire(accessToken, "resign", expiration);
 
     savedMember.resignStatus();
   }
