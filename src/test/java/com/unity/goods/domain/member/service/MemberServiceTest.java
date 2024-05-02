@@ -5,6 +5,7 @@ import static com.unity.goods.domain.member.type.Status.INACTIVE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.unity.goods.domain.member.dto.ResignDto.ResignRequest;
 import com.unity.goods.domain.member.dto.SignUpDto.SignUpRequest;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.exception.MemberException;
@@ -62,7 +63,7 @@ class MemberServiceTest {
     String encode = passwordEncoder.encode(originalPw);
     // given
     Member member = Member.builder()
-        .email("fortestseowon@gmail.com")
+        .email("fortestseowon@gmail2.com")
         .password(encode)
         .nickname("nickName")
         .status(ACTIVE)
@@ -72,7 +73,7 @@ class MemberServiceTest {
     memberRepository.save(member);
 
     // when
-//    memberService.resign(member, ResignRequest.builder().password(originalPw).build());
+    memberService.resign(member.getEmail(), ResignRequest.builder().password(originalPw).build());
 
     // then
     Optional<Member> byEmail = memberRepository.findByEmail(member.getEmail());
