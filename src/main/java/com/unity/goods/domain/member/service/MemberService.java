@@ -2,8 +2,10 @@ package com.unity.goods.domain.member.service;
 
 import static com.unity.goods.global.exception.ErrorCode.ALREADY_REGISTERED_USER;
 import static com.unity.goods.global.exception.ErrorCode.PASSWORD_NOT_MATCH;
+import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
 
 import com.unity.goods.domain.member.dto.LoginDto;
+import com.unity.goods.domain.member.dto.ResignDto.ResignRequest;
 import com.unity.goods.domain.member.dto.SignUpDto.SignUpRequest;
 import com.unity.goods.domain.member.dto.SignUpDto.SignUpResponse;
 import com.unity.goods.domain.member.entity.Member;
@@ -16,6 +18,7 @@ import com.unity.goods.global.exception.ErrorCode;
 import com.unity.goods.global.jwt.JwtTokenProvider;
 import com.unity.goods.global.service.RedisService;
 import com.unity.goods.global.service.S3Service;
+import jakarta.transaction.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -118,5 +121,17 @@ public class MemberService {
     return authentication.getAuthorities().stream()
         .map(GrantedAuthority::getAuthority)
         .collect(Collectors.joining(","));
+  }
+
+  @Transactional
+  public void resign(String member, ResignRequest resignRequest) {
+    Member savedMember = memberRepository.findByEmail(member)
+        .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
+
+    if(!passwordEncoder.matches(resignRequest.getPassword(), savedMember.getPassword())){
+      throw new MemberException(PASSWORD_NOT_MATCH);
+    }
+
+    savedMember.inactivateStatus();
   }
 }

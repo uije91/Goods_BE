@@ -71,4 +71,8 @@ public class Member {
         .build();
   }
 
+  public void inactivateStatus() {
+    this.status = INACTIVE;
+  }
+
 }
