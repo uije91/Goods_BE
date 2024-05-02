@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.unity.goods.domain.member.dto.ChangePasswordDto.ChangePasswordRequest;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.service.MemberService;
+import com.unity.goods.global.jwt.UserDetailsImpl;
 import com.unity.goods.global.security.WithCustomMockUser;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,7 +34,7 @@ class MemberControllerTest {
   void changePassword() throws Exception {
 
     doNothing().when(memberService)
-        .changePassword(any(ChangePasswordRequest.class), any(Member.class));
+        .changePassword(any(ChangePasswordRequest.class), any(UserDetailsImpl.class));
 
     mockMvc.perform(
             put("/api/member/change")

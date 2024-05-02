@@ -6,6 +6,7 @@ import com.unity.goods.domain.member.repository.MemberRepository;
 import com.unity.goods.domain.member.type.Role;
 import com.unity.goods.domain.member.type.SocialType;
 import com.unity.goods.domain.member.type.Status;
+import com.unity.goods.global.jwt.UserDetailsImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -63,8 +64,10 @@ class MemberServiceTest {
         .password("new1234")
         .build();
 
+    UserDetailsImpl userDetails = new UserDetailsImpl(member);
+
     //when
-    memberService.changePassword(changePasswordRequest, member);
+    memberService.changePassword(changePasswordRequest, userDetails);
     Member changePasswordMember = memberRepository.findByEmail(member.getEmail()).get();
 
     boolean validateChangePassword = passwordEncoder.matches(changePasswordRequest.getPassword(),
