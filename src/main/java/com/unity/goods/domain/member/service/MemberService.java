@@ -1,16 +1,15 @@
 package com.unity.goods.domain.member.service;
 
+import static com.unity.goods.global.exception.ErrorCode.ALREADY_REGISTERED_USER;
+import static com.unity.goods.global.exception.ErrorCode.NICKNAME_ALREADY_EXISTS;
+import static com.unity.goods.global.exception.ErrorCode.PASSWORD_NOT_MATCH;
+import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
 import static com.unity.goods.global.exception.ErrorCode.CURRENT_USED_PASSWORD;
 import static com.unity.goods.global.exception.ErrorCode.EMAIL_SEND_ERROR;
-import static com.unity.goods.global.exception.ErrorCode.MEMBER_NOT_FOUND;
-
-import com.unity.goods.domain.email.exception.EmailException;
-import com.unity.goods.domain.email.type.EmailSubjects;
-import com.unity.goods.domain.member.dto.ChangePasswordDto.ChangePasswordRequest;
-import com.unity.goods.domain.member.dto.FindPasswordDto.FindPasswordRequest;
 import com.unity.goods.domain.member.dto.LoginDto;
-import com.unity.goods.domain.member.dto.SignUpRequest;
-import com.unity.goods.domain.member.dto.SignUpResponse;
+import com.unity.goods.domain.member.dto.ResignDto.ResignRequest;
+import com.unity.goods.domain.member.dto.SignUpDto.SignUpRequest;
+import com.unity.goods.domain.member.dto.SignUpDto.SignUpResponse;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.exception.MemberException;
 import com.unity.goods.domain.member.repository.MemberRepository;
@@ -21,6 +20,9 @@ import com.unity.goods.global.exception.ErrorCode;
 import com.unity.goods.global.jwt.JwtTokenProvider;
 import com.unity.goods.global.jwt.UserDetailsImpl;
 import com.unity.goods.global.service.RedisService;
+import com.unity.goods.global.service.S3Service;
+import jakarta.transaction.Transactional;
+import java.util.Date;
 import java.security.SecureRandom;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -35,7 +37,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -47,15 +48,42 @@ public class MemberService {
   private final PasswordEncoder passwordEncoder;
   private final MemberRepository memberRepository;
   private final RedisService redisService;
+  private final S3Service s3Service;
   private final JwtTokenProvider jwtTokenProvider;
   private final AuthenticationManagerBuilder authenticationManagerBuilder;
   private final MailSender mailSender;
 
 
-  public SignUpResponse signUpMember(SignUpRequest signUpRequest) {
-    // 해당 유저가 이메일 인증이 된 사람인지 확인
+  public SignUpResponse signUp(SignUpRequest signUpRequest) {
+    // 비밀번호와 비밀번화 확인 일치 검사 (안전성을 위해 프론트에 이어 한번 더 검사)
+    if (!signUpRequest.getPassword().equals(signUpRequest.getChkPassword())) {
+      throw new MemberException(PASSWORD_NOT_MATCH);
+    }
 
-    return null;
+    // 이미 가입한 회원인지 검사
+    if (memberRepository.existsByEmail(signUpRequest.getEmail())) {
+      throw new MemberException(ALREADY_REGISTERED_USER);
+    }
+
+    // nickname 중복 검사
+    if (memberRepository.existsByNickname(signUpRequest.getNickName())){
+      throw new MemberException(NICKNAME_ALREADY_EXISTS);
+    }
+
+    // 이미지 있다면 s3 저장
+    String imageUrl = null;
+    if(signUpRequest.getProfileImage() != null){
+      imageUrl = s3Service.uploadFile(signUpRequest.getProfileImage(),
+          signUpRequest.getEmail());
+    }
+
+    // 비밀번호 & 거래 비밀번호 암호화
+    signUpRequest.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
+    signUpRequest.setTradePassword(passwordEncoder.encode(signUpRequest.getTradePassword()));
+    Member member = Member.fromSignUpRequest(signUpRequest, imageUrl);
+    memberRepository.save(member);
+
+    return SignUpResponse.fromMember(member);
   }
 
   // 로그인
@@ -80,7 +108,7 @@ public class MemberService {
     }
 
     if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
-      throw new MemberException(ErrorCode.PASSWORD_NOT_MATCH);
+      throw new MemberException(PASSWORD_NOT_MATCH);
     }
 
     UsernamePasswordAuthenticationToken authenticationToken =
@@ -112,6 +140,56 @@ public class MemberService {
         .map(GrantedAuthority::getAuthority)
         .collect(Collectors.joining(","));
   }
+
+  // Header 에서 전달받은 "Bearer {AT}" 에서 {AT} 추출
+  public String resolveToken(String requestAccessToken) {
+    if (requestAccessToken != null && requestAccessToken.startsWith("Bearer ")) {
+      return requestAccessToken.substring(7);
+    }
+    return null;
+  }
+
+  // 로그아웃
+  public void logout(String requestAccessToken) {
+    String accessToken = resolveToken(requestAccessToken);
+    String email = jwtTokenProvider.getAuthentication(accessToken).getName();
+
+    // Redis 에 저장된 RT 삭제
+    String redisKey = "RT:" + email;
+    String refreshTokenInRedis = redisService.getData(redisKey);
+    if (refreshTokenInRedis != null) {
+      redisService.deleteData(redisKey);
+    }
+
+    // AccessToken 을 BlackList 로 저장(사용방지 처리)
+    long expiration = jwtTokenProvider.getTokenExpirationTime(accessToken) - new Date().getTime();
+    redisService.setDataExpire(accessToken, "logout", expiration);
+
+  }
+
+  @Transactional
+  public void resign(String accessToken, UserDetailsImpl member, ResignRequest resignRequest) {
+    Member savedMember = memberRepository.findByEmail(member.getUsername())
+        .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
+
+    if(!passwordEncoder.matches(resignRequest.getPassword(), savedMember.getPassword())){
+      throw new MemberException(PASSWORD_NOT_MATCH);
+    }
+
+    // Redis 에 저장된 RT 삭제
+    String redisKey = "RT:" + savedMember.getEmail();
+    String refreshTokenInRedis = redisService.getData(redisKey);
+    if (refreshTokenInRedis != null) {
+      redisService.deleteData(redisKey);
+    }
+
+    // AccessToken 을 BlackList 로 저장(사용방지 처리)
+    long expiration = jwtTokenProvider.getTokenExpirationTime(accessToken) - new Date().getTime();
+    redisService.setDataExpire(accessToken, "resign", expiration);
+
+    savedMember.resignStatus();
+  }
+
 
   @Transactional
   public void changePassword(ChangePasswordRequest changePasswordRequest,

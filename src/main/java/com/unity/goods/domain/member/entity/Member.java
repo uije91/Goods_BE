@@ -1,7 +1,11 @@
 package com.unity.goods.domain.member.entity;
 
+import static com.unity.goods.domain.member.type.SocialType.SERVER;
+import static com.unity.goods.domain.member.type.Status.ACTIVE;
 import static com.unity.goods.domain.member.type.Status.INACTIVE;
+import static com.unity.goods.domain.member.type.Status.RESIGN;
 
+import com.unity.goods.domain.member.dto.SignUpDto.SignUpRequest;
 import com.unity.goods.domain.member.type.Role;
 import com.unity.goods.domain.member.type.SocialType;
 import com.unity.goods.domain.member.type.Status;
@@ -53,6 +57,25 @@ public class Member extends BaseEntity {
 
   @Enumerated(EnumType.STRING)
   private SocialType socialType;
+
+  public static Member fromSignUpRequest(SignUpRequest signUpRequest, String imageUrl) {
+
+    return Member.builder()
+        .nickname(signUpRequest.getNickName())
+        .email(signUpRequest.getEmail())
+        .password(signUpRequest.getPassword())
+        .phoneNumber(signUpRequest.getPhoneNumber())
+        .profileImage(imageUrl)
+        .role(Role.USER)
+        .status(ACTIVE)
+        .tradePassword(signUpRequest.getTradePassword())
+        .socialType(SERVER)
+        .build();
+  }
+
+  public void resignStatus() {
+    this.status = RESIGN;
+  }
 
   public void changePassword(String password) {
     this.password = password;
