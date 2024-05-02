@@ -6,12 +6,14 @@ import com.unity.goods.domain.member.dto.SignUpResponse;
 import com.unity.goods.domain.member.service.MemberService;
 import com.unity.goods.domain.model.TokenDto;
 import com.unity.goods.global.util.CookieUtil;
+import jakarta.servlet.http.Cookie;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,10 +35,21 @@ public class MemberController {
   @PostMapping("/login")
   public ResponseEntity<?> login(@RequestBody @Valid LoginDto.LoginRequest request) {
     TokenDto login = memberService.login(request);
-    CookieUtil.addCookie("refresh-token", login.getRefreshToken(), COOKIE_EXPIRATION);
+    Cookie cookie = CookieUtil.addCookie("refresh-token", login.getRefreshToken(),
+        COOKIE_EXPIRATION);
     return ResponseEntity.ok()
+        .header(HttpHeaders.SET_COOKIE, cookie.getName() + "=" + cookie.getValue())
         //RFC 7235 정의에 따라 인증헤더 형태를 가져야 한다.
-        .header(HttpHeaders.AUTHORIZATION,"Bearer "+login.getAccessToken())
-        .body(login);
+        .header(HttpHeaders.AUTHORIZATION, "Bearer " + login.getAccessToken())
+        .build();
+  }
+
+  @PostMapping("/logout")
+  public ResponseEntity<?> logout(@RequestHeader("Authorization") String accessToken) {
+    memberService.logout(accessToken);
+    Cookie cookie = CookieUtil.deleteCookie("refresh-token", null);
+    return ResponseEntity.ok()
+        .header(HttpHeaders.SET_COOKIE, cookie.getName() + "=" + cookie.getValue())
+        .build();
   }
 }
