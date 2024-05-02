@@ -29,7 +29,7 @@ public class MemberController {
 
   @PostMapping("/signup")
   public ResponseEntity<?> signUp(
-      @RequestBody @Valid @ModelAttribute SignUpDto.SignUpRequest signUpRequest) {
+      @Valid @ModelAttribute SignUpDto.SignUpRequest signUpRequest) {
     SignUpDto.SignUpResponse signUpResponse = memberService.signUp(signUpRequest);
     return ResponseEntity.ok(signUpResponse);
   }
