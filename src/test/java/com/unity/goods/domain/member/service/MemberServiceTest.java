@@ -1,6 +1,7 @@
 package com.unity.goods.domain.member.service;
 
 import com.unity.goods.domain.member.dto.ChangePasswordDto.ChangePasswordRequest;
+import com.unity.goods.domain.member.dto.FindPasswordDto.FindPasswordRequest;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.repository.MemberRepository;
 import com.unity.goods.domain.member.type.Role;
@@ -13,10 +14,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
+@Transactional
 class MemberServiceTest {
 
   @Autowired
@@ -45,14 +48,13 @@ class MemberServiceTest {
   }
 
   @Test
-  @Transactional
   @DisplayName("비밀번호 변경 테스트")
   void changePassword() {
     //given
     Member member = Member.builder()
         .nickname("test")
         .email("test@naver.com")
-        .password("test1234")
+        .password("test12345")
         .star(2.0)
         .role(Role.USER)
         .status(Status.INACTIVE)
@@ -78,5 +80,27 @@ class MemberServiceTest {
 
 
   }
+
+  @Test
+  @DisplayName("비밀번호 찾기 이메일 생성 테스트")
+  void findPasswordEmailTest() {
+    //given
+    FindPasswordRequest findPasswordRequest = FindPasswordRequest.builder()
+        .email("test@naver.com")
+        .build();
+
+    String tempPassword = "1a2B3%571!";
+
+    //when
+    SimpleMailMessage findPasswordEmail
+        = memberService.createFindPasswordEmail(findPasswordRequest.getEmail(), tempPassword);
+
+    //then
+    Assertions.assertEquals(findPasswordEmail.getText(),
+        "안녕하세요. 중고거래 마켓 " + "Goods" + "입니다."
+            + "\n\n" + "임시 비밀번호는 [" + "1a2B3%571!" + "] 입니다.");
+
+  }
+
 
 }

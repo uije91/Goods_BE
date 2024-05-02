@@ -3,11 +3,13 @@ package com.unity.goods.domain.member.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.unity.goods.domain.member.dto.ChangePasswordDto.ChangePasswordRequest;
+import com.unity.goods.domain.member.dto.FindPasswordDto.FindPasswordRequest;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.service.MemberService;
 import com.unity.goods.global.jwt.UserDetailsImpl;
@@ -38,6 +40,23 @@ class MemberControllerTest {
 
     mockMvc.perform(
             put("/api/member/change")
+                .with(csrf())
+        )
+        .andExpect(status().isOk())
+        .andDo(print());
+
+  }
+
+  @Test
+  @WithCustomMockUser
+  @DisplayName("비밀번호 찾기 테스트")
+  void findPassword() throws Exception {
+
+    doNothing().when(memberService)
+        .findPassword(any(FindPasswordRequest.class));
+
+    mockMvc.perform(
+            post("/api/member/find")
                 .with(csrf())
         )
         .andExpect(status().isOk())
