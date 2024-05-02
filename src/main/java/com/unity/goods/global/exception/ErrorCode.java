@@ -2,7 +2,6 @@ package com.unity.goods.global.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.http.HttpStatus;
 
 @Getter
 @AllArgsConstructor
@@ -13,6 +12,8 @@ public enum ErrorCode {
   PASSWORD_NOT_MATCH(400, "비밀번호가 올바르지 않습니다."),
   EMAIL_NOT_VERITY(400, "이메일 인증이 완료되지 않았습니다."),
   RESIGNED_ACCOUNT(400, "탈퇴한 이메일입니다."),
+  ALREADY_REGISTERED_USER(400, "이미 가입한 회원입니다."),
+  NICKNAME_ALREADY_EXISTS(400, "동일한 닉네임이 존재합니다."),
 
   // System Error
   INTERNAL_SERVER_ERROR(500, "내부 서버 오류가 발생했습니다."),

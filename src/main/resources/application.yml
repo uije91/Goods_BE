@@ -46,3 +46,17 @@ spring:
           timeout: 5000
           write timeout: 5000
       auth-code-expiration-millis: 600000  # 10 * 60 * 1000 == 10분. redis 유효시간 + 안전장치
+
+# AWS S3 설정
+cloud:
+  aws:
+    region:
+      static: ap-northeast-2
+    s3:
+      bucket:
+      baseUrl: https://'개인 버킷 이름'.s3.ap-northeast-2.amazonaws.com/
+    stack:
+      auto: false
+    credentials:
+      access-key:
+      secret-key:

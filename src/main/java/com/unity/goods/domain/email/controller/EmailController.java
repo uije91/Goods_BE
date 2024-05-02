@@ -3,6 +3,7 @@ package com.unity.goods.domain.email.controller;
 import com.unity.goods.domain.email.dto.EmailVerificationCheckDto.EmailVerificationCheckRequest;
 import com.unity.goods.domain.email.dto.EmailVerificationDto.EmailVerificationRequest;
 import com.unity.goods.domain.email.service.EmailService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,14 +20,14 @@ public class EmailController {
 
   @PostMapping("/verification")
   public ResponseEntity<?> sendVerificationEmail(
-      @RequestBody EmailVerificationRequest emailVerificationRequest) {
+      @RequestBody @Valid EmailVerificationRequest emailVerificationRequest) {
     emailService.sendVerificationEmail(emailVerificationRequest);
     return ResponseEntity.ok().build();
   }
 
   @PostMapping("/verification/check")
   public ResponseEntity<?> checkIsVerified(
-      @RequestBody EmailVerificationCheckRequest checkRequest) {
+      @RequestBody @Valid EmailVerificationCheckRequest checkRequest) {
     emailService.checkIsVerified(checkRequest);
     return ResponseEntity.ok().build();
   }

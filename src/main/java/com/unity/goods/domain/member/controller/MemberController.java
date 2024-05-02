@@ -1,17 +1,21 @@
 package com.unity.goods.domain.member.controller;
 
 import com.unity.goods.domain.member.dto.LoginDto;
-import com.unity.goods.domain.member.dto.SignUpRequest;
-import com.unity.goods.domain.member.dto.SignUpResponse;
+import com.unity.goods.domain.member.dto.ResignDto;
+import com.unity.goods.domain.member.dto.SignUpDto;
 import com.unity.goods.domain.member.service.MemberService;
 import com.unity.goods.domain.model.TokenDto;
+import com.unity.goods.global.jwt.UserDetailsImpl;
 import com.unity.goods.global.util.CookieUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,9 +30,9 @@ public class MemberController {
   private final int COOKIE_EXPIRATION = 30 * 24 * 60 * 60; // 30일
 
   @PostMapping("/signup")
-  public ResponseEntity<?> signUpMember(
-      @RequestBody SignUpRequest signUpRequest) {
-    SignUpResponse signUpResponse = memberService.signUpMember(signUpRequest);
+  public ResponseEntity<?> signUp(
+      @Valid @ModelAttribute SignUpDto.SignUpRequest signUpRequest) {
+    SignUpDto.SignUpResponse signUpResponse = memberService.signUp(signUpRequest);
     return ResponseEntity.ok(signUpResponse);
   }
 
@@ -44,12 +48,14 @@ public class MemberController {
         .build();
   }
 
-  @PostMapping("/logout")
-  public ResponseEntity<?> logout(@RequestHeader("Authorization") String accessToken) {
-    memberService.logout(accessToken);
-    Cookie cookie = CookieUtil.deleteCookie("refresh-token", null);
-    return ResponseEntity.ok()
-        .header(HttpHeaders.SET_COOKIE, cookie.getName() + "=" + cookie.getValue())
-        .build();
+  @PutMapping("/resign")
+  public ResponseEntity<?> resign(
+      @RequestHeader("Authorization") String accessToken,
+      @AuthenticationPrincipal UserDetailsImpl member,
+      @RequestBody ResignDto.ResignRequest resignRequest
+  ){
+    memberService.resign(accessToken, member, resignRequest);
+    CookieUtil.deleteCookie("refresh-token", null);
+    return ResponseEntity.ok().build();
   }
 }
