@@ -1,6 +1,7 @@
 package com.unity.goods.domain.member.service;
 
 import static com.unity.goods.global.exception.ErrorCode.ALREADY_REGISTERED_USER;
+import static com.unity.goods.global.exception.ErrorCode.NICKNAME_ALREADY_EXISTS;
 import static com.unity.goods.global.exception.ErrorCode.PASSWORD_NOT_MATCH;
 import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
 
@@ -50,6 +51,11 @@ public class MemberService {
     // 이미 가입한 회원인지 검사
     if (memberRepository.existsByEmail(signUpRequest.getEmail())) {
       throw new MemberException(ALREADY_REGISTERED_USER);
+    }
+
+    // nickname 중복 검사
+    if (memberRepository.existsByNickname(signUpRequest.getNickName())){
+      throw new MemberException(NICKNAME_ALREADY_EXISTS);
     }
 
     // 이미지 있다면 s3 저장
@@ -132,6 +138,6 @@ public class MemberService {
       throw new MemberException(PASSWORD_NOT_MATCH);
     }
 
-    savedMember.inactivateStatus();
+    savedMember.resignStatus();
   }
 }

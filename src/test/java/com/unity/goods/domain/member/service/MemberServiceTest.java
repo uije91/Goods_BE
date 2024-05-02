@@ -1,7 +1,7 @@
 package com.unity.goods.domain.member.service;
 
 import static com.unity.goods.domain.member.type.Status.ACTIVE;
-import static com.unity.goods.domain.member.type.Status.INACTIVE;
+import static com.unity.goods.domain.member.type.Status.RESIGN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -82,7 +82,7 @@ class MemberServiceTest {
     }
 
     Member savedMember = byEmail.get();
-    assertEquals(INACTIVE, savedMember.getStatus());
+    assertEquals(RESIGN, savedMember.getStatus());
   }
 
 

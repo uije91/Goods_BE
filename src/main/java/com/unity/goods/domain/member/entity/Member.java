@@ -3,6 +3,7 @@ package com.unity.goods.domain.member.entity;
 import static com.unity.goods.domain.member.type.SocialType.SERVER;
 import static com.unity.goods.domain.member.type.Status.ACTIVE;
 import static com.unity.goods.domain.member.type.Status.INACTIVE;
+import static com.unity.goods.domain.member.type.Status.RESIGN;
 
 import com.unity.goods.domain.member.dto.SignUpDto.SignUpRequest;
 import com.unity.goods.domain.member.type.Role;
@@ -71,8 +72,8 @@ public class Member {
         .build();
   }
 
-  public void inactivateStatus() {
-    this.status = INACTIVE;
+  public void resignStatus() {
+    this.status = RESIGN;
   }
 
 }
