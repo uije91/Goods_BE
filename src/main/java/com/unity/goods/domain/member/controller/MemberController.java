@@ -1,14 +1,13 @@
 package com.unity.goods.domain.member.controller;
 
-import com.unity.goods.domain.member.dto.LoginDto;
 import com.unity.goods.domain.member.dto.ChangePasswordDto.ChangePasswordRequest;
+import com.unity.goods.domain.member.dto.LoginDto;
 import com.unity.goods.domain.member.dto.SignUpRequest;
 import com.unity.goods.domain.member.dto.SignUpResponse;
-import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.service.MemberService;
 import com.unity.goods.domain.model.TokenDto;
+import com.unity.goods.global.jwt.UserDetailsImpl;
 import com.unity.goods.global.util.CookieUtil;
-import jakarta.validation.Valid;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -47,7 +46,7 @@ public class MemberController {
   @PutMapping("/change")
   public ResponseEntity<?> changePassword(
       @RequestBody @Valid ChangePasswordRequest changePasswordRequest,
-      @AuthenticationPrincipal Member member) {
+      @AuthenticationPrincipal UserDetailsImpl member) {
     memberService.changePassword(changePasswordRequest, member);
     return ResponseEntity.ok().build();
   }

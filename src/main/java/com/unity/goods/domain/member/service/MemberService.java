@@ -10,16 +10,12 @@ import com.unity.goods.domain.member.dto.SignUpResponse;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.exception.MemberException;
 import com.unity.goods.domain.member.repository.MemberRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import com.unity.goods.domain.member.entity.Member;
-import com.unity.goods.domain.member.exception.MemberException;
-import com.unity.goods.domain.member.repository.MemberRepository;
 import com.unity.goods.domain.member.type.SocialType;
 import com.unity.goods.domain.member.type.Status;
 import com.unity.goods.domain.model.TokenDto;
 import com.unity.goods.global.exception.ErrorCode;
 import com.unity.goods.global.jwt.JwtTokenProvider;
+import com.unity.goods.global.jwt.UserDetailsImpl;
 import com.unity.goods.global.service.RedisService;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -106,8 +102,8 @@ public class MemberService {
 
   @Transactional
   public void changePassword(ChangePasswordRequest changePasswordRequest,
-      Member member) {
-    Member findMember = memberRepository.findByEmail(member.getEmail())
+      UserDetailsImpl member) {
+    Member findMember = memberRepository.findByEmail(member.getUsername())
         .orElseThrow(() -> new MemberException(MEMBER_NOT_FOUND));
 
     if (passwordEncoder.matches(changePasswordRequest.getPassword(), member.getPassword())) {
