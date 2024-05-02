@@ -6,6 +6,11 @@ import static com.unity.goods.global.exception.ErrorCode.PASSWORD_NOT_MATCH;
 import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
 import static com.unity.goods.global.exception.ErrorCode.CURRENT_USED_PASSWORD;
 import static com.unity.goods.global.exception.ErrorCode.EMAIL_SEND_ERROR;
+
+import com.unity.goods.domain.email.exception.EmailException;
+import com.unity.goods.domain.email.type.EmailSubjects;
+import com.unity.goods.domain.member.dto.ChangePasswordDto.ChangePasswordRequest;
+import com.unity.goods.domain.member.dto.FindPasswordDto.FindPasswordRequest;
 import com.unity.goods.domain.member.dto.LoginDto;
 import com.unity.goods.domain.member.dto.ResignDto.ResignRequest;
 import com.unity.goods.domain.member.dto.SignUpDto.SignUpRequest;
@@ -195,7 +200,7 @@ public class MemberService {
   public void changePassword(ChangePasswordRequest changePasswordRequest,
       UserDetailsImpl member) {
     Member findMember = memberRepository.findByEmail(member.getUsername())
-        .orElseThrow(() -> new MemberException(MEMBER_NOT_FOUND));
+        .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
 
     if (passwordEncoder.matches(changePasswordRequest.getPassword(), member.getPassword())) {
       throw new MemberException(CURRENT_USED_PASSWORD);
@@ -209,7 +214,7 @@ public class MemberService {
   public void findPassword(FindPasswordRequest findPasswordRequest) {
 
     Member findMember = memberRepository.findByEmail(findPasswordRequest.getEmail())
-        .orElseThrow(() -> new MemberException(MEMBER_NOT_FOUND));
+        .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
 
     String tempPassword = createTempPassword();
 
