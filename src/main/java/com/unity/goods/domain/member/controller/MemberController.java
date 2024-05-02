@@ -1,5 +1,7 @@
 package com.unity.goods.domain.member.controller;
 
+import static com.unity.goods.domain.member.dto.FindPasswordDto.FindPasswordRequest;
+
 import com.unity.goods.domain.member.dto.ChangePasswordDto.ChangePasswordRequest;
 import com.unity.goods.domain.member.dto.LoginDto;
 import com.unity.goods.domain.member.dto.SignUpRequest;
@@ -40,14 +42,22 @@ public class MemberController {
     CookieUtil.addCookie("refresh-token", login.getRefreshToken(), COOKIE_EXPIRATION);
     return ResponseEntity.ok()
         //RFC 7235 정의에 따라 인증헤더 형태를 가져야 한다.
-        .header(HttpHeaders.AUTHORIZATION,"Bearer "+login.getAccessToken())
+        .header(HttpHeaders.AUTHORIZATION, "Bearer " + login.getAccessToken())
         .body(login);
   }
+
   @PutMapping("/change")
   public ResponseEntity<?> changePassword(
       @RequestBody @Valid ChangePasswordRequest changePasswordRequest,
       @AuthenticationPrincipal UserDetailsImpl member) {
     memberService.changePassword(changePasswordRequest, member);
+    return ResponseEntity.ok().build();
+  }
+
+  @PostMapping("/find")
+  public ResponseEntity<?> findPassword(
+      @RequestBody @Valid FindPasswordRequest findPasswordRequest) {
+    memberService.findPassword(findPasswordRequest);
     return ResponseEntity.ok().build();
   }
 
