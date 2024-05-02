@@ -20,6 +20,7 @@ import com.unity.goods.global.jwt.JwtTokenProvider;
 import com.unity.goods.global.service.RedisService;
 import com.unity.goods.global.service.S3Service;
 import jakarta.transaction.Transactional;
+import java.util.Date;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -128,7 +129,33 @@ public class MemberService {
         .map(GrantedAuthority::getAuthority)
         .collect(Collectors.joining(","));
   }
+  
+  // Header 에서 전달받은 "Bearer {AT}" 에서 {AT} 추출
+  public String resolveToken(String requestAccessToken) {
+    if (requestAccessToken != null && requestAccessToken.startsWith("Bearer ")) {
+      return requestAccessToken.substring(7);
+    }
+    return null;
+  }
 
+  // 로그아웃
+  public void logout(String requestAccessToken) {
+    String accessToken = resolveToken(requestAccessToken);
+    String email = jwtTokenProvider.getAuthentication(accessToken).getName();
+
+    // Redis 에 저장된 RT 삭제
+    String redisKey = "RT:" + email;
+    String refreshTokenInRedis = redisService.getData(redisKey);
+    if (refreshTokenInRedis != null) {
+      redisService.deleteData(redisKey);
+    }
+
+    // AccessToken 을 BlackList 로 저장(사용방지 처리)
+    long expiration = jwtTokenProvider.getTokenExpirationTime(accessToken) - new Date().getTime();
+    redisService.setDataExpire(accessToken, "logout", expiration);
+
+  }
+  
   @Transactional
   public void resign(String member, ResignRequest resignRequest) {
     Member savedMember = memberRepository.findByEmail(member)
@@ -140,4 +167,5 @@ public class MemberService {
 
     savedMember.resignStatus();
   }
+  
 }
