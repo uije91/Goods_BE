@@ -8,11 +8,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.unity.goods.domain.member.dto.ChangePasswordDto.ChangePasswordRequest;
 import com.unity.goods.domain.member.dto.FindPasswordDto.FindPasswordRequest;
 import com.unity.goods.domain.member.dto.LoginDto.LoginRequest;
 import com.unity.goods.domain.member.service.MemberService;
-import com.unity.goods.global.jwt.UserDetailsImpl;
 import com.unity.goods.global.security.WithCustomMockUser;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -54,21 +52,6 @@ class MemberControllerTest {
         .andDo(print());
   }
 
-  @Test
-  @WithCustomMockUser
-  @DisplayName("비밀번호 변경 테스트")
-  void changePassword() throws Exception {
-
-    Mockito.doNothing().when(memberService)
-        .changePassword(any(ChangePasswordRequest.class), any(UserDetailsImpl.class));
-
-    mockMvc.perform(
-            put("/api/member/change")
-                .with(csrf())
-        )
-        .andExpect(status().isOk())
-        .andDo(print());
-  }
 
   @Test
   @WithCustomMockUser

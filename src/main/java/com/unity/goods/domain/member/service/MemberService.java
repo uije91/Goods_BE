@@ -1,15 +1,13 @@
 package com.unity.goods.domain.member.service;
 
 import static com.unity.goods.global.exception.ErrorCode.ALREADY_REGISTERED_USER;
+import static com.unity.goods.global.exception.ErrorCode.EMAIL_SEND_ERROR;
 import static com.unity.goods.global.exception.ErrorCode.NICKNAME_ALREADY_EXISTS;
 import static com.unity.goods.global.exception.ErrorCode.PASSWORD_NOT_MATCH;
 import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
-import static com.unity.goods.global.exception.ErrorCode.CURRENT_USED_PASSWORD;
-import static com.unity.goods.global.exception.ErrorCode.EMAIL_SEND_ERROR;
 
 import com.unity.goods.domain.email.exception.EmailException;
 import com.unity.goods.domain.email.type.EmailSubjects;
-import com.unity.goods.domain.member.dto.ChangePasswordDto.ChangePasswordRequest;
 import com.unity.goods.domain.member.dto.FindPasswordDto.FindPasswordRequest;
 import com.unity.goods.domain.member.dto.LoginDto;
 import com.unity.goods.domain.member.dto.ResignDto.ResignRequest;
@@ -27,8 +25,8 @@ import com.unity.goods.global.jwt.UserDetailsImpl;
 import com.unity.goods.global.service.RedisService;
 import com.unity.goods.global.service.S3Service;
 import jakarta.transaction.Transactional;
-import java.util.Date;
 import java.security.SecureRandom;
+import java.util.Date;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -71,13 +69,13 @@ public class MemberService {
     }
 
     // nickname 중복 검사
-    if (memberRepository.existsByNickname(signUpRequest.getNickName())){
+    if (memberRepository.existsByNickname(signUpRequest.getNickName())) {
       throw new MemberException(NICKNAME_ALREADY_EXISTS);
     }
 
     // 이미지 있다면 s3 저장
     String imageUrl = null;
-    if(signUpRequest.getProfileImage() != null){
+    if (signUpRequest.getProfileImage() != null) {
       imageUrl = s3Service.uploadFile(signUpRequest.getProfileImage(),
           signUpRequest.getEmail());
     }
@@ -177,7 +175,7 @@ public class MemberService {
     Member savedMember = memberRepository.findByEmail(member.getUsername())
         .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
 
-    if(!passwordEncoder.matches(resignRequest.getPassword(), savedMember.getPassword())){
+    if (!passwordEncoder.matches(resignRequest.getPassword(), savedMember.getPassword())) {
       throw new MemberException(PASSWORD_NOT_MATCH);
     }
 
@@ -193,20 +191,6 @@ public class MemberService {
     redisService.setDataExpire(accessToken, "resign", expiration);
 
     savedMember.resignStatus();
-  }
-
-
-  @Transactional
-  public void changePassword(ChangePasswordRequest changePasswordRequest,
-      UserDetailsImpl member) {
-    Member findMember = memberRepository.findByEmail(member.getUsername())
-        .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
-
-    if (passwordEncoder.matches(changePasswordRequest.getPassword(), member.getPassword())) {
-      throw new MemberException(CURRENT_USED_PASSWORD);
-    }
-    findMember.changePassword(passwordEncoder.encode(changePasswordRequest.getPassword()));
-
   }
 
   // 비밀번호 찾기 이메일 전송
@@ -254,7 +238,7 @@ public class MemberService {
     SecureRandom random = new SecureRandom();
     StringBuilder sb = new StringBuilder();
 
-    for(int i=0; i<10; i++) {
+    for (int i = 0; i < 10; i++) {
       sb.append(chars.charAt(random.nextInt(chars.length())));
     }
 
