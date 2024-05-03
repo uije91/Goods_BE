@@ -2,7 +2,6 @@ package com.unity.goods.domain.member.controller;
 
 import static com.unity.goods.domain.member.dto.FindPasswordDto.FindPasswordRequest;
 
-import com.unity.goods.domain.member.dto.ChangePasswordDto.ChangePasswordRequest;
 import com.unity.goods.domain.member.dto.LoginDto;
 import com.unity.goods.domain.member.dto.ResignDto;
 import com.unity.goods.domain.member.dto.SignUpDto;
@@ -56,17 +55,9 @@ public class MemberController {
       @RequestHeader("Authorization") String accessToken,
       @AuthenticationPrincipal UserDetailsImpl member,
       @RequestBody ResignDto.ResignRequest resignRequest
-  ){
+  ) {
     memberService.resign(accessToken, member, resignRequest);
     CookieUtil.deleteCookie("refresh-token", null);
-    return ResponseEntity.ok().build();
-  }
-
-  @PutMapping("/change")
-  public ResponseEntity<?> changePassword(
-      @RequestBody @Valid ChangePasswordRequest changePasswordRequest,
-      @AuthenticationPrincipal UserDetailsImpl member) {
-    memberService.changePassword(changePasswordRequest, member);
     return ResponseEntity.ok().build();
   }
 
