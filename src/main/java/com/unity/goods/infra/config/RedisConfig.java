@@ -1,4 +1,4 @@
-package com.unity.goods.global.config;
+package com.unity.goods.infra.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;

@@ -1,4 +1,4 @@
-package com.unity.goods.global.config;
+package com.unity.goods.infra.config;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
