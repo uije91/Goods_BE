@@ -1,7 +1,7 @@
 package com.unity.goods.global.jwt;
 
 import com.unity.goods.domain.model.TokenDto;
-import com.unity.goods.global.service.RedisService;
+import com.unity.goods.infra.service.RedisService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;

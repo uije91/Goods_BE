@@ -1,4 +1,4 @@
-package com.unity.goods.global.service;
+package com.unity.goods.infra.service;
 
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;

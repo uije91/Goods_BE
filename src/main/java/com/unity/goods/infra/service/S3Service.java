@@ -1,4 +1,4 @@
-package com.unity.goods.global.service;
+package com.unity.goods.infra.service;
 
 import static com.unity.goods.global.exception.ErrorCode.INTERNAL_SERVER_ERROR;
 

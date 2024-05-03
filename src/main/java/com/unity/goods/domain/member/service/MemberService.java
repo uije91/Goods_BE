@@ -22,9 +22,8 @@ import com.unity.goods.domain.model.TokenDto;
 import com.unity.goods.global.exception.ErrorCode;
 import com.unity.goods.global.jwt.JwtTokenProvider;
 import com.unity.goods.global.jwt.UserDetailsImpl;
-import com.unity.goods.global.service.RedisService;
-import com.unity.goods.global.service.S3Service;
-import jakarta.transaction.Transactional;
+import com.unity.goods.infra.service.RedisService;
+import com.unity.goods.infra.service.S3Service;
 import java.security.SecureRandom;
 import java.util.Date;
 import java.util.Optional;
@@ -40,6 +39,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service

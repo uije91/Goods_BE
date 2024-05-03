@@ -8,7 +8,7 @@ import com.unity.goods.domain.email.dto.EmailVerificationCheckDto.EmailVerificat
 import com.unity.goods.domain.email.dto.EmailVerificationDto.EmailVerificationRequest;
 import com.unity.goods.domain.email.exception.EmailException;
 import com.unity.goods.domain.email.type.EmailSubjects;
-import com.unity.goods.global.service.RedisService;
+import com.unity.goods.infra.service.RedisService;
 import java.security.SecureRandom;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

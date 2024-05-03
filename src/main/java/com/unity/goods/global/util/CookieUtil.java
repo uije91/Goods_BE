@@ -1,7 +1,10 @@
 package com.unity.goods.global.util;
 
 import jakarta.servlet.http.Cookie;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CookieUtil {
 
   public static Cookie addCookie(String key, String value, int maxAge) {
