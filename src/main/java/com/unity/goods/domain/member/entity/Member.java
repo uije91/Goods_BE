@@ -9,6 +9,7 @@ import com.unity.goods.domain.member.dto.SignUpDto.SignUpRequest;
 import com.unity.goods.domain.member.type.Role;
 import com.unity.goods.domain.member.type.SocialType;
 import com.unity.goods.domain.member.type.Status;
+import com.unity.goods.domain.model.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -26,7 +27,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Entity
-public class Member {
+public class Member extends BaseEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -74,6 +75,10 @@ public class Member {
 
   public void resignStatus() {
     this.status = RESIGN;
+  }
+
+  public void changePassword(String password) {
+    this.password = password;
   }
 
 }

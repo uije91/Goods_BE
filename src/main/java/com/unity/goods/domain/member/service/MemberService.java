@@ -4,7 +4,13 @@ import static com.unity.goods.global.exception.ErrorCode.ALREADY_REGISTERED_USER
 import static com.unity.goods.global.exception.ErrorCode.NICKNAME_ALREADY_EXISTS;
 import static com.unity.goods.global.exception.ErrorCode.PASSWORD_NOT_MATCH;
 import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
+import static com.unity.goods.global.exception.ErrorCode.CURRENT_USED_PASSWORD;
+import static com.unity.goods.global.exception.ErrorCode.EMAIL_SEND_ERROR;
 
+import com.unity.goods.domain.email.exception.EmailException;
+import com.unity.goods.domain.email.type.EmailSubjects;
+import com.unity.goods.domain.member.dto.ChangePasswordDto.ChangePasswordRequest;
+import com.unity.goods.domain.member.dto.FindPasswordDto.FindPasswordRequest;
 import com.unity.goods.domain.member.dto.LoginDto;
 import com.unity.goods.domain.member.dto.ResignDto.ResignRequest;
 import com.unity.goods.domain.member.dto.SignUpDto.SignUpRequest;
@@ -22,9 +28,14 @@ import com.unity.goods.global.service.RedisService;
 import com.unity.goods.global.service.S3Service;
 import jakarta.transaction.Transactional;
 import java.util.Date;
+import java.security.SecureRandom;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.mail.MailException;
+import org.springframework.mail.MailSender;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -32,9 +43,12 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MemberService {
+
+  private final static String FROM = "Goods";
 
   private final PasswordEncoder passwordEncoder;
   private final MemberRepository memberRepository;
@@ -42,6 +56,7 @@ public class MemberService {
   private final S3Service s3Service;
   private final JwtTokenProvider jwtTokenProvider;
   private final AuthenticationManagerBuilder authenticationManagerBuilder;
+  private final MailSender mailSender;
 
 
   public SignUpResponse signUp(SignUpRequest signUpRequest) {
@@ -130,7 +145,7 @@ public class MemberService {
         .map(GrantedAuthority::getAuthority)
         .collect(Collectors.joining(","));
   }
-  
+
   // Header 에서 전달받은 "Bearer {AT}" 에서 {AT} 추출
   public String resolveToken(String requestAccessToken) {
     if (requestAccessToken != null && requestAccessToken.startsWith("Bearer ")) {
@@ -156,7 +171,7 @@ public class MemberService {
     redisService.setDataExpire(accessToken, "logout", expiration);
 
   }
-  
+
   @Transactional
   public void resign(String accessToken, UserDetailsImpl member, ResignRequest resignRequest) {
     Member savedMember = memberRepository.findByEmail(member.getUsername())
@@ -179,5 +194,71 @@ public class MemberService {
 
     savedMember.resignStatus();
   }
-  
+
+
+  @Transactional
+  public void changePassword(ChangePasswordRequest changePasswordRequest,
+      UserDetailsImpl member) {
+    Member findMember = memberRepository.findByEmail(member.getUsername())
+        .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
+
+    if (passwordEncoder.matches(changePasswordRequest.getPassword(), member.getPassword())) {
+      throw new MemberException(CURRENT_USED_PASSWORD);
+    }
+    findMember.changePassword(passwordEncoder.encode(changePasswordRequest.getPassword()));
+
+  }
+
+  // 비밀번호 찾기 이메일 전송
+  @Transactional
+  public void findPassword(FindPasswordRequest findPasswordRequest) {
+
+    Member findMember = memberRepository.findByEmail(findPasswordRequest.getEmail())
+        .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
+
+    String tempPassword = createTempPassword();
+
+    // 임시 비밀번호 전송
+    try {
+      mailSender.send(createFindPasswordEmail(findMember.getEmail(), tempPassword));
+    } catch (MailException e) {
+      log.debug("[findPasswordEmail] : 비밀번호 찾기 이메일 전송 과정 중 에러 발생");
+      throw new EmailException(EMAIL_SEND_ERROR);
+    }
+
+    // db password 임시 비밀번호로 변경
+    findMember.changePassword(tempPassword);
+
+  }
+
+  // 비밀번호 찾기 이메일 생성
+  public SimpleMailMessage createFindPasswordEmail(String emailAddress,
+      String tempPassword) {
+
+    SimpleMailMessage message = new SimpleMailMessage();
+    message.setFrom(FROM);
+    message.setTo(emailAddress);
+    message.setSubject(EmailSubjects.SEND_VERIFICATION_CODE.getTitle());
+    message.setText(
+        "안녕하세요. 중고거래 마켓 " + FROM + "입니다.\n\n"
+            + "임시 비밀번호는 [" + tempPassword + "] 입니다.");
+
+    log.info("[createFindPasswordEmail] : 비밀번호 찾기 이메일 생성 완료");
+    return message;
+  }
+
+  // 임시 비밀번호 생성
+  private static String createTempPassword() {
+    final String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+";
+
+    SecureRandom random = new SecureRandom();
+    StringBuilder sb = new StringBuilder();
+
+    for(int i=0; i<10; i++) {
+      sb.append(chars.charAt(random.nextInt(chars.length())));
+    }
+
+    log.info("[getTempPassword] : 임시 비밀번호 생성 완료");
+    return sb.toString();
+  }
 }
