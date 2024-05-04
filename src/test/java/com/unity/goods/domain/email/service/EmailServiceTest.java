@@ -1,25 +1,31 @@
 package com.unity.goods.domain.email.service;
 
+import static com.unity.goods.global.exception.ErrorCode.INCORRECT_VERIFICATION_NUM;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.BDDMockito.given;
 
+import com.unity.goods.domain.email.dto.EmailVerificationCheckDto.EmailVerificationCheckRequest;
+import com.unity.goods.domain.email.exception.EmailException;
 import com.unity.goods.domain.email.type.EmailSubjects;
 import com.unity.goods.infra.service.RedisService;
 import java.util.Objects;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.SimpleMailMessage;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class EmailServiceTest {
 
-  @Autowired
+  @InjectMocks
   private EmailService emailService;
 
-  @Autowired
+  @Mock
   private RedisService redisService;
 
   @Test
@@ -54,48 +60,49 @@ class EmailServiceTest {
   }
 
   @Test
-  @DisplayName("이메일 인증 정보 redis 저장 및 유효시간 내 확인")
+  @DisplayName("이메일 인증 확인 성공")
   public void checkIsVerifiedSuccessTest() {
-    // given
     String testEmail = "fortestseowon@gmail.com";
     String testVerificationNumber = "123456";
-    emailService.createVerificationEmail(testEmail,
-        testVerificationNumber);
+
+    EmailVerificationCheckRequest checkRequest = EmailVerificationCheckRequest.builder()
+        .email(testEmail)
+        .verificationNumber(testVerificationNumber)
+        .build();
+
+    // given
+    given(redisService.existData(checkRequest.getEmail())).willReturn(true);
+    given(redisService.getData(checkRequest.getEmail())).willReturn(testVerificationNumber);
 
     // when
-    try {
-      // 유효시간 1분 설정
-      redisService.setDataExpire(testEmail, testVerificationNumber, 1000L * 60);
-    } catch (RuntimeException e) {
-      throw new RuntimeException();
-    }
+    emailService.checkIsVerified(checkRequest);
 
-    // then
-    assertEquals(testVerificationNumber, redisService.getData(testEmail));
   }
 
   @Test
-  @DisplayName("이메일 인증 정보 redis 저장 및 유효시간 만료 확인")
+  @DisplayName("이메일 인증 확인 실패")
   public void checkIsVerifiedFailTest() {
-    // given
+
     String testEmail = "fortestseowon@gmail.com";
     String testVerificationNumber = "123456";
-    emailService.createVerificationEmail(testEmail, testVerificationNumber);
 
-    long startTime = System.currentTimeMillis();
-    long expiryTime = 5000;  // 5 seconds
+    EmailVerificationCheckRequest checkRequest = EmailVerificationCheckRequest.builder()
+        .email(testEmail)
+        .verificationNumber(testVerificationNumber)
+        .build();
+
+    // given
+    given(redisService.existData(checkRequest.getEmail())).willReturn(true);
+    given(redisService.getData(checkRequest.getEmail())).willReturn("X" + testVerificationNumber);
 
     // when
-    try {
-      redisService.setDataExpire(testEmail, testVerificationNumber, 1000L * 5);
-    } catch (RuntimeException e) {
-      throw new RuntimeException();
-    }
-
-    while (System.currentTimeMillis() - startTime <= 6000);  // 6초 delay
+    EmailException exception =
+        assertThrows(EmailException.class, () ->
+            emailService.checkIsVerified(checkRequest));
 
     // then
-    assertNull(redisService.getData(testEmail));
+    assertEquals(INCORRECT_VERIFICATION_NUM, exception.getErrorCode());
+
   }
 
 }

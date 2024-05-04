@@ -39,10 +39,11 @@ public class EmailService {
       mailSender.send(verificationEmail);
       redisService.setDataExpire(emailVerificationRequest.getEmail(), verificationNumber,
           VERIFICATION_EXPIRED_AT);
-      log.info("[sendVerificationEmail] : 이메일 전송 완료. 인증 번호 redis 저장");
+      log.info("[EmailService] : {}에게 이메일 전송 완료. 인증 번호 redis 저장",
+          emailVerificationRequest.getEmail());
 
     } catch (RuntimeException e) {
-      log.debug("[sendVerificationEmail] : 이메일 전송 과정 중 에러 발생");
+      log.error("[EmailService] : 이메일 전송 과정 중 에러 발생");
       throw new EmailException(EMAIL_SEND_ERROR);
 
     }
@@ -53,7 +54,7 @@ public class EmailService {
 
     SecureRandom random = new SecureRandom();
     int randomNumber = random.nextInt(900000) + 100000;
-    log.info("[createVerificationNumber] : 인증 번호 생성 완료");
+    log.info("[EmailService] : 인증 번호 생성 완료");
 
     return String.valueOf(randomNumber);
   }
@@ -69,21 +70,21 @@ public class EmailService {
             + "인증 번호는 [" + verificationNumber + "] 입니다.\n\n"
             + "인증 번호를 입력하고 인증 완료 버튼을 눌러주세요.");
 
-    log.info("[createVerificationEmail] : 인증 이메일 생성 완료");
+    log.info("[EmailService] : 인증 이메일 생성 완료. 수신인 : {}", emailAddress);
     return message;
   }
 
   public void checkIsVerified(EmailVerificationCheckRequest checkRequest) {
 
     // redis에 존재하는지, 조회되는지
-    if(!redisService.existData(checkRequest.getEmail())){
+    if (!redisService.existData(checkRequest.getEmail())) {
       throw new EmailException(EMAIL_VERIFICATION_NOT_EXISTS);
     }
 
     String redisCode = redisService.getData(checkRequest.getEmail());
 
     // 입력한 값과 redis에 저장된 값이 같은지
-    if(!checkRequest.getVerificationNumber().equals(redisCode)){
+    if (!checkRequest.getVerificationNumber().equals(redisCode)) {
       throw new EmailException(INCORRECT_VERIFICATION_NUM);
     }
 
