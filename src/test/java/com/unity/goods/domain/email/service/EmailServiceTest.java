@@ -2,6 +2,7 @@ package com.unity.goods.domain.email.service;
 
 import static com.unity.goods.global.exception.ErrorCode.INCORRECT_VERIFICATION_NUM;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 
@@ -74,7 +75,7 @@ class EmailServiceTest {
     given(redisService.getData(checkRequest.getEmail())).willReturn(testVerificationNumber);
 
     // when
-      emailService.checkIsVerified(checkRequest);
+    emailService.checkIsVerified(checkRequest);
 
   }
 
@@ -95,13 +96,12 @@ class EmailServiceTest {
     given(redisService.getData(checkRequest.getEmail())).willReturn("X" + testVerificationNumber);
 
     // when
-    try {
-      emailService.checkIsVerified(checkRequest);
-    } catch (EmailException e) {
+    EmailException exception =
+        assertThrows(EmailException.class, () ->
+            emailService.checkIsVerified(checkRequest));
 
-      // then
-      assertEquals(INCORRECT_VERIFICATION_NUM, e.getErrorCode());
-    }
+    // then
+    assertEquals(INCORRECT_VERIFICATION_NUM, exception.getErrorCode());
 
   }
 
