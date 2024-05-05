@@ -153,6 +153,7 @@ public class MemberService {
   }
 
   // 로그아웃
+  @Transactional
   public void logout(String requestAccessToken) {
     String accessToken = resolveToken(requestAccessToken);
     String email = jwtTokenProvider.getAuthentication(accessToken).getName();
@@ -167,7 +168,6 @@ public class MemberService {
     // AccessToken 을 BlackList 로 저장(사용방지 처리)
     long expiration = jwtTokenProvider.getTokenExpirationTime(accessToken) - new Date().getTime();
     redisService.setDataExpire(accessToken, "logout", expiration);
-
   }
 
   @Transactional
