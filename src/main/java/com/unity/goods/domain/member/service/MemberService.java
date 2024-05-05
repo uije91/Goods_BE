@@ -206,7 +206,7 @@ public class MemberService {
     try {
       mailSender.send(createFindPasswordEmail(findMember.getEmail(), tempPassword));
     } catch (MailException e) {
-      log.debug("[findPasswordEmail] : 비밀번호 찾기 이메일 전송 과정 중 에러 발생");
+      log.error("[MemberService][findPasswordEmail] : 비밀번호 찾기 이메일 전송 과정 중 에러 발생");
       throw new EmailException(EMAIL_SEND_ERROR);
     }
 
@@ -227,7 +227,8 @@ public class MemberService {
         "안녕하세요. 중고거래 마켓 " + FROM + "입니다.\n\n"
             + "임시 비밀번호는 [" + tempPassword + "] 입니다.");
 
-    log.info("[createFindPasswordEmail] : 비밀번호 찾기 이메일 생성 완료");
+    log.info("[MemberService][createFindPasswordEmail] : 비밀번호 찾기 이메일 생성 완료. 수신인 : {}",
+        emailAddress);
     return message;
   }
 
@@ -242,7 +243,7 @@ public class MemberService {
       sb.append(chars.charAt(random.nextInt(chars.length())));
     }
 
-    log.info("[getTempPassword] : 임시 비밀번호 생성 완료");
+    log.info("[MemberService][getTempPassword] : 임시 비밀번호 생성 완료");
     return sb.toString();
   }
 }

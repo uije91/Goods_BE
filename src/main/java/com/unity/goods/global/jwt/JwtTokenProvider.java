@@ -64,6 +64,8 @@ public class JwtTokenProvider {
         .signWith(key, SignatureAlgorithm.HS512)
         .compact();
 
+    log.info("[JwtTokenProvider] : accessToken, refreshToken 생성 완료");
+
     return TokenDto.builder()
         .accessToken(accessToken)
         .refreshToken(refreshToken)
@@ -84,6 +86,8 @@ public class JwtTokenProvider {
     String email = getClaims(token).get("email").toString();
 
     UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsService.loadUserByUsername(email);
+    log.info("[JwtTokenProvider] 토큰 인증 정보 조회 완료, userName : {}",
+        userDetails.getUsername());
     return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
   }
 
@@ -99,13 +103,13 @@ public class JwtTokenProvider {
       Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken);
       return true;
     } catch (SecurityException | MalformedJwtException e) {
-      log.info("Invalid JWT Token", e);
+      log.error("Invalid JWT Token", e);
     } catch (ExpiredJwtException e) {
-      log.info("Expired JWT Token", e);
+      log.error("Expired JWT Token", e);
     } catch (UnsupportedJwtException e) {
-      log.info("Unsupported JWT Token", e);
+      log.error("Unsupported JWT Token", e);
     } catch (IllegalArgumentException e) {
-      log.info("JWT claims string is empty.", e);
+      log.error("JWT claims string is empty.", e);
     }
     return false;
   }
