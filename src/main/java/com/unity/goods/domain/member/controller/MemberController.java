@@ -45,9 +45,16 @@ public class MemberController {
         COOKIE_EXPIRATION);
     return ResponseEntity.ok()
         .header(HttpHeaders.SET_COOKIE, cookie.getName() + "=" + cookie.getValue())
-        //RFC 7235 정의에 따라 인증헤더 형태를 가져야 한다.
         .header(HttpHeaders.AUTHORIZATION, "Bearer " + login.getAccessToken())
         .build();
+  }
+
+  @PostMapping("/logout")
+  public ResponseEntity<?> logout(@RequestHeader("Authorization") String requestAccessToken) {
+    memberService.logout(requestAccessToken);
+    Cookie cookie = CookieUtil.deleteCookie("refresh-token", null);
+    return ResponseEntity.ok()
+        .header(HttpHeaders.SET_COOKIE, cookie.toString()).build();
   }
 
   @PutMapping("/resign")
