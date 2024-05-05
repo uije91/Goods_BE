@@ -21,6 +21,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @AllArgsConstructor
@@ -33,14 +34,16 @@ public class Member extends BaseEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "member_id")
   private Long id;
+  @Setter
   private String nickname;
 
   @Column(unique = true)
   private String email;
   private String password;
 
-  @Column(unique = true)
+  //@Column(unique = true)
   private String phoneNumber;
+  @Setter
   private String profileImage;
 
   @Builder.Default

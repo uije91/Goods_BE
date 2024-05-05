@@ -3,15 +3,18 @@ package com.unity.goods.global.jwt;
 import com.unity.goods.domain.member.entity.Member;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 @RequiredArgsConstructor
-public class UserDetailsImpl implements UserDetails {
+public class UserDetailsImpl implements UserDetails, OAuth2User {
 
   private final Member member;
+
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -48,5 +51,15 @@ public class UserDetailsImpl implements UserDetails {
   @Override
   public boolean isEnabled() { // 계정의 활성화 여부
     return true;
+  }
+
+  @Override
+  public String getName() {
+    return member.getEmail();
+  }
+
+  @Override
+  public Map<String, Object> getAttributes() {
+    return null;
   }
 }

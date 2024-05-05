@@ -5,6 +5,7 @@ import static com.unity.goods.global.exception.ErrorCode.INTERNAL_SERVER_ERROR;
 
 import com.unity.goods.domain.email.exception.EmailException;
 import com.unity.goods.domain.member.exception.MemberException;
+import com.unity.goods.domain.oauth.exception.OAuthException;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -15,6 +16,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+  @ExceptionHandler(OAuthException.class)
+  public ErrorResponse handleOAuthException(EmailException e) {
+    log.error("Exception \"{}({})\" is occurred.", e.getErrorCode(), e.getErrorCode().getMessage());
+
+    return new ErrorResponse(e.getErrorCode(), e.getErrorCode().getStatus(),
+        e.getErrorCode().getMessage());
+  }
 
   @ExceptionHandler(EmailException.class)
   public ErrorResponse handleEmailException(EmailException e) {

@@ -12,7 +12,7 @@ spring:
     username: root
     password: 1234
 
-  #JPA 설정
+  # JPA 설정
   jpa:
     hibernate:
       ddl-auto: create-drop
@@ -23,11 +23,39 @@ spring:
     database: mysql
     defer-datasource-initialization: true
 
-  #JWT 설정
+  # JWT 설정
   jwt:
     secret: VGhpcyBpcyBhIHByb2plY3QgZnJvbSB0aGUgVW5pdHkgdGVhbS4gVGhlIHNlcnZpY2UgbmFtZSBpcyBnb29kcyBhbmQgaXQgaXMgYSBwbGF0Zm9ybSB0aGF0IHN1cHBvcnRzIHVzZWQgZ29vZHMgdHJhbnNhY3Rpb25zLg
     access-token-expiration-time: 3600000 # 60분(60*60*1000L) ms
     refresh-token-expiration-time: 1209600000 # 14일(7*24*60*60*1000L) ms
+
+  # OAuth
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-name: Kakao
+            client-id: '78aa8c2cf25d7d7b1c1b4a5993f9901e'
+            client-secret: '7yrCiP8LvQiqbir1lrV5wnNMXlw2TkbG'
+            client-authentication-method: client_secret_post
+            authorization-grant-type: authorization_code
+            redirect-uri: '{baseUrl}/api/oauth/code/{registrationId}'
+
+            scope:
+              - profile_nickname
+              - profile_image
+              - account_email
+
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-info-authentication-method: header
+            user-name-attribute: id
+
+        # 로그인 요청 경로 : http://localhost:8080/oauth2/authorization/kakao
 
   # Email 설정
   mail:
@@ -53,10 +81,12 @@ cloud:
     region:
       static: ap-northeast-2
     s3:
-      bucket:
+      bucket: goods
       baseUrl: https://'개인 버킷 이름'.s3.ap-northeast-2.amazonaws.com/
     stack:
       auto: false
     credentials:
-      access-key:
-      secret-key:
+      access-key: accessKey
+      secret-key: secretKey
+
+
