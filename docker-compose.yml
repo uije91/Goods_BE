@@ -1,0 +1,38 @@
+version: '3.8'
+services:
+  mysql:
+    image: mysql:8.0.33
+    environment:
+      MYSQL_ROOT_PASSWORD: unity-goods
+      MYSQL_DATABASE: goodsDb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: unity-goods
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - goods-network
+
+  goodsapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - mysql
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/goodsDb
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: unity-goods
+    ports:
+      - "8080:8080"
+    networks:
+      - goods-network
+
+networks:
+  goods-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
+    driver: local
