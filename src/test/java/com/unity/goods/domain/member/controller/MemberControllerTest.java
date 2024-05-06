@@ -36,10 +36,10 @@ class MemberControllerTest {
 
   @Test
   @DisplayName("로그인 성공")
-  @WithCustomMockUser
+  @WithMockUser
   void login_success() throws Exception {
-    String email = "email@test.com";
-    String password = "test123";
+    String email = "test@test.com";
+    String password = "!q2w3e4r";
 
     LoginRequest login = LoginRequest.builder().email(email).password(password).build();
 
