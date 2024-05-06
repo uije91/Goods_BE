@@ -1,12 +1,16 @@
 package com.unity.goods.domain.member.service;
 
 import static com.unity.goods.domain.member.type.Status.ACTIVE;
+import static com.unity.goods.domain.member.type.Status.INACTIVE;
 import static com.unity.goods.domain.member.type.Status.RESIGN;
 import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 
 import com.unity.goods.domain.member.dto.FindPasswordDto.FindPasswordRequest;
+import com.unity.goods.domain.member.dto.LoginDto.LoginRequest;
 import com.unity.goods.domain.member.dto.ResignDto.ResignRequest;
 import com.unity.goods.domain.member.dto.SignUpDto.SignUpRequest;
 import com.unity.goods.domain.member.entity.Member;
@@ -15,6 +19,7 @@ import com.unity.goods.domain.member.repository.MemberRepository;
 import com.unity.goods.domain.member.type.Role;
 import com.unity.goods.domain.member.type.SocialType;
 import com.unity.goods.domain.member.type.Status;
+import com.unity.goods.global.exception.ErrorCode;
 import com.unity.goods.global.jwt.JwtTokenProvider;
 import com.unity.goods.global.jwt.UserDetailsImpl;
 import com.unity.goods.infra.service.RedisService;
@@ -164,7 +169,113 @@ class MemberServiceTest {
     Assertions.assertEquals(findPasswordEmail.getText(),
         "안녕하세요. 중고거래 마켓 " + "Goods" + "입니다."
             + "\n\n" + "임시 비밀번호는 [" + "1a2B3%571!" + "] 입니다.");
+  }
 
+  @Test
+  @DisplayName("로그인 실패 - 없는 이메일")
+  void loginTest_userNotFound() {
+    //given
+    String email = "test@naver.com";
+    String password = "1234";
+    LoginRequest loginRequest = new LoginRequest(email, password);
+
+    when(memberRepository.findByEmail(email)).thenReturn(Optional.empty());
+
+    //when
+    MemberException memberException = Assertions.assertThrows(MemberException.class,
+        () -> memberService.login(loginRequest));
+
+    //then
+    assertEquals(USER_NOT_FOUND, memberException.getErrorCode());
+  }
+
+  @Test
+  @DisplayName("로그인 실패 - 비밀번호 불일치")
+  void loginTest_passwordNotMatch() {
+    //given
+    String email = "test@naver.com";
+    String password = "1234";
+
+    LoginRequest loginRequest = new LoginRequest(email, password);
+
+    Member member = Member.builder()
+        .email(email)
+        .password("hashedPassword")
+        .socialType(SocialType.SERVER)
+        .status(ACTIVE)
+        .build();
+
+    when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
+    when(passwordEncoder.matches(password, member.getPassword())).thenReturn(false);
+
+    //when
+    MemberException memberException = Assertions.assertThrows(MemberException.class,
+        () -> memberService.login(loginRequest));
+
+    //then
+    assertEquals(ErrorCode.PASSWORD_NOT_MATCH, memberException.getErrorCode());
+  }
+
+  @Test
+  @DisplayName("로그인 실패 - 소셜 로그인")
+  void loginTest_useSocial() {
+    //given
+    String email = "test@naver.com";
+    String password = "1234";
+
+    LoginRequest loginRequest = new LoginRequest(email, password);
+
+    Member member = Member.builder()
+        .email(email)
+        .socialType(SocialType.KAKAO)
+        .status(ACTIVE)
+        .build();
+
+    when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
+
+    //when
+    MemberException memberException = Assertions.assertThrows(MemberException.class,
+        () -> memberService.login(loginRequest));
+
+    //then
+    assertEquals(ErrorCode.USE_SOCIAL_LOGIN, memberException.getErrorCode());
+  }
+
+  @Test
+  @DisplayName("로그인 실패 - 회원 상태 검증")
+  void loginTest_memberStatusVerification() {
+    //given
+    String email = "test@naver.com";
+    String password = "1234";
+    LoginRequest loginRequest = new LoginRequest(email, password);
+
+    Member inactiveMember = Member.builder()
+        .email(email)
+        .password("hashedPassword")
+        .socialType(SocialType.SERVER)
+        .status(INACTIVE)
+        .build();
+
+    Member resignedMember = Member.builder()
+        .email(email)
+        .password("hashedPassword")
+        .socialType(SocialType.SERVER)
+        .status(RESIGN)
+        .build();
+
+    when(memberRepository.findByEmail(email))
+        .thenReturn(Optional.of(inactiveMember))
+        .thenReturn(Optional.of(resignedMember));
+
+    //when
+    MemberException inactiveException = assertThrows(MemberException.class,
+        () -> memberService.login(loginRequest));
+    MemberException resignedException = assertThrows(MemberException.class,
+        () -> memberService.login(loginRequest));
+
+    //then
+    assertEquals(ErrorCode.EMAIL_NOT_VERITY, inactiveException.getErrorCode());
+    assertEquals(ErrorCode.RESIGNED_ACCOUNT, resignedException.getErrorCode());
   }
 
 }

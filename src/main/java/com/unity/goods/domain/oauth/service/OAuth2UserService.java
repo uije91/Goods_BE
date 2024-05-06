@@ -40,7 +40,7 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
     }
   }
 
-  private OAuth2User process(OAuth2UserRequest userRequest, OAuth2User oAuth2User) {
+  public OAuth2User process(OAuth2UserRequest userRequest, OAuth2User oAuth2User) {
     SocialType socialType =
         SocialType.valueOf(userRequest.getClientRegistration().getRegistrationId().toUpperCase());
 
