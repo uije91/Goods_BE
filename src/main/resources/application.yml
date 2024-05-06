@@ -55,6 +55,11 @@ spring:
           write timeout: 5000
       auth-code-expiration-millis: 600000  # 10 * 60 * 1000 == 10분. redis 유효시간 + 안전장치
 
+  servlet:
+    multipart:
+      maxFileSize: 10MB
+      max-request-size: 50MB
+
 # AWS S3 설정
 cloud:
   aws:
