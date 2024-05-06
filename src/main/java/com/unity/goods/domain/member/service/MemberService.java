@@ -20,6 +20,8 @@ import com.unity.goods.domain.member.dto.MemberProfileDto.MemberProfileResponse;
 import com.unity.goods.domain.member.dto.ResignDto.ResignRequest;
 import com.unity.goods.domain.member.dto.SignUpDto.SignUpRequest;
 import com.unity.goods.domain.member.dto.SignUpDto.SignUpResponse;
+import com.unity.goods.domain.member.dto.UpdateProfileDto.UpdateProfileRequest;
+import com.unity.goods.domain.member.dto.UpdateProfileDto.UpdateProfileResponse;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.exception.MemberException;
 import com.unity.goods.domain.member.repository.MemberRepository;
@@ -254,6 +256,7 @@ public class MemberService {
   // 회원 프로필 조회
   public MemberProfileResponse getMemberProfile(UserDetailsImpl member) {
 
+    // 소셜 타입 구분하여 email 추출
     String email = "";
     if (member.getSocialType() == SERVER) {
       email = member.getUsername();
@@ -269,5 +272,46 @@ public class MemberService {
     }
 
     return MemberProfileResponse.fromMember(findMember);
+  }
+
+  // 회원 프로필 수정
+  @Transactional
+  public UpdateProfileResponse updateMemberProfile(UserDetailsImpl member,
+      UpdateProfileRequest updateProfileRequest) {
+
+    String email = "";
+    if (member.getSocialType() == SERVER) {
+      email = member.getUsername();
+    } else {
+      email = member.getName();
+    }
+
+    Member findMember = memberRepository.findByEmail(email)
+        .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
+
+    // 변경 사항 있는 필드만 프로필 변경
+    if (updateProfileRequest.getNickName() != null) {
+      findMember.setNickname(updateProfileRequest.getNickName());
+    }
+
+    if (updateProfileRequest.getTradePassword() != null) {
+      findMember.setTradePassword(updateProfileRequest.getTradePassword());
+    }
+
+    if (updateProfileRequest.getPhoneNumber() != null) {
+      findMember.setPhoneNumber(updateProfileRequest.getPhoneNumber());
+    }
+
+    if (updateProfileRequest.getProfileImage() != null) {
+      // 기존에 프로필 이미지가 있다면 S3에서 파일 삭제
+      if (findMember.getProfileImage() != null) {
+        s3Service.deleteFile(findMember.getProfileImage());
+      }
+      findMember.setProfileImage(
+          s3Service.uploadFile(
+              updateProfileRequest.getProfileImage(), email));
+    }
+
+    return UpdateProfileResponse.fromMember(findMember);
   }
 }

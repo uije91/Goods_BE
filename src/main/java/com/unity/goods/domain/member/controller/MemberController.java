@@ -6,7 +6,8 @@ import com.unity.goods.domain.member.dto.LoginDto;
 import com.unity.goods.domain.member.dto.MemberProfileDto.MemberProfileResponse;
 import com.unity.goods.domain.member.dto.ResignDto;
 import com.unity.goods.domain.member.dto.SignUpDto;
-import com.unity.goods.domain.member.entity.Member;
+import com.unity.goods.domain.member.dto.UpdateProfileDto.UpdateProfileRequest;
+import com.unity.goods.domain.member.dto.UpdateProfileDto.UpdateProfileResponse;
 import com.unity.goods.domain.member.service.MemberService;
 import com.unity.goods.domain.model.TokenDto;
 import com.unity.goods.global.jwt.UserDetailsImpl;
@@ -14,7 +15,6 @@ import com.unity.goods.global.util.CookieUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -80,9 +80,21 @@ public class MemberController {
   }
 
   @GetMapping("/profile")
-  public ResponseEntity<?> getProfile(@AuthenticationPrincipal UserDetailsImpl member){
+  public ResponseEntity<?> getProfile(@AuthenticationPrincipal UserDetailsImpl member) {
     MemberProfileResponse memberProfile = memberService.getMemberProfile(member);
     return ResponseEntity.ok(memberProfile);
   }
+
+  @PutMapping("/profile")
+  public ResponseEntity<?> updateProfile(
+      @AuthenticationPrincipal UserDetailsImpl member,
+      @Valid @ModelAttribute UpdateProfileRequest updateProfileRequest
+  ) {
+    UpdateProfileResponse updateProfileResponse
+        = memberService.updateMemberProfile(member, updateProfileRequest);
+
+    return ResponseEntity.ok(updateProfileResponse);
+  }
+
 
 }
