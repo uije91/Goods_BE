@@ -1,25 +1,29 @@
 package com.unity.goods.domain.member.service;
 
+import static com.unity.goods.domain.member.type.SocialType.SERVER;
+import static com.unity.goods.domain.member.type.Status.INACTIVE;
+import static com.unity.goods.domain.member.type.Status.RESIGN;
 import static com.unity.goods.global.exception.ErrorCode.ALREADY_REGISTERED_USER;
+import static com.unity.goods.global.exception.ErrorCode.EMAIL_NOT_VERITY;
 import static com.unity.goods.global.exception.ErrorCode.EMAIL_SEND_ERROR;
 import static com.unity.goods.global.exception.ErrorCode.NICKNAME_ALREADY_EXISTS;
 import static com.unity.goods.global.exception.ErrorCode.PASSWORD_NOT_MATCH;
+import static com.unity.goods.global.exception.ErrorCode.RESIGNED_ACCOUNT;
 import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
+import static com.unity.goods.global.exception.ErrorCode.USE_SOCIAL_LOGIN;
 
 import com.unity.goods.domain.email.exception.EmailException;
 import com.unity.goods.domain.email.type.EmailSubjects;
 import com.unity.goods.domain.member.dto.FindPasswordDto.FindPasswordRequest;
 import com.unity.goods.domain.member.dto.LoginDto;
+import com.unity.goods.domain.member.dto.MemberProfileDto.MemberProfileResponse;
 import com.unity.goods.domain.member.dto.ResignDto.ResignRequest;
 import com.unity.goods.domain.member.dto.SignUpDto.SignUpRequest;
 import com.unity.goods.domain.member.dto.SignUpDto.SignUpResponse;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.exception.MemberException;
 import com.unity.goods.domain.member.repository.MemberRepository;
-import com.unity.goods.domain.member.type.SocialType;
-import com.unity.goods.domain.member.type.Status;
 import com.unity.goods.domain.model.TokenDto;
-import com.unity.goods.global.exception.ErrorCode;
 import com.unity.goods.global.jwt.JwtTokenProvider;
 import com.unity.goods.global.jwt.UserDetailsImpl;
 import com.unity.goods.infra.service.RedisService;
@@ -94,20 +98,20 @@ public class MemberService {
     Optional<Member> optionalMember = memberRepository.findByEmail(request.getEmail());
 
     if (optionalMember.isEmpty()) {
-      throw new MemberException(ErrorCode.USER_NOT_FOUND);
+      throw new MemberException(USER_NOT_FOUND);
     }
 
     Member member = optionalMember.get();
-    if (member.getSocialType() != SocialType.SERVER) {
-      throw new MemberException(ErrorCode.USE_SOCIAL_LOGIN);
+    if (member.getSocialType() != SERVER) {
+      throw new MemberException(USE_SOCIAL_LOGIN);
     }
 
-    if (member.getStatus() == Status.INACTIVE) {
-      throw new MemberException(ErrorCode.EMAIL_NOT_VERITY);
+    if (member.getStatus() == INACTIVE) {
+      throw new MemberException(EMAIL_NOT_VERITY);
     }
 
-    if (member.getStatus() == Status.RESIGN) {
-      throw new MemberException(ErrorCode.RESIGNED_ACCOUNT);
+    if (member.getStatus() == RESIGN) {
+      throw new MemberException(RESIGNED_ACCOUNT);
     }
 
     if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
@@ -245,5 +249,25 @@ public class MemberService {
 
     log.info("[MemberService][getTempPassword] : 임시 비밀번호 생성 완료");
     return sb.toString();
+  }
+
+  // 회원 프로필 조회
+  public MemberProfileResponse getMemberProfile(UserDetailsImpl member) {
+
+    String email = "";
+    if (member.getSocialType() == SERVER) {
+      email = member.getUsername();
+    } else {
+      email = member.getName();
+    }
+
+    Member findMember = memberRepository.findByEmail(email)
+        .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
+
+    if (findMember.getStatus() == RESIGN) {
+      throw new MemberException(RESIGNED_ACCOUNT);
+    }
+
+    return MemberProfileResponse.fromMember(findMember);
   }
 }
