@@ -4,6 +4,7 @@ import static com.unity.goods.domain.member.type.SocialType.SERVER;
 import static com.unity.goods.domain.member.type.Status.INACTIVE;
 import static com.unity.goods.domain.member.type.Status.RESIGN;
 import static com.unity.goods.global.exception.ErrorCode.ALREADY_REGISTERED_USER;
+import static com.unity.goods.global.exception.ErrorCode.CURRENT_USED_PASSWORD;
 import static com.unity.goods.global.exception.ErrorCode.EMAIL_NOT_VERITY;
 import static com.unity.goods.global.exception.ErrorCode.EMAIL_SEND_ERROR;
 import static com.unity.goods.global.exception.ErrorCode.NICKNAME_ALREADY_EXISTS;
@@ -14,6 +15,7 @@ import static com.unity.goods.global.exception.ErrorCode.USE_SOCIAL_LOGIN;
 
 import com.unity.goods.domain.email.exception.EmailException;
 import com.unity.goods.domain.email.type.EmailSubjects;
+import com.unity.goods.domain.member.dto.ChangePasswordDto.ChangePasswordRequest;
 import com.unity.goods.domain.member.dto.FindPasswordDto.FindPasswordRequest;
 import com.unity.goods.domain.member.dto.LoginDto;
 import com.unity.goods.domain.member.dto.MemberProfileDto.MemberProfileResponse;
@@ -26,6 +28,7 @@ import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.exception.MemberException;
 import com.unity.goods.domain.member.repository.MemberRepository;
 import com.unity.goods.domain.model.TokenDto;
+import com.unity.goods.global.exception.ErrorCode;
 import com.unity.goods.global.jwt.JwtTokenProvider;
 import com.unity.goods.global.jwt.UserDetailsImpl;
 import com.unity.goods.infra.service.RedisService;
@@ -313,5 +316,23 @@ public class MemberService {
     }
 
     return UpdateProfileResponse.fromMember(findMember);
+  }
+
+  // 비밀번호 변경
+  @Transactional
+  public void changePassword(ChangePasswordRequest changePasswordRequest,
+      UserDetailsImpl member) {
+    Member findMember = memberRepository.findByEmail(member.getUsername())
+        .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
+
+    if (passwordEncoder.matches(changePasswordRequest.getCurPassword(), member.getPassword())) {
+      throw new MemberException(PASSWORD_NOT_MATCH);
+    }
+
+    if (passwordEncoder.matches(changePasswordRequest.getNewPassword(), member.getPassword())) {
+      throw new MemberException(CURRENT_USED_PASSWORD);
+    }
+
+    findMember.changePassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
   }
 }
