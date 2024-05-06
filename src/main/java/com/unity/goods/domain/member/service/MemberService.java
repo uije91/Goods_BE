@@ -259,15 +259,7 @@ public class MemberService {
   // 회원 프로필 조회
   public MemberProfileResponse getMemberProfile(UserDetailsImpl member) {
 
-    // 소셜 타입 구분하여 email 추출
-    String email = "";
-    if (member.getSocialType() == SERVER) {
-      email = member.getUsername();
-    } else {
-      email = member.getName();
-    }
-
-    Member findMember = memberRepository.findByEmail(email)
+    Member findMember = memberRepository.findByEmail(member.getUsername())
         .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
 
     if (findMember.getStatus() == RESIGN) {
@@ -282,14 +274,7 @@ public class MemberService {
   public UpdateProfileResponse updateMemberProfile(UserDetailsImpl member,
       UpdateProfileRequest updateProfileRequest) {
 
-    String email = "";
-    if (member.getSocialType() == SERVER) {
-      email = member.getUsername();
-    } else {
-      email = member.getName();
-    }
-
-    Member findMember = memberRepository.findByEmail(email)
+    Member findMember = memberRepository.findByEmail(member.getUsername())
         .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
 
     // 변경 사항 있는 필드만 프로필 변경
@@ -312,7 +297,7 @@ public class MemberService {
       }
       findMember.setProfileImage(
           s3Service.uploadFile(
-              updateProfileRequest.getProfileImage(), email));
+              updateProfileRequest.getProfileImage(), member.getUsername()));
     }
 
     return UpdateProfileResponse.fromMember(findMember);

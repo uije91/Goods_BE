@@ -64,7 +64,4 @@ public class UserDetailsImpl implements UserDetails, OAuth2User {
     return null;
   }
 
-  public SocialType getSocialType() {
-    return member.getSocialType();
-  }
 }
