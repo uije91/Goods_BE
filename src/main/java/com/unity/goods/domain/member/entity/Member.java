@@ -41,7 +41,7 @@ public class Member extends BaseEntity {
   private String email;
   private String password;
 
-  //@Column(unique = true)
+  @Column(unique = true)
   private String phoneNumber;
   @Setter
   private String profileImage;
