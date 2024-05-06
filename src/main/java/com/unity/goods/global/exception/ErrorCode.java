@@ -7,6 +7,10 @@ import org.springframework.http.HttpStatus;
 @Getter
 @AllArgsConstructor
 public enum ErrorCode {
+  // OAuth Error
+  INVALID_SOCIAL_TYPE(400,"잘못된 소셜 타입입니다"),
+  USE_SERVER_LOGIN(400,"기존 회원입니다. 자체 로그인을 이용해주세요."),
+
   // Member Error
   USER_NOT_FOUND(404,"회원 정보를 찾을 수 없습니다"),
   USE_SOCIAL_LOGIN(400, "소셜 로그인을 이용해주세요"),

@@ -91,23 +91,16 @@ public class JwtTokenProvider {
     return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
   }
 
-  // 토큰 만료 시간 확인
-  public long getTokenExpirationTime(String token) {
-    if(token.startsWith(TOKEN_PREFIX)){
-      token = token.substring(TOKEN_PREFIX.length());
-    }
-    return getClaims(token).getExpiration().getTime();
-  }
-
   /**
    * 토큰 검증
    */
-  public boolean validateRefreshToken(String refreshToken) {
+  public boolean validateToken(String accessToken) {
     try {
-      if (redisService.getData(refreshToken).equals("delete")) { // 회원탈퇴 했을 경우
+      if (redisService.getData(accessToken) != null // NPE 방지
+          && redisService.getData(accessToken).equals("logout")) { // 로그아웃 했을 경우
         return false;
       }
-      Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(refreshToken);
+      Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken);
       return true;
     } catch (SecurityException | MalformedJwtException e) {
       log.error("Invalid JWT Token", e);
@@ -121,23 +114,12 @@ public class JwtTokenProvider {
     return false;
   }
 
-  // Filter 에서 사용
-  public boolean validateAccessToken(String accessToken) {
-    try {
-      if (redisService.getData(accessToken) != null // NPE 방지
-          && redisService.getData(accessToken).equals("logout")) { // 로그아웃 했을 경우
-        return false;
-      }
-      Jwts.parserBuilder()
-          .setSigningKey(key)
-          .build()
-          .parseClaimsJws(accessToken);
-      return true;
-    } catch (ExpiredJwtException e) {
-      return true;
-    } catch (Exception e) {
-      return false;
+  // 토큰 만료 시간 확인
+  public long getTokenExpirationTime(String token) {
+    if(token.startsWith(TOKEN_PREFIX)){
+      token = token.substring(TOKEN_PREFIX.length());
     }
+    return getClaims(token).getExpiration().getTime();
   }
 
   // 토큰 만료 여부 확인 ( 토큰 재발급시 사용 )
