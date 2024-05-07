@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,8 +48,10 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     }
 
     // Redis 에  RefreshToken 저장
-    redisService.setDataExpire("RT:" + email, tokenDto.getRefreshToken(),
-        jwtTokenProvider.getTokenExpirationTime(tokenDto.getRefreshToken()));
+    long expiration =
+        jwtTokenProvider.getTokenExpirationTime(tokenDto.getRefreshToken()) - new Date().getTime();
+
+    redisService.setDataExpire("RT:" + email, tokenDto.getRefreshToken(), expiration);
 
     // 쿠키 만료 시간 : 30일
     Cookie cookie = CookieUtil.addCookie("refresh", tokenDto.getRefreshToken(),
