@@ -1,1 +1,92 @@
-spring.application.name=Goods
+spring:
+  # Redis 설정
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  # MySQL 설정
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/goods?characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+    username: root
+    password: 1234
+
+  # JPA 설정
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    generate-ddl: true
+    properties:
+      hibernate:
+        show_sql: true
+    database: mysql
+    defer-datasource-initialization: true
+
+  # JWT 설정
+  jwt:
+    secret: VGhpcyBpcyBhIHByb2plY3QgZnJvbSB0aGUgVW5pdHkgdGVhbS4gVGhlIHNlcnZpY2UgbmFtZSBpcyBnb29kcyBhbmQgaXQgaXMgYSBwbGF0Zm9ybSB0aGF0IHN1cHBvcnRzIHVzZWQgZ29vZHMgdHJhbnNhY3Rpb25zLg
+    access-token-expiration-time: 3600000 # 60분(60*60*1000L) ms
+    refresh-token-expiration-time: 1209600000 # 14일(14*24*60*60*1000L) ms
+
+  # OAuth
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-name: Kakao
+            client-id: '78aa8c2cf25d7d7b1c1b4a5993f9901e'
+            client-secret: '7yrCiP8LvQiqbir1lrV5wnNMXlw2TkbG'
+            client-authentication-method: client_secret_post
+            authorization-grant-type: authorization_code
+            redirect-uri: '{baseUrl}/api/oauth/code/{registrationId}'
+
+            scope:
+              - profile_nickname
+              - profile_image
+              - account_email
+
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-info-authentication-method: header
+            user-name-attribute: id
+
+        # 로그인 요청 경로 : http://localhost:8080/oauth2/authorization/kakao
+
+  # Email 설정
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username:
+    password:
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connection timeout: 5000
+          timeout: 5000
+          write timeout: 5000
+      auth-code-expiration-millis: 600000  # 10 * 60 * 1000 == 10분. redis 유효시간 + 안전장치
+
+# AWS S3 설정
+cloud:
+  aws:
+    region:
+      static: ap-northeast-2
+    s3:
+      bucket: goods
+      baseUrl: https://'개인 버킷 이름'.s3.ap-northeast-2.amazonaws.com/
+    stack:
+      auto: false
+    credentials:
+      access-key: accessKey
+      secret-key: secretKey
+
+
