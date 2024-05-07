@@ -6,9 +6,14 @@ import static com.unity.goods.global.exception.ErrorCode.RESIGNED_ACCOUNT;
 import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
+import com.unity.goods.domain.member.dto.ChangePasswordDto.ChangePasswordRequest;
 import com.unity.goods.domain.member.dto.FindPasswordDto.FindPasswordRequest;
 import com.unity.goods.domain.member.dto.MemberProfileDto.MemberProfileResponse;
 import com.unity.goods.domain.member.dto.ResignDto.ResignRequest;
@@ -23,7 +28,6 @@ import com.unity.goods.global.jwt.JwtTokenProvider;
 import com.unity.goods.global.jwt.UserDetailsImpl;
 import com.unity.goods.infra.service.RedisService;
 import java.util.Optional;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,6 +35,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,6 +55,8 @@ class MemberServiceTest {
   private RedisService redisService;
   @Mock
   private JwtTokenProvider jwtTokenProvider;
+  @Mock
+  private MailSender mailSender;
 
   @BeforeEach
   public void setMember() {
@@ -154,20 +161,22 @@ class MemberServiceTest {
   @DisplayName("비밀번호 찾기 이메일 생성 테스트")
   void findPasswordEmailTest() {
     //given
-    FindPasswordRequest findPasswordRequest = FindPasswordRequest.builder()
-        .email("test@naver.com")
-        .build();
+    given(memberRepository.findByEmail(anyString()))
+        .willReturn(Optional.of(Member.builder()
+            .email("test@naver.com")
+            .password("test1234")
+            .build()));
 
-    String tempPassword = "1a2B3%571!";
+    doNothing().when(mailSender).send(any(SimpleMailMessage.class));
 
     //when
-    SimpleMailMessage findPasswordEmail
-        = memberService.createFindPasswordEmail(findPasswordRequest.getEmail(), tempPassword);
+    memberService.findPassword(
+        FindPasswordRequest.builder()
+            .email("test@naver.com")
+            .build());
 
     //then
-    Assertions.assertEquals(findPasswordEmail.getText(),
-        "안녕하세요. 중고거래 마켓 " + "Goods" + "입니다."
-            + "\n\n" + "임시 비밀번호는 [" + "1a2B3%571!" + "] 입니다.");
+    verify(memberRepository, times(1)).findByEmail(anyString());
 
   }
 
@@ -223,6 +232,38 @@ class MemberServiceTest {
 
     //then
     assertEquals(RESIGNED_ACCOUNT, exception.getErrorCode());
+  }
+
+  @Test
+  @DisplayName("비밀번호 변경 테스트")
+  void changePasswordTest() {
+    //given
+    Member member = Member.builder()
+        .email("test@naver.com")
+        .password("test1234")
+        .nickname("test")
+        .status(RESIGN)
+        .phoneNumber("010-1111-1111")
+        .profileImage("http://amazonS3/test.jpg")
+        .build();
+
+    ChangePasswordRequest changePasswordRequest = ChangePasswordRequest.builder()
+        .curPassword("test1234")
+        .newPassword("new1234")
+        .build();
+
+    UserDetailsImpl userDetails = new UserDetailsImpl(member);
+
+    given(memberRepository.findByEmail(anyString()))
+        .willReturn(Optional.of(member));
+    given(passwordEncoder.encode(changePasswordRequest.getNewPassword())).willReturn("new1234");
+
+
+    //when
+    memberService.changePassword(changePasswordRequest, userDetails);
+
+    //then
+    assertEquals(member.getPassword(), "new1234");
   }
 
 
