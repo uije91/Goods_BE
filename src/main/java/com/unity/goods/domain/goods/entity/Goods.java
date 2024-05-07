@@ -3,6 +3,7 @@ package com.unity.goods.domain.goods.entity;
 import static com.unity.goods.domain.goods.dto.GoodsStatus.SALE;
 
 import com.unity.goods.domain.goods.dto.GoodsStatus;
+import com.unity.goods.domain.goods.dto.UploadGoodsDto.UploadGoodsRequest;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.model.BaseEntity;
 import jakarta.persistence.Column;
@@ -17,8 +18,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -60,5 +65,16 @@ public class Goods extends BaseEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "member")
   private Member member;
+
+  public static Goods fromUploadGoodsRequest(UploadGoodsRequest request){
+    return Goods.builder()
+        .goodsName(request.getGoodsName())
+        .price(Long.parseLong(request.getPrice()))
+        .description(request.getDescription())
+        .address(request.getAddress() + " " + request.getUserDefinedLocation())
+        .lat(request.getLat())
+        .lng(request.getLng())
+        .build();
+  }
 
 }
