@@ -7,6 +7,7 @@ import static org.springframework.security.web.util.matcher.AntPathRequestMatche
 import com.unity.goods.domain.oauth.handler.OAuth2FailHandler;
 import com.unity.goods.domain.oauth.handler.OAuth2SuccessHandler;
 import com.unity.goods.domain.oauth.service.OAuth2UserService;
+import com.unity.goods.global.exception.AuthenticationEntryPointHandler;
 import com.unity.goods.global.jwt.JwtAuthenticationFilter;
 import com.unity.goods.global.jwt.JwtTokenProvider;
 import java.util.List;
@@ -34,6 +35,8 @@ public class SecurityConfig {
   private final OAuth2UserService oAuth2UserService;
   private final OAuth2SuccessHandler successHandler;
   private final OAuth2FailHandler failHandler;
+
+  private final AuthenticationEntryPointHandler authenticationEntryPointHandler;
 
   @Bean
   public PasswordEncoder passwordEncoder() {
@@ -64,6 +67,10 @@ public class SecurityConfig {
         // JWT Filter
         .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
             UsernamePasswordAuthenticationFilter.class)
+        // 인가되지 않은 사용자 접근 에러 핸들링
+        .exceptionHandling(exceptionHandling ->
+            exceptionHandling
+                .authenticationEntryPoint(authenticationEntryPointHandler))
     ;
     return http.build();
   }
@@ -85,7 +92,8 @@ public class SecurityConfig {
   private RequestMatcher[] requestAuthenticated() {
     List<RequestMatcher> requestMatchers = List.of(
         antMatcher(POST, "/api/member/logout"), // 로그아웃
-        antMatcher(PUT, "/api/member/resign") // 회원탈퇴
+        antMatcher(PUT, "/api/member/resign"), // 회원탈퇴
+        antMatcher(POST, "/api/goods/new")
     );
     return requestMatchers.toArray(RequestMatcher[]::new);
   }
