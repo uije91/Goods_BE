@@ -1,6 +1,7 @@
 package com.unity.goods.global.util;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -21,5 +22,18 @@ public class CookieUtil {
     cookie.setMaxAge(0);
     cookie.setPath("/");
     return cookie;
+  }
+
+  public static String getCookie(HttpServletRequest request, String name) {
+    Cookie[] cookies = request.getCookies();
+
+    if (cookies != null) {
+      for (Cookie cookie : cookies) {
+        if (name.equals(cookie.getName())) {
+          return cookie.getValue();
+        }
+      }
+    }
+    return null;
   }
 }
