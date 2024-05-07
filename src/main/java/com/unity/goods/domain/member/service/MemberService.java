@@ -1,25 +1,34 @@
 package com.unity.goods.domain.member.service;
 
+import static com.unity.goods.domain.member.type.SocialType.SERVER;
+import static com.unity.goods.domain.member.type.Status.INACTIVE;
+import static com.unity.goods.domain.member.type.Status.RESIGN;
 import static com.unity.goods.global.exception.ErrorCode.ALREADY_REGISTERED_USER;
+import static com.unity.goods.global.exception.ErrorCode.CURRENT_USED_PASSWORD;
+import static com.unity.goods.global.exception.ErrorCode.EMAIL_NOT_VERITY;
 import static com.unity.goods.global.exception.ErrorCode.EMAIL_SEND_ERROR;
+import static com.unity.goods.global.exception.ErrorCode.INVALID_REFRESH_TOKEN;
 import static com.unity.goods.global.exception.ErrorCode.NICKNAME_ALREADY_EXISTS;
 import static com.unity.goods.global.exception.ErrorCode.PASSWORD_NOT_MATCH;
+import static com.unity.goods.global.exception.ErrorCode.RESIGNED_ACCOUNT;
 import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
+import static com.unity.goods.global.exception.ErrorCode.USE_SOCIAL_LOGIN;
 
 import com.unity.goods.domain.email.exception.EmailException;
 import com.unity.goods.domain.email.type.EmailSubjects;
+import com.unity.goods.domain.member.dto.ChangePasswordDto.ChangePasswordRequest;
 import com.unity.goods.domain.member.dto.FindPasswordDto.FindPasswordRequest;
 import com.unity.goods.domain.member.dto.LoginDto;
+import com.unity.goods.domain.member.dto.MemberProfileDto.MemberProfileResponse;
 import com.unity.goods.domain.member.dto.ResignDto.ResignRequest;
 import com.unity.goods.domain.member.dto.SignUpDto.SignUpRequest;
 import com.unity.goods.domain.member.dto.SignUpDto.SignUpResponse;
+import com.unity.goods.domain.member.dto.UpdateProfileDto.UpdateProfileRequest;
+import com.unity.goods.domain.member.dto.UpdateProfileDto.UpdateProfileResponse;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.exception.MemberException;
 import com.unity.goods.domain.member.repository.MemberRepository;
-import com.unity.goods.domain.member.type.SocialType;
-import com.unity.goods.domain.member.type.Status;
 import com.unity.goods.domain.model.TokenDto;
-import com.unity.goods.global.exception.ErrorCode;
 import com.unity.goods.global.jwt.JwtTokenProvider;
 import com.unity.goods.global.jwt.UserDetailsImpl;
 import com.unity.goods.infra.service.RedisService;
@@ -93,20 +102,20 @@ public class MemberService {
     Optional<Member> optionalMember = memberRepository.findByEmail(request.getEmail());
 
     if (optionalMember.isEmpty()) {
-      throw new MemberException(ErrorCode.USER_NOT_FOUND);
+      throw new MemberException(USER_NOT_FOUND);
     }
 
     Member member = optionalMember.get();
-    if (member.getSocialType() != SocialType.SERVER) {
-      throw new MemberException(ErrorCode.USE_SOCIAL_LOGIN);
+    if (member.getSocialType() != SERVER) {
+      throw new MemberException(USE_SOCIAL_LOGIN);
     }
 
-    if (member.getStatus() == Status.INACTIVE) {
-      throw new MemberException(ErrorCode.EMAIL_NOT_VERITY);
+    if (member.getStatus() == INACTIVE) {
+      throw new MemberException(EMAIL_NOT_VERITY);
     }
 
-    if (member.getStatus() == Status.RESIGN) {
-      throw new MemberException(ErrorCode.RESIGNED_ACCOUNT);
+    if (member.getStatus() == RESIGN) {
+      throw new MemberException(RESIGNED_ACCOUNT);
     }
 
     if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
@@ -252,7 +261,7 @@ public class MemberService {
     // 1. RT 검증
     if (!jwtTokenProvider.validateToken(tokenDto.getRefreshToken())) {
       log.error("[MemberService][reissue] : RefreshToken 검증 실패");
-      throw new MemberException(ErrorCode.INVALID_REFRESH_TOKEN);
+      throw new MemberException(INVALID_REFRESH_TOKEN);
     }
 
     // 2.AT 에서 email 정보 습득
@@ -264,10 +273,75 @@ public class MemberService {
     String refreshToken = redisService.getData("RT:" + email);
     if (!refreshToken.equals(tokenDto.getRefreshToken())) {
       log.error("[MemberService][reissue] : Redis에 저장된 RT와 가져온 RT가 불일치");
-      throw new MemberException(ErrorCode.INVALID_REFRESH_TOKEN);
+      throw new MemberException(INVALID_REFRESH_TOKEN);
     }
 
     // 4.새로운 토큰 생성 및 반환
     return jwtTokenProvider.generateAccessToken(email, role);
+  }
+
+  // 회원 프로필 조회
+  public MemberProfileResponse getMemberProfile(UserDetailsImpl member) {
+
+    Member findMember = memberRepository.findByEmail(member.getUsername())
+        .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
+
+    if (findMember.getStatus() == RESIGN) {
+      throw new MemberException(RESIGNED_ACCOUNT);
+    }
+
+    return MemberProfileResponse.fromMember(findMember);
+  }
+
+  // 회원 프로필 수정
+  @Transactional
+  public UpdateProfileResponse updateMemberProfile(UserDetailsImpl member,
+      UpdateProfileRequest updateProfileRequest) {
+
+    Member findMember = memberRepository.findByEmail(member.getUsername())
+        .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
+
+    // 변경 사항 있는 필드만 프로필 변경
+    if (updateProfileRequest.getNickName() != null) {
+      findMember.setNickname(updateProfileRequest.getNickName());
+    }
+
+    if (updateProfileRequest.getTradePassword() != null) {
+      findMember.setTradePassword(updateProfileRequest.getTradePassword());
+    }
+
+    if (updateProfileRequest.getPhoneNumber() != null) {
+      findMember.setPhoneNumber(updateProfileRequest.getPhoneNumber());
+    }
+
+    if (updateProfileRequest.getProfileImage() != null) {
+      // 기존에 프로필 이미지가 있다면 S3에서 파일 삭제
+      if (findMember.getProfileImage() != null) {
+        s3Service.deleteFile(findMember.getProfileImage());
+      }
+      findMember.setProfileImage(
+          s3Service.uploadFile(
+              updateProfileRequest.getProfileImage(), member.getUsername()));
+    }
+
+    return UpdateProfileResponse.fromMember(findMember);
+  }
+
+  // 비밀번호 변경
+  @Transactional
+  public void changePassword(ChangePasswordRequest changePasswordRequest,
+      UserDetailsImpl member) {
+    Member findMember = memberRepository.findByEmail(member.getUsername())
+        .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
+
+    if (passwordEncoder.matches(changePasswordRequest.getCurPassword(), member.getPassword())) {
+      throw new MemberException(PASSWORD_NOT_MATCH);
+    }
+
+    if (passwordEncoder.matches(changePasswordRequest.getNewPassword(), member.getPassword())) {
+      throw new MemberException(CURRENT_USED_PASSWORD);
+    }
+
+    findMember.changePassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
   }
 }

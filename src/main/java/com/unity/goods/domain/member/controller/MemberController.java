@@ -1,10 +1,15 @@
 package com.unity.goods.domain.member.controller;
 
+import static com.unity.goods.domain.member.dto.ChangePasswordDto.*;
 import static com.unity.goods.domain.member.dto.FindPasswordDto.FindPasswordRequest;
 
+import com.unity.goods.domain.member.dto.ChangePasswordDto;
 import com.unity.goods.domain.member.dto.LoginDto;
+import com.unity.goods.domain.member.dto.MemberProfileDto.MemberProfileResponse;
 import com.unity.goods.domain.member.dto.ResignDto;
 import com.unity.goods.domain.member.dto.SignUpDto;
+import com.unity.goods.domain.member.dto.UpdateProfileDto.UpdateProfileRequest;
+import com.unity.goods.domain.member.dto.UpdateProfileDto.UpdateProfileResponse;
 import com.unity.goods.domain.member.service.MemberService;
 import com.unity.goods.domain.model.TokenDto;
 import com.unity.goods.global.jwt.UserDetailsImpl;
@@ -16,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -73,6 +79,31 @@ public class MemberController {
   public ResponseEntity<?> findPassword(
       @RequestBody @Valid FindPasswordRequest findPasswordRequest) {
     memberService.findPassword(findPasswordRequest);
+    return ResponseEntity.ok().build();
+  }
+
+  @GetMapping("/profile")
+  public ResponseEntity<?> getProfile(@AuthenticationPrincipal UserDetailsImpl member) {
+    MemberProfileResponse memberProfile = memberService.getMemberProfile(member);
+    return ResponseEntity.ok(memberProfile);
+  }
+
+  @PutMapping("/profile")
+  public ResponseEntity<?> updateProfile(
+      @AuthenticationPrincipal UserDetailsImpl member,
+      @Valid @ModelAttribute UpdateProfileRequest updateProfileRequest
+  ) {
+    UpdateProfileResponse updateProfileResponse
+        = memberService.updateMemberProfile(member, updateProfileRequest);
+
+    return ResponseEntity.ok(updateProfileResponse);
+  }
+
+  @PutMapping("/password")
+  public ResponseEntity<?> changePassword(
+      @AuthenticationPrincipal UserDetailsImpl member,
+      @RequestBody @Valid ChangePasswordRequest changePasswordRequest) {
+    memberService.changePassword(changePasswordRequest, member);
     return ResponseEntity.ok().build();
   }
 

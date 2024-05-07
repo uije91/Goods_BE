@@ -1,6 +1,7 @@
 package com.unity.goods.global.jwt;
 
 import com.unity.goods.domain.member.entity.Member;
+import com.unity.goods.domain.member.type.SocialType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -62,4 +63,5 @@ public class UserDetailsImpl implements UserDetails, OAuth2User {
   public Map<String, Object> getAttributes() {
     return null;
   }
+
 }
