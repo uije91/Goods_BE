@@ -1,10 +1,13 @@
 package com.unity.goods.domain.goods.service;
 
+import static com.unity.goods.global.exception.ErrorCode.GOODS_NOT_FOUND;
 import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
 
+import com.unity.goods.domain.goods.dto.GoodsDetailDto.GoodsDetailResponse;
 import com.unity.goods.domain.goods.dto.UploadGoodsDto.UploadGoodsRequest;
 import com.unity.goods.domain.goods.dto.UploadGoodsDto.UploadGoodsResponse;
 import com.unity.goods.domain.goods.entity.Goods;
+import com.unity.goods.domain.goods.exception.GoodsException;
 import com.unity.goods.domain.goods.repository.GoodsRepository;
 import com.unity.goods.domain.image.entity.Image;
 import com.unity.goods.domain.image.repository.ImageRepository;
@@ -54,5 +57,24 @@ public class GoodsService {
     }
 
     return UploadGoodsResponse.fromGoods(goods);
+  }
+
+  public GoodsDetailResponse getDetailGoods(UserDetailsImpl member, Long id) {
+
+    Member findMember = memberRepository.findByEmail(member.getUsername())
+        .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
+
+    Goods goods = goodsRepository.findById(id)
+        .orElseThrow(() -> new GoodsException(GOODS_NOT_FOUND));
+
+    GoodsDetailResponse goodsDetailResponse = GoodsDetailResponse.fromGoodsAndMember(goods,
+        findMember);
+
+    List<String> goodsImages = new ArrayList<>();
+    for(Image image : goods.getImageList()){
+      goodsImages.add(image.getImageUrl());
+    }
+    goodsDetailResponse.setGoodsImages(goodsImages);
+    return goodsDetailResponse;
   }
 }

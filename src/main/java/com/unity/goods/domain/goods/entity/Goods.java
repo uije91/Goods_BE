@@ -4,6 +4,7 @@ import static com.unity.goods.domain.goods.dto.GoodsStatus.SALE;
 
 import com.unity.goods.domain.goods.dto.GoodsStatus;
 import com.unity.goods.domain.goods.dto.UploadGoodsDto.UploadGoodsRequest;
+import com.unity.goods.domain.image.entity.Image;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.model.BaseEntity;
 import jakarta.persistence.Column;
@@ -16,6 +17,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -65,6 +69,10 @@ public class Goods extends BaseEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "member")
   private Member member;
+
+  @OneToMany(mappedBy = "goods")
+  @Builder.Default
+  private List<Image> imageList = new ArrayList<>();
 
   public static Goods fromUploadGoodsRequest(UploadGoodsRequest request){
     return Goods.builder()

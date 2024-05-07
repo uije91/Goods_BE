@@ -1,5 +1,6 @@
 package com.unity.goods.global.config;
 
+import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpMethod.PUT;
 import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
@@ -93,7 +94,8 @@ public class SecurityConfig {
     List<RequestMatcher> requestMatchers = List.of(
         antMatcher(POST, "/api/member/logout"), // 로그아웃
         antMatcher(PUT, "/api/member/resign"), // 회원탈퇴
-        antMatcher(POST, "/api/goods/new")
+        antMatcher(POST, "/api/goods/new"),
+        antMatcher(GET, "/api/goods/**")
     );
     return requestMatchers.toArray(RequestMatcher[]::new);
   }
