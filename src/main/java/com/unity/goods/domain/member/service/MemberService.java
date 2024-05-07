@@ -7,6 +7,7 @@ import static com.unity.goods.global.exception.ErrorCode.ALREADY_REGISTERED_USER
 import static com.unity.goods.global.exception.ErrorCode.CURRENT_USED_PASSWORD;
 import static com.unity.goods.global.exception.ErrorCode.EMAIL_NOT_VERITY;
 import static com.unity.goods.global.exception.ErrorCode.EMAIL_SEND_ERROR;
+import static com.unity.goods.global.exception.ErrorCode.INVALID_REFRESH_TOKEN;
 import static com.unity.goods.global.exception.ErrorCode.NICKNAME_ALREADY_EXISTS;
 import static com.unity.goods.global.exception.ErrorCode.PASSWORD_NOT_MATCH;
 import static com.unity.goods.global.exception.ErrorCode.RESIGNED_ACCOUNT;
@@ -260,7 +261,7 @@ public class MemberService {
     // 1. RT 검증
     if (!jwtTokenProvider.validateToken(tokenDto.getRefreshToken())) {
       log.error("[MemberService][reissue] : RefreshToken 검증 실패");
-      throw new MemberException(ErrorCode.INVALID_REFRESH_TOKEN);
+      throw new MemberException(INVALID_REFRESH_TOKEN);
     }
 
     // 2.AT 에서 email 정보 습득
@@ -272,7 +273,7 @@ public class MemberService {
     String refreshToken = redisService.getData("RT:" + email);
     if (!refreshToken.equals(tokenDto.getRefreshToken())) {
       log.error("[MemberService][reissue] : Redis에 저장된 RT와 가져온 RT가 불일치");
-      throw new MemberException(ErrorCode.INVALID_REFRESH_TOKEN);
+      throw new MemberException(INVALID_REFRESH_TOKEN);
     }
 
     // 4.새로운 토큰 생성 및 반환

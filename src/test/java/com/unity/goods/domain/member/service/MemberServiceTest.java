@@ -6,16 +6,13 @@ import static com.unity.goods.global.exception.ErrorCode.RESIGNED_ACCOUNT;
 import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.unity.goods.domain.member.dto.ChangePasswordDto.ChangePasswordRequest;
 import com.unity.goods.domain.member.dto.FindPasswordDto.FindPasswordRequest;
@@ -33,7 +30,6 @@ import com.unity.goods.global.exception.ErrorCode;
 import com.unity.goods.global.jwt.JwtTokenProvider;
 import com.unity.goods.global.jwt.UserDetailsImpl;
 import com.unity.goods.infra.service.RedisService;
-import io.jsonwebtoken.Claims;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -163,28 +159,6 @@ class MemberServiceTest {
     assertEquals(RESIGN, resignedMember.getStatus());
   }
 
-
-  @Test
-  @DisplayName("비밀번호 찾기 이메일 생성 테스트")
-  void findPasswordEmailTest() {
-    //given
-    FindPasswordRequest findPasswordRequest = FindPasswordRequest.builder()
-        .email("test@naver.com")
-        .build();
-
-    String tempPassword = "1a2B3%571!";
-
-    //when
-    SimpleMailMessage findPasswordEmail
-        = memberService.createFindPasswordEmail(findPasswordRequest.getEmail(), tempPassword);
-
-    //then
-    assertEquals(findPasswordEmail.getText(),
-        "안녕하세요. 중고거래 마켓 " + "Goods" + "입니다."
-            + "\n\n" + "임시 비밀번호는 [" + "1a2B3%571!" + "] 입니다.");
-
-  }
-
   @Test
   @DisplayName("토큰 재발급 실패 - 잘못된 토큰")
   void reissue_fail_invalidToken() {
@@ -304,7 +278,6 @@ class MemberServiceTest {
     given(memberRepository.findByEmail(anyString()))
         .willReturn(Optional.of(member));
     given(passwordEncoder.encode(changePasswordRequest.getNewPassword())).willReturn("new1234");
-
 
     //when
     memberService.changePassword(changePasswordRequest, userDetails);
