@@ -43,6 +43,23 @@ public class JwtTokenProvider {
     key = Keys.hmacShaKeyFor(keyBytes);
   }
 
+  // AT 생성
+  public String generateAccessToken(String email, String role) {
+    Date now = new Date();
+    Date accessTokenExpiration = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_TIME);
+
+    String accessToken = Jwts.builder()
+        .setExpiration(accessTokenExpiration)
+        .setSubject("access-token")
+        .claim("email", email)
+        .claim("role", role)
+        .signWith(key, SignatureAlgorithm.HS512)
+        .compact();
+
+    log.info("[JwtTokenProvider] : accessToken 생성 완료");
+
+    return accessToken;
+  }
 
   // AT, RT 생성
   public TokenDto generateToken(String email, String role) {
@@ -86,52 +103,38 @@ public class JwtTokenProvider {
     String email = getClaims(token).get("email").toString();
 
     UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsService.loadUserByUsername(email);
-    log.info("[JwtTokenProvider] 토큰 인증 정보 조회 완료, userName : {}",
-        userDetails.getUsername());
+    log.info("[JwtTokenProvider] 토큰 인증 정보 조회 완료, userName : {}", userDetails.getUsername());
     return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
   }
 
   /**
    * 토큰 검증
    */
-  public boolean validateToken(String accessToken) {
+  public boolean validateToken(String token) {
     try {
-      if (redisService.getData(accessToken) != null // NPE 방지
-          && redisService.getData(accessToken).equals("logout")) { // 로그아웃 했을 경우
+      if (redisService.getData(token) != null // NPE 방지
+          && redisService.getData(token).equals("logout")) { // 로그아웃 했을 경우
         return false;
       }
-      Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken);
+      Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
       return true;
     } catch (SecurityException | MalformedJwtException e) {
-      log.error("Invalid JWT Token", e);
+      log.error("[JwtTokenProvider] Invalid JWT Token : {}", e.getMessage());
     } catch (ExpiredJwtException e) {
-      log.error("Expired JWT Token", e);
+      log.error("[JwtTokenProvider] Expired JWT Token : {}", e.getMessage());
     } catch (UnsupportedJwtException e) {
-      log.error("Unsupported JWT Token", e);
+      log.error("[JwtTokenProvider] Unsupported JWT Token : {}", e.getMessage());
     } catch (IllegalArgumentException e) {
-      log.error("JWT claims string is empty.", e);
+      log.error("[JwtTokenProvider] JWT claims string is empty : {}", e.getMessage());
     }
     return false;
   }
 
   // 토큰 만료 시간 확인
   public long getTokenExpirationTime(String token) {
-    if(token.startsWith(TOKEN_PREFIX)){
+    if (token.startsWith(TOKEN_PREFIX)) {
       token = token.substring(TOKEN_PREFIX.length());
     }
     return getClaims(token).getExpiration().getTime();
   }
-
-  // 토큰 만료 여부 확인 ( 토큰 재발급시 사용 )
-  public boolean isExpired(String token) {
-    try {
-      return getClaims(token).getExpiration().before(new Date());
-    } catch (ExpiredJwtException e) { // 토큰 만료
-      return true;
-    } catch (Exception e) {
-      return false;
-    }
-  }
-
-
 }

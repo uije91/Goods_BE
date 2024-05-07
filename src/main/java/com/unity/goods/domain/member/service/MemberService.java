@@ -76,8 +76,7 @@ public class MemberService {
     // 이미지 있다면 s3 저장
     String imageUrl = null;
     if (signUpRequest.getProfileImage() != null) {
-      imageUrl = s3Service.uploadFile(signUpRequest.getProfileImage(),
-          signUpRequest.getEmail());
+      imageUrl = s3Service.uploadFile(signUpRequest.getProfileImage(), signUpRequest.getEmail());
     }
 
     // 비밀번호 & 거래 비밀번호 암호화
@@ -131,9 +130,10 @@ public class MemberService {
 
     // AT, RT 생성 및 Redis 에 RT 저장
     TokenDto tokenDto = jwtTokenProvider.generateToken(email, role);
-    redisService.setDataExpire("RT:" + email,
-        tokenDto.getRefreshToken(),
-        jwtTokenProvider.getTokenExpirationTime(tokenDto.getRefreshToken()));
+    long expiration =
+        jwtTokenProvider.getTokenExpirationTime(tokenDto.getRefreshToken()) - new Date().getTime();
+
+    redisService.setDataExpire("RT:" + email, tokenDto.getRefreshToken(), expiration);
     return tokenDto;
   }
 
@@ -245,5 +245,29 @@ public class MemberService {
 
     log.info("[MemberService][getTempPassword] : 임시 비밀번호 생성 완료");
     return sb.toString();
+  }
+
+  // 토큰 재발급
+  public String reissue(TokenDto tokenDto) {
+    // 1. RT 검증
+    if (!jwtTokenProvider.validateToken(tokenDto.getRefreshToken())) {
+      log.error("[MemberService][reissue] : RefreshToken 검증 실패");
+      throw new MemberException(ErrorCode.INVALID_REFRESH_TOKEN);
+    }
+
+    // 2.AT 에서 email 정보 습득
+    String accessToken = resolveToken(tokenDto.getAccessToken());
+    String email = (String) jwtTokenProvider.getClaims(accessToken).get("email");
+    String role = (String) jwtTokenProvider.getClaims(accessToken).get("role");
+
+    // 3.Redis 에 저장된 RT와 가져온 RT 비교
+    String refreshToken = redisService.getData("RT:" + email);
+    if (!refreshToken.equals(tokenDto.getRefreshToken())) {
+      log.error("[MemberService][reissue] : Redis에 저장된 RT와 가져온 RT가 불일치");
+      throw new MemberException(ErrorCode.INVALID_REFRESH_TOKEN);
+    }
+
+    // 4.새로운 토큰 생성 및 반환
+    return jwtTokenProvider.generateAccessToken(email, role);
   }
 }

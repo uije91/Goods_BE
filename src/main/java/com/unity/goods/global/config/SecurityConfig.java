@@ -75,6 +75,7 @@ public class SecurityConfig {
         antMatcher(POST, "/api/member/signup"), // 회원가입
         antMatcher(POST, "/api/member/login"),  // 로그인
         antMatcher(POST, "/api/member/logout"), // 로그아웃
+        antMatcher(POST, "/api/member/reissue"), // 토큰 재발급
         antMatcher(POST, "/api/email/**") // 이메일 인증
     );
     return requestMatchers.toArray(RequestMatcher[]::new);
