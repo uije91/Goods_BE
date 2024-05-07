@@ -2,11 +2,15 @@ package com.unity.goods.domain.member.service;
 
 import static com.unity.goods.domain.member.type.Status.ACTIVE;
 import static com.unity.goods.domain.member.type.Status.RESIGN;
+import static com.unity.goods.global.exception.ErrorCode.RESIGNED_ACCOUNT;
 import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 
 import com.unity.goods.domain.member.dto.FindPasswordDto.FindPasswordRequest;
+import com.unity.goods.domain.member.dto.MemberProfileDto.MemberProfileResponse;
 import com.unity.goods.domain.member.dto.ResignDto.ResignRequest;
 import com.unity.goods.domain.member.dto.SignUpDto.SignUpRequest;
 import com.unity.goods.domain.member.entity.Member;
@@ -166,5 +170,60 @@ class MemberServiceTest {
             + "\n\n" + "임시 비밀번호는 [" + "1a2B3%571!" + "] 입니다.");
 
   }
+
+  @Test
+  @DisplayName("회원 프로필 조회 성공 테스트")
+  void getMemberProfileSuccess() {
+    //given
+    Member member = Member.builder()
+        .email("test@naver.com")
+        .password("test1234")
+        .nickname("test")
+        .status(ACTIVE)
+        .phoneNumber("010-1111-1111")
+        .profileImage("http://amazonS3/test.jpg")
+        .build();
+
+    UserDetailsImpl userDetails = new UserDetailsImpl(member);
+
+    given(memberRepository.findByEmail(anyString()))
+        .willReturn(Optional.of(member));
+
+    //when
+    MemberProfileResponse memberProfile = memberService.getMemberProfile(userDetails);
+
+    //then
+    assertEquals("test", memberProfile.getNickName());
+    assertEquals("010-1111-1111", memberProfile.getPhoneNumber());
+    assertEquals("http://amazonS3/test.jpg", memberProfile.getProfileImage());
+    assertEquals(0.0, memberProfile.getStar());
+  }
+
+  @Test
+  @DisplayName("탈퇴 회원 프로필 조회 실패 테스트")
+  void getMemberProfileFail() {
+    //given
+    Member member = Member.builder()
+        .email("test@naver.com")
+        .password("test1234")
+        .nickname("test")
+        .status(RESIGN)
+        .phoneNumber("010-1111-1111")
+        .profileImage("http://amazonS3/test.jpg")
+        .build();
+
+    UserDetailsImpl userDetails = new UserDetailsImpl(member);
+
+    given(memberRepository.findByEmail(anyString()))
+        .willReturn(Optional.of(member));
+
+    //when
+    MemberException exception = assertThrows(MemberException.class, ()
+        -> memberService.getMemberProfile(userDetails));
+
+    //then
+    assertEquals(RESIGNED_ACCOUNT, exception.getErrorCode());
+  }
+
 
 }
