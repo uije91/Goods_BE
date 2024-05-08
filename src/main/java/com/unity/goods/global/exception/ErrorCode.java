@@ -28,7 +28,13 @@ public enum ErrorCode {
   // Email Error
   EMAIL_SEND_ERROR(500, "이메일 전송 과정 중 에러가 발생하였습니다."),
   EMAIL_VERIFICATION_NOT_EXISTS(400, "해당 이메일에 대한 인증 정보가 존재하지 않습니다."),
-  INCORRECT_VERIFICATION_NUM(400, "인증 번호가 올바르지 않습니다.");
+  INCORRECT_VERIFICATION_NUM(400, "인증 번호가 올바르지 않습니다."),
+
+  // Goods Error
+  GOODS_NOT_FOUND(404, "해당 상품을 찾을 수 없습니다."),
+  MISMATCHED_SELLER(404, "판매자 정보가 일치하지 않습니다."),
+  ALREADY_SOLD_OUT_GOODS(400, "이미 판매가 완료된 상품입니다."),
+  MAX_IMAGE_LIMIT_EXCEEDED(404, "등록할 수 있는 이미지의 최대 개수를 초과하였습니다.");
 
   private final int status;
   private final String message;
