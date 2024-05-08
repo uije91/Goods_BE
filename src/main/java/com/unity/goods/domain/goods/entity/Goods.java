@@ -1,12 +1,16 @@
 package com.unity.goods.domain.goods.entity;
 
-import com.unity.goods.domain.goods.type.GoodsStatus;
+import static com.unity.goods.domain.goods.dto.GoodsStatus.SALE;
+
+import com.unity.goods.domain.goods.dto.GoodsStatus;
+import com.unity.goods.domain.goods.dto.UploadGoodsDto.UploadGoodsRequest;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.model.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -23,9 +27,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 public class Goods extends BaseEntity {
 
@@ -34,26 +38,49 @@ public class Goods extends BaseEntity {
   @Column(name = "goods_id")
   private Long id;
 
+  @Column(nullable = false, length = 50)
   private String goodsName;
-  private int price;
+
+  @Column(nullable = false)
+  private Long price;
+
+  @Column(nullable = false, length = 500)
   private String description;
 
+  @Column(nullable = false)
   @Enumerated(EnumType.STRING)
   @Builder.Default
-  private GoodsStatus goodsStatus = GoodsStatus.SALE;
+  private GoodsStatus goodsStatus = SALE;
 
   @Builder.Default
-  private double goodsStar = 0;
+  private double star = 0.0;
 
+  @Column(nullable = false)
   private String address;
 
-  private double lat;
-  private double lng;
+  @Column(nullable = false)
+  private double lat; // 위도
 
-  @ManyToOne
-  @JoinColumn(name = "member_id")
+  @Column(nullable = false)
+  private double lng; // 경도
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "member")
   private Member member;
 
   @OneToMany(mappedBy = "goods")
-  private List<GoodsImage> goodsImageList = new ArrayList<>();
+  @Builder.Default
+  private List<Image> imageList = new ArrayList<>();
+
+  public static Goods fromUploadGoodsRequest(UploadGoodsRequest request){
+    return Goods.builder()
+        .goodsName(request.getGoodsName())
+        .price(Long.parseLong(request.getPrice()))
+        .description(request.getDescription())
+        .address(request.getAddress() + " " + request.getUserDefinedLocation())
+        .lat(request.getLat())
+        .lng(request.getLng())
+        .build();
+  }
+
 }

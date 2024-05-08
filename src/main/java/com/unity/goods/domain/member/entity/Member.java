@@ -20,7 +20,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,6 +69,7 @@ public class Member extends BaseEntity {
   private SocialType socialType;
 
   @OneToMany(mappedBy = "member")
+  @Builder.Default
   private List<Goods> goodsList = new ArrayList<>();
 
   public static Member fromSignUpRequest(SignUpRequest signUpRequest, String imageUrl) {
