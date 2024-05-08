@@ -114,7 +114,7 @@ public class GoodsService {
       goods.setDescription(updateGoodsInfoRequest.getDescription());
     }
 
-    if (!updateGoodsInfoRequest.getGoodsImages().isEmpty()) {
+    if (updateGoodsInfoRequest.getGoodsImages() != null) {
       if (goods.getImageList().size() + updateGoodsInfoRequest.getGoodsImages().size()
           > MAX_IMAGE_NUM) {
         log.error("[GoodsService][updateGoodsInfo] : \"{}\" 상품 이미지 등록 개수 초과", goods.getGoodsName());
