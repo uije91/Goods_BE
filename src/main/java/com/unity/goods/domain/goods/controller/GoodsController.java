@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -48,9 +47,9 @@ public class GoodsController {
 
   @PutMapping("/{goodsId}")
   public ResponseEntity<?> updateGoodsInfo(
-      @PathVariable Long goodsId,
       @AuthenticationPrincipal UserDetailsImpl member,
-      @Valid @RequestBody UpdateGoodsInfoRequest updateGoodsInfoRequest) {
+      @PathVariable Long goodsId,
+      @Valid @ModelAttribute UpdateGoodsInfoRequest updateGoodsInfoRequest) {
 
     UpdateGoodsInfoResponse updateGoodsInfoResponse = goodsService.updateGoodsInfo(goodsId, member,
         updateGoodsInfoRequest);
