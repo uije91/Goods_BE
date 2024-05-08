@@ -13,10 +13,9 @@ import com.unity.goods.domain.goods.dto.UpdateGoodsInfoDto.UpdateGoodsInfoRespon
 import com.unity.goods.domain.goods.dto.UploadGoodsDto.UploadGoodsRequest;
 import com.unity.goods.domain.goods.dto.UploadGoodsDto.UploadGoodsResponse;
 import com.unity.goods.domain.goods.entity.Goods;
-import com.unity.goods.domain.goods.entity.GoodsImage;
+import com.unity.goods.domain.goods.entity.Image;
 import com.unity.goods.domain.goods.exception.GoodsException;
 import com.unity.goods.domain.goods.repository.GoodsRepository;
-import com.unity.goods.domain.goods.entity.Image;
 import com.unity.goods.domain.goods.repository.ImageRepository;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.exception.MemberException;
@@ -26,10 +25,12 @@ import com.unity.goods.infra.service.S3Service;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class GoodsService {
@@ -59,7 +60,7 @@ public class GoodsService {
     goodsRepository.save(goods);
 
     // 이미지 url db에 저장
-    for (String uploadSuccessFile : uploadSuccessFiles){
+    for (String uploadSuccessFile : uploadSuccessFiles) {
       Image image = Image.fromImageUrlAndGoods(uploadSuccessFile, goods);
       imageRepository.save(image);
     }
@@ -79,7 +80,7 @@ public class GoodsService {
         findMember);
 
     List<String> goodsImages = new ArrayList<>();
-    for(Image image : goods.getImageList()){
+    for (Image image : goods.getImageList()) {
       goodsImages.add(image.getImageUrl());
     }
     goodsDetailResponse.setGoodsImages(goodsImages);
@@ -106,7 +107,7 @@ public class GoodsService {
     }
 
     if (updateGoodsInfoRequest.getPrice() != null) {
-      goods.setPrice(Integer.parseInt(updateGoodsInfoRequest.getPrice()));
+      goods.setPrice(Long.parseLong(updateGoodsInfoRequest.getPrice()));
     }
 
     if (updateGoodsInfoRequest.getDescription() != null) {
@@ -114,7 +115,7 @@ public class GoodsService {
     }
 
     if (!updateGoodsInfoRequest.getGoodsImages().isEmpty()) {
-      if (goods.getGoodsImageList().size() + updateGoodsInfoRequest.getGoodsImages().size()
+      if (goods.getImageList().size() + updateGoodsInfoRequest.getGoodsImages().size()
           > MAX_IMAGE_NUM) {
         log.error("[GoodsService][updateGoodsInfo] : \"{}\" 상품 이미지 등록 개수 초과", goods.getGoodsName());
         throw new GoodsException(MAX_IMAGE_LIMIT_EXCEEDED);
@@ -123,9 +124,9 @@ public class GoodsService {
       for (MultipartFile multipart : updateGoodsInfoRequest.getGoodsImages()) {
         String goodsImageUrl = s3Service.uploadFile(multipart, goods.getMember().getEmail());
 
-        goodsImageRepository.save(
-            GoodsImage.builder()
-                .goodsImageUrl(goodsImageUrl)
+        imageRepository.save(
+            Image.builder()
+                .imageUrl(goodsImageUrl)
                 .goods(goods)
                 .build()
         );

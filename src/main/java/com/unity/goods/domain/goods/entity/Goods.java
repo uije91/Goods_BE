@@ -1,9 +1,9 @@
 package com.unity.goods.domain.goods.entity;
 
-import static com.unity.goods.domain.goods.dto.GoodsStatus.SALE;
+import static com.unity.goods.domain.goods.type.GoodsStatus.SALE;
 
-import com.unity.goods.domain.goods.dto.GoodsStatus;
 import com.unity.goods.domain.goods.dto.UploadGoodsDto.UploadGoodsRequest;
+import com.unity.goods.domain.goods.type.GoodsStatus;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.model.BaseEntity;
 import jakarta.persistence.Column;
@@ -72,7 +72,7 @@ public class Goods extends BaseEntity {
   @Builder.Default
   private List<Image> imageList = new ArrayList<>();
 
-  public static Goods fromUploadGoodsRequest(UploadGoodsRequest request){
+  public static Goods fromUploadGoodsRequest(UploadGoodsRequest request) {
     return Goods.builder()
         .goodsName(request.getGoodsName())
         .price(Long.parseLong(request.getPrice()))

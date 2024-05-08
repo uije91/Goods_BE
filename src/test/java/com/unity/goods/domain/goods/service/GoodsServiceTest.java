@@ -13,10 +13,10 @@ import static org.mockito.Mockito.verify;
 import com.unity.goods.domain.goods.dto.UpdateGoodsInfoDto.UpdateGoodsInfoRequest;
 import com.unity.goods.domain.goods.dto.UpdateGoodsInfoDto.UpdateGoodsInfoResponse;
 import com.unity.goods.domain.goods.entity.Goods;
-import com.unity.goods.domain.goods.entity.GoodsImage;
+import com.unity.goods.domain.goods.entity.Image;
 import com.unity.goods.domain.goods.exception.GoodsException;
-import com.unity.goods.domain.goods.repository.GoodsImageRepository;
 import com.unity.goods.domain.goods.repository.GoodsRepository;
+import com.unity.goods.domain.goods.repository.ImageRepository;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.global.jwt.UserDetailsImpl;
 import com.unity.goods.infra.service.S3Service;
@@ -43,7 +43,7 @@ class GoodsServiceTest {
   private GoodsRepository goodsRepository;
 
   @Mock
-  private GoodsImageRepository goodsImageRepository;
+  private ImageRepository imageRepository;
 
   @Mock
   private S3Service s3Service;
@@ -65,21 +65,21 @@ class GoodsServiceTest {
     Goods goods = Goods.builder()
         .id(1L)
         .goodsName("테스트상품")
-        .price(20000)
+        .price(20000L)
         .description("테스트 상품입니다.")
         .address("테스트 건물 앞")
         .lat(37.564)
         .lng(127.001)
         .member(member)
-        .goodsImageList(new ArrayList<>())
+        .imageList(new ArrayList<>())
         .build();
 
-    GoodsImage goodsImage1 = GoodsImage.builder()
-        .goodsImageUrl("http://amazonS3/testGoods1.png")
+    Image goodsImage1 = Image.builder()
+        .imageUrl("http://amazonS3/testGoods1.png")
         .goods(goods)
         .build();
 
-    goods.getGoodsImageList().add(goodsImage1);
+    goods.getImageList().add(goodsImage1);
 
     List<MultipartFile> goodsImages = new ArrayList<>();
     MockMultipartFile multipartFile1 = new MockMultipartFile
@@ -104,12 +104,12 @@ class GoodsServiceTest {
     given(s3Service.uploadFile(any(MultipartFile.class), anyString()))
         .willReturn("http://amazonS3/new.png");
 
-    GoodsImage image = GoodsImage.builder()
-        .goodsImageUrl("http://amazonS3/new.png")
+    Image image = Image.builder()
+        .imageUrl("http://amazonS3/new.png")
         .goods(goods)
         .build();
 
-    given(goodsImageRepository.save(any(GoodsImage.class)))
+    given(imageRepository.save(any(Image.class)))
         .willReturn(image);
 
     //when
@@ -119,7 +119,7 @@ class GoodsServiceTest {
     //then
     verify(goodsRepository, times(1)).findById(1L);
     verify(s3Service, times(1)).uploadFile(any(MultipartFile.class), anyString());
-    verify(goodsImageRepository, times(1)).save(any(GoodsImage.class));
+    verify(imageRepository, times(1)).save(any(Image.class));
 
     assertEquals("test", updateGoodsInfoResponse.getSellerName());
     assertEquals("새로운 테스트상품", updateGoodsInfoResponse.getGoodsName());
@@ -145,12 +145,12 @@ class GoodsServiceTest {
     Goods goods = Goods.builder()
         .id(1L)
         .goodsName("테스트상품")
-        .goodsImageList(new ArrayList<>())
+        .imageList(new ArrayList<>())
         .member(member)
         .build();
 
     for (int i = 0; i < 10; i++) {
-      goods.getGoodsImageList().add(new GoodsImage(1L + i, "test" + i, goods));
+      goods.getImageList().add(new Image(1L + i, "test" + i, goods));
     }
 
     given(goodsRepository.findById(1L))

@@ -1,9 +1,6 @@
 package com.unity.goods.domain.goods.dto;
 
 import com.unity.goods.domain.goods.entity.Goods;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import java.time.LocalDateTime;
 import java.util.List;

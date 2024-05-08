@@ -49,6 +49,7 @@ public class UploadGoodsDto {
   @Getter
   @Builder
   public static class UploadGoodsResponse {
+
     private String sellerName;
     private String goodsName;
     private String price;
