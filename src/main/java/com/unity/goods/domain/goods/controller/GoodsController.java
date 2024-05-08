@@ -50,7 +50,7 @@ public class GoodsController {
   public ResponseEntity<?> updateGoodsInfo(
       @PathVariable Long goodsId,
       @AuthenticationPrincipal UserDetailsImpl member,
-      @RequestBody UpdateGoodsInfoRequest updateGoodsInfoRequest) {
+      @Valid @RequestBody UpdateGoodsInfoRequest updateGoodsInfoRequest) {
 
     UpdateGoodsInfoResponse updateGoodsInfoResponse = goodsService.updateGoodsInfo(goodsId, member,
         updateGoodsInfoRequest);
