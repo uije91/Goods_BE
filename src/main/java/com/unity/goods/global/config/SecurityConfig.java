@@ -95,7 +95,8 @@ public class SecurityConfig {
         antMatcher(POST, "/api/member/logout"), // 로그아웃
         antMatcher(PUT, "/api/member/resign"), // 회원탈퇴
         antMatcher(POST, "/api/goods/new"),
-        antMatcher(GET, "/api/goods/**")
+        antMatcher(GET, "/api/goods/**"),
+        antMatcher(PUT, "/api/goods/**")
     );
     return requestMatchers.toArray(RequestMatcher[]::new);
   }
