@@ -65,7 +65,7 @@ public class Goods extends BaseEntity {
   private double lng; // 경도
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "member")
+  @JoinColumn(name = "member_id")
   private Member member;
 
   @OneToMany(mappedBy = "goods")
