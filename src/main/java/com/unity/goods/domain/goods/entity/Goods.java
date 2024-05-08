@@ -52,7 +52,6 @@ public class Goods extends BaseEntity {
 
   @ManyToOne
   @JoinColumn(name = "member_id")
-  @Column(name = "seller_id")
   private Member member;
 
   @OneToMany(mappedBy = "goods")
