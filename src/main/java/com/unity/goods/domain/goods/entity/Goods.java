@@ -51,8 +51,6 @@ public class Goods extends BaseEntity {
   @Builder.Default
   private GoodsStatus goodsStatus = SALE;
 
-  private String thumbnailImageUrl;
-
   @Builder.Default
   private double star = 0.0;
 

@@ -47,7 +47,6 @@ public class GoodsService {
     // Goods 생성 및 썸네일 url 설정
     Goods goods = Goods.fromUploadGoodsRequest(uploadGoodsRequest);
     goods.setMember(findMember);
-    goods.setThumbnailImageUrl(uploadSuccessFiles.get(0));
     goodsRepository.save(goods);
 
     // 이미지 url db에 저장

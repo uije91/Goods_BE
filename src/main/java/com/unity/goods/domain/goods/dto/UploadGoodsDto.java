@@ -53,7 +53,6 @@ public class UploadGoodsDto {
     private String goodsName;
     private String price;
     private String description;
-    private String thumbnailImageUrl;
     private String address;
     private LocalDateTime createdAt;
 
@@ -63,7 +62,6 @@ public class UploadGoodsDto {
           .goodsName(goods.getGoodsName())
           .price(String.valueOf(goods.getPrice()))
           .description(goods.getDescription())
-          .thumbnailImageUrl(goods.getThumbnailImageUrl())
           .createdAt(goods.getCreatedAt())
           .build();
     }
