@@ -5,9 +5,8 @@ import static com.unity.goods.domain.member.type.Status.ACTIVE;
 import static com.unity.goods.domain.member.type.Status.INACTIVE;
 import static com.unity.goods.domain.member.type.Status.RESIGN;
 
+import com.unity.goods.domain.goods.entity.Goods;
 import com.unity.goods.domain.member.dto.SignUpDto.SignUpRequest;
-import com.unity.goods.domain.member.dto.UpdateProfileDto.UpdateProfileRequest;
-import com.unity.goods.domain.member.dto.UpdateProfileDto.UpdateProfileResponse;
 import com.unity.goods.domain.member.type.Role;
 import com.unity.goods.domain.member.type.SocialType;
 import com.unity.goods.domain.member.type.Status;
@@ -19,6 +18,9 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -63,6 +65,10 @@ public class Member extends BaseEntity {
 
   @Enumerated(EnumType.STRING)
   private SocialType socialType;
+
+  @OneToMany(mappedBy = "member")
+  @Builder.Default
+  private List<Goods> goodsList = new ArrayList<>();
 
   public static Member fromSignUpRequest(SignUpRequest signUpRequest, String imageUrl) {
 
