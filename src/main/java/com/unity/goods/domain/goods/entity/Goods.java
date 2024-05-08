@@ -4,7 +4,6 @@ import static com.unity.goods.domain.goods.dto.GoodsStatus.SALE;
 
 import com.unity.goods.domain.goods.dto.GoodsStatus;
 import com.unity.goods.domain.goods.dto.UploadGoodsDto.UploadGoodsRequest;
-import com.unity.goods.domain.image.entity.Image;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.model.BaseEntity;
 import jakarta.persistence.Column;

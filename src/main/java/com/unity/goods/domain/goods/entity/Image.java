@@ -1,6 +1,5 @@
-package com.unity.goods.domain.image.entity;
+package com.unity.goods.domain.goods.entity;
 
-import com.unity.goods.domain.goods.entity.Goods;
 import com.unity.goods.domain.model.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
