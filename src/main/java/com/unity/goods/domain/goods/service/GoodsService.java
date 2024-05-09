@@ -10,6 +10,7 @@ import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
 import com.unity.goods.domain.goods.dto.GoodsDetailDto.GoodsDetailResponse;
 import com.unity.goods.domain.goods.dto.UpdateGoodsInfoDto.UpdateGoodsInfoRequest;
 import com.unity.goods.domain.goods.dto.UpdateGoodsInfoDto.UpdateGoodsInfoResponse;
+import com.unity.goods.domain.goods.dto.UpdateGoodsStateDto.UpdateGoodsStateRequest;
 import com.unity.goods.domain.goods.dto.UploadGoodsDto.UploadGoodsRequest;
 import com.unity.goods.domain.goods.dto.UploadGoodsDto.UploadGoodsResponse;
 import com.unity.goods.domain.goods.entity.Goods;
@@ -102,17 +103,7 @@ public class GoodsService {
       throw new GoodsException(ALREADY_SOLD_OUT_GOODS);
     }
 
-    if (updateGoodsInfoRequest.getGoodsName() != null) {
-      goods.setGoodsName(updateGoodsInfoRequest.getGoodsName());
-    }
-
-    if (updateGoodsInfoRequest.getPrice() != null) {
-      goods.setPrice(Long.parseLong(updateGoodsInfoRequest.getPrice()));
-    }
-
-    if (updateGoodsInfoRequest.getDescription() != null) {
-      goods.setDescription(updateGoodsInfoRequest.getDescription());
-    }
+    updateGoodsInfoRequest.updateGoodsEntity(goods);
 
     if (updateGoodsInfoRequest.getGoodsImages() != null) {
       if (goods.getImageList().size() + updateGoodsInfoRequest.getGoodsImages().size()
@@ -133,18 +124,20 @@ public class GoodsService {
       }
     }
 
-    if (updateGoodsInfoRequest.getLat() != null) {
-      goods.setLat(updateGoodsInfoRequest.getLat());
-    }
-
-    if (updateGoodsInfoRequest.getLng() != null) {
-      goods.setLng(updateGoodsInfoRequest.getLng());
-    }
-
-    if (updateGoodsInfoRequest.getDetailLocation() != null) {
-      goods.setAddress(updateGoodsInfoRequest.getDetailLocation());
-    }
-
     return UpdateGoodsInfoResponse.fromGoods(goods);
+  }
+
+  @Transactional
+  public void updateState(UserDetailsImpl member, Long goodsId,
+      UpdateGoodsStateRequest updateGoodsStateRequest) {
+
+    Goods goods = goodsRepository.findById(goodsId)
+        .orElseThrow(() -> new GoodsException(GOODS_NOT_FOUND));
+
+    if (!goods.getMember().getEmail().equals(member.getUsername())) {
+      throw new GoodsException(MISMATCHED_SELLER);
+    }
+
+    goods.setGoodsStatus(updateGoodsStateRequest.getGoodsStatus());
   }
 }
