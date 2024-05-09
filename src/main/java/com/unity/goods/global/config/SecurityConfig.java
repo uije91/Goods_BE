@@ -53,8 +53,8 @@ public class SecurityConfig {
         .sessionManagement(configurer -> configurer
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-            .requestMatchers(requestAuthenticated()).authenticated()
             .requestMatchers(anyRequest()).permitAll()
+            .requestMatchers(requestAuthenticated()).authenticated()
         )
         // OAuth2
         .oauth2Login(oauth2 -> oauth2
@@ -84,7 +84,8 @@ public class SecurityConfig {
         antMatcher(POST, "/api/member/login"),  // 로그인
         antMatcher(POST, "/api/member/logout"), // 로그아웃
         antMatcher(POST, "/api/member/reissue"), // 토큰 재발급
-        antMatcher(POST, "/api/email/**") // 이메일 인증
+        antMatcher(POST, "/api/email/**"), // 이메일 인증
+        antMatcher(GET, "/api/goods/search")
     );
     return requestMatchers.toArray(RequestMatcher[]::new);
   }
