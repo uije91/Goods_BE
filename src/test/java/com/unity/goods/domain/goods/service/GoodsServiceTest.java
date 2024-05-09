@@ -67,7 +67,7 @@ class GoodsServiceTest {
         .goodsName("테스트상품")
         .price(20000L)
         .description("테스트 상품입니다.")
-        .address("테스트 건물 앞")
+        .address("서울시 강남구 테스트 건물 앞")
         .lat(37.564)
         .lng(127.001)
         .member(member)
@@ -95,6 +95,7 @@ class GoodsServiceTest {
         .lat(11.564)
         .lng(27.001)
         .goodsImages(goodsImages)
+        .address("서울시 강남구")
         .detailLocation("새로운 테스트 건물 앞")
         .build();
 
@@ -125,7 +126,7 @@ class GoodsServiceTest {
     assertEquals("새로운 테스트상품", updateGoodsInfoResponse.getGoodsName());
     assertEquals("10000", updateGoodsInfoResponse.getPrice());
     assertEquals("테스트 상품의 새로운 설명 입니다.", updateGoodsInfoResponse.getDescription());
-    assertEquals("새로운 테스트 건물 앞", updateGoodsInfoResponse.getDetailLocation());
+    assertEquals("서울시 강남구 새로운 테스트 건물 앞", updateGoodsInfoResponse.getAddress());
   }
 
   @Test
@@ -165,7 +166,13 @@ class GoodsServiceTest {
 
     UpdateGoodsInfoRequest updateGoodsInfoRequest = UpdateGoodsInfoRequest.builder()
         .goodsName("새로운 테스트상품")
+        .price("10000")
+        .description("테스트 상품의 새로운 설명 입니다.")
+        .lat(11.564)
+        .lng(27.001)
         .goodsImages(goodsImages)
+        .address("서울시 강남구")
+        .detailLocation("새로운 테스트 건물 앞")
         .build();
 
     //when
