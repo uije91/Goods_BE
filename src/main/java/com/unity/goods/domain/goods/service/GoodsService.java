@@ -103,17 +103,7 @@ public class GoodsService {
       throw new GoodsException(ALREADY_SOLD_OUT_GOODS);
     }
 
-    if (updateGoodsInfoRequest.getGoodsName() != null) {
-      goods.setGoodsName(updateGoodsInfoRequest.getGoodsName());
-    }
-
-    if (updateGoodsInfoRequest.getPrice() != null) {
-      goods.setPrice(Long.parseLong(updateGoodsInfoRequest.getPrice()));
-    }
-
-    if (updateGoodsInfoRequest.getDescription() != null) {
-      goods.setDescription(updateGoodsInfoRequest.getDescription());
-    }
+    updateGoodsInfoRequest.updateGoodsEntity(goods);
 
     if (updateGoodsInfoRequest.getGoodsImages() != null) {
       if (goods.getImageList().size() + updateGoodsInfoRequest.getGoodsImages().size()
@@ -132,18 +122,6 @@ public class GoodsService {
                 .build()
         );
       }
-    }
-
-    if (updateGoodsInfoRequest.getLat() != null) {
-      goods.setLat(updateGoodsInfoRequest.getLat());
-    }
-
-    if (updateGoodsInfoRequest.getLng() != null) {
-      goods.setLng(updateGoodsInfoRequest.getLng());
-    }
-
-    if (updateGoodsInfoRequest.getDetailLocation() != null) {
-      goods.setAddress(updateGoodsInfoRequest.getDetailLocation());
     }
 
     return UpdateGoodsInfoResponse.fromGoods(goods);
