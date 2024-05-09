@@ -1,7 +1,17 @@
 package com.unity.goods.global.config;
 
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.PUT;
+import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
+
+import com.unity.goods.domain.oauth.handler.OAuth2FailHandler;
+import com.unity.goods.domain.oauth.handler.OAuth2SuccessHandler;
+import com.unity.goods.domain.oauth.service.OAuth2UserService;
+import com.unity.goods.global.exception.AuthenticationEntryPointHandler;
 import com.unity.goods.global.jwt.JwtAuthenticationFilter;
 import com.unity.goods.global.jwt.JwtTokenProvider;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +24,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -22,6 +33,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
   private final JwtTokenProvider jwtTokenProvider;
+  private final OAuth2UserService oAuth2UserService;
+  private final OAuth2SuccessHandler successHandler;
+  private final OAuth2FailHandler failHandler;
+
+  private final AuthenticationEntryPointHandler authenticationEntryPointHandler;
 
   @Bean
   public PasswordEncoder passwordEncoder() {
@@ -37,15 +53,53 @@ public class SecurityConfig {
         .sessionManagement(configurer -> configurer
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-            .requestMatchers("/api/member/signup", "/api/member/login", "/api/email/**")
-            .permitAll())
-        .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-            .requestMatchers("/api/member/resign")
-            .authenticated())
+            .requestMatchers(requestAuthenticated()).authenticated()
+            .requestMatchers(anyRequest()).permitAll()
+        )
+        // OAuth2
+        .oauth2Login(oauth2 -> oauth2
+            .authorizationEndpoint(endpoint -> endpoint
+                .baseUri("/oauth2/authorization"))
+            .redirectionEndpoint(endpoint -> endpoint
+                .baseUri("/api/oauth/code/*"))
+            .userInfoEndpoint(endpoint -> endpoint.userService(oAuth2UserService))
+            .successHandler(successHandler)
+            .failureHandler(failHandler))
+        // JWT Filter
         .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
             UsernamePasswordAuthenticationFilter.class)
+        // 인가되지 않은 사용자 접근 에러 핸들링
+        .exceptionHandling(exceptionHandling ->
+            exceptionHandling
+                .authenticationEntryPoint(authenticationEntryPointHandler))
     ;
-
     return http.build();
   }
+
+  // 모든 사용자 접근 가능 경로
+  private RequestMatcher[] anyRequest() {
+    List<RequestMatcher> requestMatchers = List.of(
+        antMatcher("/"),
+        antMatcher(POST, "/api/member/signup"), // 회원가입
+        antMatcher(POST, "/api/member/login"),  // 로그인
+        antMatcher(POST, "/api/member/logout"), // 로그아웃
+        antMatcher(POST, "/api/member/reissue"), // 토큰 재발급
+        antMatcher(POST, "/api/email/**") // 이메일 인증
+    );
+    return requestMatchers.toArray(RequestMatcher[]::new);
+  }
+
+  // 유저, 관리자 모두 접근 가능
+  private RequestMatcher[] requestAuthenticated() {
+    List<RequestMatcher> requestMatchers = List.of(
+        antMatcher(POST, "/api/member/logout"), // 로그아웃
+        antMatcher(PUT, "/api/member/resign"), // 회원탈퇴
+        antMatcher(POST, "/api/goods/new"),
+        antMatcher(GET, "/api/goods/**"),
+        antMatcher(PUT, "/api/goods/**")
+    );
+    return requestMatchers.toArray(RequestMatcher[]::new);
+  }
+
+
 }
