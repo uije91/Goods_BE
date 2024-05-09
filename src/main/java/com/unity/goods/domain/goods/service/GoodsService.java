@@ -10,6 +10,7 @@ import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
 import com.unity.goods.domain.goods.dto.GoodsDetailDto.GoodsDetailResponse;
 import com.unity.goods.domain.goods.dto.UpdateGoodsInfoDto.UpdateGoodsInfoRequest;
 import com.unity.goods.domain.goods.dto.UpdateGoodsInfoDto.UpdateGoodsInfoResponse;
+import com.unity.goods.domain.goods.dto.UpdateGoodsStateDto.UpdateGoodsStateRequest;
 import com.unity.goods.domain.goods.dto.UploadGoodsDto.UploadGoodsRequest;
 import com.unity.goods.domain.goods.dto.UploadGoodsDto.UploadGoodsResponse;
 import com.unity.goods.domain.goods.entity.Goods;
@@ -146,5 +147,19 @@ public class GoodsService {
     }
 
     return UpdateGoodsInfoResponse.fromGoods(goods);
+  }
+
+  @Transactional
+  public void updateState(UserDetailsImpl member, Long goodsId,
+      UpdateGoodsStateRequest updateGoodsStateRequest) {
+
+    Goods goods = goodsRepository.findById(goodsId)
+        .orElseThrow(() -> new GoodsException(GOODS_NOT_FOUND));
+
+    if (!goods.getMember().getEmail().equals(member.getUsername())) {
+      throw new GoodsException(MISMATCHED_SELLER);
+    }
+
+    goods.setGoodsStatus(updateGoodsStateRequest.getGoodsStatus());
   }
 }
