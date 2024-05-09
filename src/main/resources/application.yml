@@ -5,6 +5,11 @@ spring:
       host: localhost
       port: 6379
 
+    elasticsearch:
+      repositories:
+        enabled: true
+      url: localhost:9200
+
   # MySQL 설정
 #  datasource:
 #    driver-class-name: com.mysql.cj.jdbc.Driver
@@ -101,5 +106,13 @@ cloud:
     credentials:
       access-key: accessKey
       secret-key: secretKey
+logging:
+  level:
+    org:
+      springframework:
+        data:
+          elasticsearch:
+            client:
+              WIRE=DEBUG:
 
 
