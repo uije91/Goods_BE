@@ -24,6 +24,10 @@ public enum ErrorCode {
   // Goods Error
   GOODS_NOT_FOUND(400, "조회되지 않는 상품입니다."),
 
+  // WishList Error
+  GOODS_ALREADY_WISHLIST(400,"이미 찜한 상품입니다."),
+  WISHLIST_NOT_FOUND(400,"찜한 상품을 찾을 수 없습니다"),
+
   // System Error
   INTERNAL_SERVER_ERROR(500, "내부 서버 오류가 발생했습니다."),
   BAD_REQUEST_VALID_ERROR(400, "유효성 검사에 실패했습니다."),
