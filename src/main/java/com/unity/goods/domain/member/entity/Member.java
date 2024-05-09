@@ -7,6 +7,8 @@ import static com.unity.goods.domain.member.type.Status.RESIGN;
 
 import com.unity.goods.domain.goods.entity.Goods;
 import com.unity.goods.domain.member.dto.SignUpDto.SignUpRequest;
+import com.unity.goods.domain.member.dto.UpdateProfileDto.UpdateProfileRequest;
+import com.unity.goods.domain.member.dto.UpdateProfileDto.UpdateProfileResponse;
 import com.unity.goods.domain.member.type.Role;
 import com.unity.goods.domain.member.type.SocialType;
 import com.unity.goods.domain.member.type.Status;

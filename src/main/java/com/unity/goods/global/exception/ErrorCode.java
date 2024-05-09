@@ -23,6 +23,9 @@ public enum ErrorCode {
 
   // Goods Error
   GOODS_NOT_FOUND(400, "조회되지 않는 상품입니다."),
+  MISMATCHED_SELLER(404, "판매자 정보가 일치하지 않습니다."),
+  ALREADY_SOLD_OUT_GOODS(400, "이미 판매가 완료된 상품입니다."),
+  MAX_IMAGE_LIMIT_EXCEEDED(404, "등록할 수 있는 이미지의 최대 개수를 초과하였습니다."),
 
   // System Error
   INTERNAL_SERVER_ERROR(500, "내부 서버 오류가 발생했습니다."),

@@ -23,16 +23,17 @@ public class Image extends BaseEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "image_id")
   private Long id;
 
   @Column(nullable = false)
   private String imageUrl;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "goods")
+  @JoinColumn(name = "goods_id")
   private Goods goods;
 
-  public static Image fromImageUrlAndGoods(String imageUrl, Goods goods){
+  public static Image fromImageUrlAndGoods(String imageUrl, Goods goods) {
     return Image.builder()
         .imageUrl(imageUrl)
         .goods(goods)
