@@ -9,6 +9,17 @@ services:
     ports:
       - "6379:6379"
 
+  es:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
+    container_name: elastic-search-container
+    environment:
+      - node.name=single-node
+      - cluster.name=goods
+      - discovery.type=single-node
+    ports:
+      - 9200:9200
+      - 9300:9300
+
   goodsapp:
     restart: always
     build:
@@ -17,6 +28,7 @@ services:
     depends_on:
       - mysql
       - redis
+      - es
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/goodsDb
       SPRING_DATASOURCE_USERNAME: root
