@@ -74,8 +74,6 @@ public class GoodsController {
       @AuthenticationPrincipal UserDetailsImpl member,
       @PathVariable Long goodsId) {
 
-    System.out.println("!!!!!!!!!!!!!!!");
-
     goodsService.deleteGoods(member, goodsId);
     return ResponseEntity.ok().build();
   }
