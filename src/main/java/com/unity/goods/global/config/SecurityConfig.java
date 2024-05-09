@@ -1,5 +1,6 @@
 package com.unity.goods.global.config;
 
+import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpMethod.PUT;
@@ -96,7 +97,8 @@ public class SecurityConfig {
         antMatcher(PUT, "/api/member/resign"), // 회원탈퇴
         antMatcher(POST, "/api/goods/new"),
         antMatcher(GET, "/api/goods/**"),
-        antMatcher(PUT, "/api/goods/**")
+        antMatcher(PUT, "/api/goods/**"),
+        antMatcher(DELETE, "/api/goods/**")
     );
     return requestMatchers.toArray(RequestMatcher[]::new);
   }
