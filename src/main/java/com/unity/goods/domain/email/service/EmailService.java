@@ -87,6 +87,7 @@ public class EmailService {
     if (!checkRequest.getVerificationNumber().equals(redisCode)) {
       throw new EmailException(INCORRECT_VERIFICATION_NUM);
     }
+    log.info("[EmailService] : {} 이메일 인증 확인 ", checkRequest.getEmail());
 
   }
 }
