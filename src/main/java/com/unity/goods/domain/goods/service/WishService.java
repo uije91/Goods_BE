@@ -81,9 +81,9 @@ public class WishService {
 
   public Page<WishlistDto> getWishlist(Long memberId, Pageable pageable) {
     List<WishlistDto> goodsInWishlist = new ArrayList<>();
-    List<Wishlist> wishlists = wishRepository.findByMemberId(memberId);
 
-    wishlists.forEach(item -> {
+    Page<Wishlist> wishlists = wishRepository.findByMemberId(memberId,pageable);
+    wishlists.getContent().forEach(item -> {
       Long goodsId = item.getId();
       Optional<Goods> optionalGoods = goodsRepository.findById(goodsId);
 
@@ -112,7 +112,7 @@ public class WishService {
       });
     });
 
-    return new PageImpl<>(goodsInWishlist, pageable, goodsInWishlist.size());
+    return new PageImpl<>(goodsInWishlist, pageable, wishlists.getTotalElements());
   }
 
   private Long calculateTimeAgo(LocalDateTime createdAt, LocalDateTime updatedAt) {

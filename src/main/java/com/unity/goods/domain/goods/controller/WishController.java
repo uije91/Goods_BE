@@ -31,9 +31,9 @@ public class WishController {
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size) {
 
-    Pageable pageable = PageRequest.of(page, size, Sort.by("uploadBefore").descending());
-    Page<WishlistDto> wishlistPage = wishService.getWishlist(principal.getId(), pageable);
-    return ResponseEntity.ok().body(wishlistPage);
+    Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+    Page<WishlistDto> wishlist = wishService.getWishlist(principal.getId(), pageable);
+    return ResponseEntity.ok(wishlist);
   }
 
   @PostMapping("/{goodsId}/likes")
