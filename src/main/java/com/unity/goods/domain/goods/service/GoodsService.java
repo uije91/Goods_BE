@@ -143,4 +143,24 @@ public class GoodsService {
 
     goods.setGoodsStatus(updateGoodsStateRequest.getGoodsStatus());
   }
+
+  @Transactional
+  public void deleteGoods(UserDetailsImpl member, Long goodsId) {
+
+    Goods goods = goodsRepository.findById(goodsId)
+        .orElseThrow(() -> new GoodsException(GOODS_NOT_FOUND));
+
+    if (!goods.getMember().getEmail().equals(member.getUsername())) {
+      throw new GoodsException(MISMATCHED_SELLER);
+    }
+
+    for (Image goodsImageUrl : goods.getImageList()) {
+      imageRepository.deleteById(goodsImageUrl.getId());
+      s3Service.deleteFile(goodsImageUrl.getImageUrl());
+    }
+
+    log.info("[GoodsService][deleteGoods] : \"GoodsId: {}, GoodsName: {}\" 상품 삭제"
+        , goods.getId(), goods.getGoodsName());
+    goodsRepository.deleteById(goodsId);
+  }
 }
