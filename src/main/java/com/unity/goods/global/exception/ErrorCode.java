@@ -27,6 +27,11 @@ public enum ErrorCode {
   ALREADY_SOLD_OUT_GOODS(400, "이미 판매가 완료된 상품입니다."),
   MAX_IMAGE_LIMIT_EXCEEDED(404, "등록할 수 있는 이미지의 최대 개수를 초과하였습니다."),
 
+  // WishList Error
+  GOODS_ALREADY_WISHLIST(400,"이미 찜한 상품입니다."),
+  WISHLIST_NOT_FOUND(400,"찜한 상품을 찾을 수 없습니다"),
+  IMPOSSIBLE_TO_WISHLIST_MY_GOODS(400,"내가 등록한 제품에 찜은 불가능합니다."),
+
   // System Error
   INTERNAL_SERVER_ERROR(500, "내부 서버 오류가 발생했습니다."),
   BAD_REQUEST_VALID_ERROR(400, "유효성 검사에 실패했습니다."),

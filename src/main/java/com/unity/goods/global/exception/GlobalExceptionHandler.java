@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(OAuthException.class)
-  public ErrorResponse handleOAuthException(EmailException e) {
+  public ErrorResponse handleOAuthException(OAuthException e) {
     log.error("Exception \"{}({})\" is occurred.", e.getErrorCode(), e.getErrorCode().getMessage());
 
     return new ErrorResponse(e.getErrorCode(), e.getErrorCode().getStatus(),
