@@ -30,6 +30,7 @@ public enum ErrorCode {
   // WishList Error
   GOODS_ALREADY_WISHLIST(400,"이미 찜한 상품입니다."),
   WISHLIST_NOT_FOUND(400,"찜한 상품을 찾을 수 없습니다"),
+  IMPOSSIBLE_TO_WISHLIST_MY_GOODS(400,"내가 등록한 제품에 찜은 불가능합니다."),
 
   // System Error
   INTERNAL_SERVER_ERROR(500, "내부 서버 오류가 발생했습니다."),
