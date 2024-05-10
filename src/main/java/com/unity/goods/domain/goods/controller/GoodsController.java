@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -65,6 +66,15 @@ public class GoodsController {
       @PathVariable Long goodsId,
       @RequestBody UpdateGoodsStateRequest updateGoodsStateRequest) {
     goodsService.updateState(member, goodsId, updateGoodsStateRequest);
+    return ResponseEntity.ok().build();
+  }
+
+  @DeleteMapping("/{goodsId}")
+  public ResponseEntity<?> deleteGoods(
+      @AuthenticationPrincipal UserDetailsImpl member,
+      @PathVariable Long goodsId) {
+
+    goodsService.deleteGoods(member, goodsId);
     return ResponseEntity.ok().build();
   }
 

@@ -5,10 +5,13 @@ import static com.unity.goods.global.exception.ErrorCode.MAX_IMAGE_LIMIT_EXCEEDE
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.unity.goods.domain.goods.dto.UpdateGoodsInfoDto.UpdateGoodsInfoRequest;
 import com.unity.goods.domain.goods.dto.UpdateGoodsInfoDto.UpdateGoodsInfoResponse;
@@ -183,6 +186,51 @@ class GoodsServiceTest {
 
     //then
     assertEquals(MAX_IMAGE_LIMIT_EXCEEDED, goodsException.getErrorCode());
+  }
+
+  @Test
+  @DisplayName("상품 삭제 테스트")
+  void deleteGoodsTest() {
+
+    //given
+    Member member = Member.builder()
+        .email("test@naver.com")
+        .password("test1234")
+        .nickname("test")
+        .status(ACTIVE)
+        .phoneNumber("010-1111-1111")
+        .profileImage("http://amazonS3/test.png")
+        .build();
+
+    Image image = Image.builder()
+        .id(1L)
+        .imageUrl("http://amazonS3/test.png")
+        .build();
+
+    List<Image> goodsImageList = new ArrayList<>();
+    goodsImageList.add(image);
+
+    Goods goods = Goods.builder()
+        .id(1L)
+        .goodsName("테스트상품")
+        .imageList(goodsImageList)
+        .member(member)
+        .build();
+
+    given(goodsRepository.findById(1L))
+        .willReturn(Optional.of(goods));
+
+    doNothing().when(imageRepository).deleteById(1L);
+    doNothing().when(s3Service).deleteFile("http://amazonS3/test.png");
+
+    //when
+    goodsService.deleteGoods(new UserDetailsImpl(member), 1L);
+
+    //then
+    verify(goodsRepository, times(1)).findById(1L);
+    verify(s3Service, times(1)).deleteFile("http://amazonS3/test.png");
+    verify(imageRepository, times(1)).deleteById(1L);
+    verify(goodsRepository, times(1)).deleteById(1L);
   }
 
 
