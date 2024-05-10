@@ -17,6 +17,7 @@ import static com.unity.goods.global.exception.ErrorCode.USE_SOCIAL_LOGIN;
 import com.unity.goods.domain.email.exception.EmailException;
 import com.unity.goods.domain.email.type.EmailSubjects;
 import com.unity.goods.domain.member.dto.ChangePasswordDto.ChangePasswordRequest;
+import com.unity.goods.domain.member.dto.ChangeTradePasswordDto.ChangeTradePasswordRequest;
 import com.unity.goods.domain.member.dto.FindPasswordDto.FindPasswordRequest;
 import com.unity.goods.domain.member.dto.LoginDto;
 import com.unity.goods.domain.member.dto.MemberProfileDto.MemberProfileResponse;
@@ -334,7 +335,7 @@ public class MemberService {
     Member findMember = memberRepository.findByEmail(member.getUsername())
         .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
 
-    if (passwordEncoder.matches(changePasswordRequest.getCurPassword(), member.getPassword())) {
+    if (!passwordEncoder.matches(changePasswordRequest.getCurPassword(), member.getPassword())) {
       throw new MemberException(PASSWORD_NOT_MATCH);
     }
 
@@ -343,5 +344,23 @@ public class MemberService {
     }
 
     findMember.changePassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
+  }
+
+  // 거래 비밀번호 변경
+  @Transactional
+  public void changeTradePassword(ChangeTradePasswordRequest changeTradePasswordRequest,
+      UserDetailsImpl member) {
+    Member findMember = memberRepository.findByEmail(member.getUsername())
+        .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
+
+    if (!passwordEncoder.matches(changeTradePasswordRequest.getCurTradePassword(), findMember.getTradePassword())) {
+      throw new MemberException(PASSWORD_NOT_MATCH);
+    }
+
+    if (passwordEncoder.matches(changeTradePasswordRequest.getNewTradePassword(), findMember.getTradePassword())) {
+      throw new MemberException(CURRENT_USED_PASSWORD);
+    }
+
+    findMember.setTradePassword(passwordEncoder.encode(changeTradePasswordRequest.getNewTradePassword()));
   }
 }

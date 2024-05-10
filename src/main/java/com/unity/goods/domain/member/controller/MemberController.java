@@ -1,6 +1,7 @@
 package com.unity.goods.domain.member.controller;
 
 import static com.unity.goods.domain.member.dto.ChangePasswordDto.ChangePasswordRequest;
+import static com.unity.goods.domain.member.dto.ChangeTradePasswordDto.ChangeTradePasswordRequest;
 import static com.unity.goods.domain.member.dto.FindPasswordDto.FindPasswordRequest;
 
 import com.unity.goods.domain.member.dto.LoginDto;
@@ -103,6 +104,14 @@ public class MemberController {
       @AuthenticationPrincipal UserDetailsImpl member,
       @RequestBody @Valid ChangePasswordRequest changePasswordRequest) {
     memberService.changePassword(changePasswordRequest, member);
+    return ResponseEntity.ok().build();
+  }
+
+  @PutMapping("/trade-password")
+  public ResponseEntity<?> changeTradePassword(
+      @AuthenticationPrincipal UserDetailsImpl member,
+      @RequestBody @Valid ChangeTradePasswordRequest changeTradePasswordRequest) {
+    memberService.changeTradePassword(changeTradePasswordRequest, member);
     return ResponseEntity.ok().build();
   }
 

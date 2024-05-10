@@ -15,6 +15,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.unity.goods.domain.member.dto.ChangePasswordDto.ChangePasswordRequest;
+import com.unity.goods.domain.member.dto.ChangeTradePasswordDto.ChangeTradePasswordRequest;
 import com.unity.goods.domain.member.dto.FindPasswordDto.FindPasswordRequest;
 import com.unity.goods.domain.member.dto.MemberProfileDto.MemberProfileResponse;
 import com.unity.goods.domain.member.dto.ResignDto.ResignRequest;
@@ -278,12 +279,49 @@ class MemberServiceTest {
     given(memberRepository.findByEmail(anyString()))
         .willReturn(Optional.of(member));
     given(passwordEncoder.encode(changePasswordRequest.getNewPassword())).willReturn("new1234");
+    given(!passwordEncoder.matches(changePasswordRequest.getCurPassword(),
+        member.getPassword())).willReturn(true);
 
     //when
     memberService.changePassword(changePasswordRequest, userDetails);
 
     //then
     assertEquals(member.getPassword(), "new1234");
+  }
+
+  @Test
+  @DisplayName("거래 비밀번호 변경 테스트")
+  void changeTradePasswordTest() {
+    //given
+    Member member = Member.builder()
+        .email("test@naver.com")
+        .password("test1234")
+        .tradePassword("111111")
+        .nickname("test")
+        .status(RESIGN)
+        .phoneNumber("010-1111-1111")
+        .profileImage("http://amazonS3/test.jpg")
+        .build();
+
+    ChangeTradePasswordRequest changeTradePasswordRequest = ChangeTradePasswordRequest.builder()
+        .curTradePassword("111111")
+        .newTradePassword("222222")
+        .build();
+
+    UserDetailsImpl userDetails = new UserDetailsImpl(member);
+
+    given(memberRepository.findByEmail(anyString()))
+        .willReturn(Optional.of(member));
+    given(passwordEncoder.encode(changeTradePasswordRequest.getNewTradePassword())).willReturn(
+        "222222");
+    given(!passwordEncoder.matches(changeTradePasswordRequest.getCurTradePassword(),
+        member.getTradePassword())).willReturn(true);
+
+    //when
+    memberService.changeTradePassword(changeTradePasswordRequest, userDetails);
+
+    //then
+    assertEquals(member.getTradePassword(), "222222");
   }
 
 
