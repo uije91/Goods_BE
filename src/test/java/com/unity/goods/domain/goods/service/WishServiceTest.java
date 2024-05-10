@@ -141,8 +141,6 @@ class WishServiceTest {
     assertEquals(20000L, dto.getPrice());
     assertEquals("test", dto.getSellerName());
     assertEquals(GoodsStatus.SALE, dto.getGoodsStatus());
-    // goods1Time 시간에 맞춰서 변경 후 테스트
-    // assertEquals("30일 전",dto.getUploadBefore());
   }
 
 
