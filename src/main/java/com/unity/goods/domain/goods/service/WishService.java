@@ -1,6 +1,5 @@
 package com.unity.goods.domain.goods.service;
 
-import static com.unity.goods.domain.goods.type.GoodsStatus.SOLDOUT;
 import static com.unity.goods.global.exception.ErrorCode.GOODS_ALREADY_WISHLIST;
 import static com.unity.goods.global.exception.ErrorCode.GOODS_NOT_FOUND;
 import static com.unity.goods.global.exception.ErrorCode.IMPOSSIBLE_TO_WISHLIST_MY_GOODS;
@@ -78,37 +77,32 @@ public class WishService {
     wishRepository.delete(wishlist);
   }
 
-
   public Page<WishlistDto> getWishlist(Long memberId, Pageable pageable) {
     List<WishlistDto> goodsInWishlist = new ArrayList<>();
 
-    Page<Wishlist> wishlists = wishRepository.findByMemberId(memberId,pageable);
+    Page<Wishlist> wishlists = wishRepository.findByMemberId(memberId, pageable);
     wishlists.getContent().forEach(item -> {
       Long goodsId = item.getId();
       Optional<Goods> optionalGoods = goodsRepository.findById(goodsId);
 
       optionalGoods.ifPresent(goods -> {
-        if (goods.getGoodsStatus() == SOLDOUT) {
-          log.info("[WishService] : Delete Wishlist for goodsId {}", goodsId);
-          deleteWishlist(goodsId, memberId);
-        } else {
-          String image = null;
-          List<Image> images = imageRepository.findByGoodsId(goodsId);
-          if (images != null && !images.isEmpty()) {
-            image = imageRepository.findByGoodsId(goodsId).get(0).getImageUrl();
-          }
-
-          WishlistDto wishlistDto = WishlistDto.builder()
-              .imageUrl(image)
-              .goodsName(goods.getGoodsName())
-              .address(goods.getAddress())
-              .price(goods.getPrice())
-              .sellerName(goods.getMember().getNickname())
-              .goodsStatus(goods.getGoodsStatus())
-              .uploadBefore(calculateTimeAgo(goods.getCreatedAt(), goods.getUpdatedAt()))
-              .build();
-          goodsInWishlist.add(wishlistDto);
+        String image = null;
+        List<Image> images = imageRepository.findByGoodsId(goodsId);
+        if (images != null && !images.isEmpty()) {
+          image = imageRepository.findByGoodsId(goodsId).get(0).getImageUrl();
         }
+
+        WishlistDto wishlistDto = WishlistDto.builder()
+            .imageUrl(image)
+            .goodsName(goods.getGoodsName())
+            .address(goods.getAddress())
+            .price(goods.getPrice())
+            .sellerName(goods.getMember().getNickname())
+            .goodsStatus(goods.getGoodsStatus())
+            .uploadBefore(calculateTimeAgo(goods.getCreatedAt(), goods.getUpdatedAt()))
+            .build();
+
+        goodsInWishlist.add(wishlistDto);
       });
     });
 
