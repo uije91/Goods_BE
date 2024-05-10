@@ -335,7 +335,7 @@ public class MemberService {
     Member findMember = memberRepository.findByEmail(member.getUsername())
         .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
 
-    if (passwordEncoder.matches(changePasswordRequest.getCurPassword(), member.getPassword())) {
+    if (!passwordEncoder.matches(changePasswordRequest.getCurPassword(), member.getPassword())) {
       throw new MemberException(PASSWORD_NOT_MATCH);
     }
 
