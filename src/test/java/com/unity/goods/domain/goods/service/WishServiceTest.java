@@ -35,6 +35,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
@@ -98,6 +99,7 @@ class WishServiceTest {
   @DisplayName("위시리스트 조회 성공")
   void getWishlist_success() throws NoSuchFieldException, IllegalAccessException {
     //given
+    Pageable pageable = Pageable.unpaged();
     Goods goods1 = Goods.builder()
         .id(1L)
         .goodsName("테스트상품1")
@@ -131,11 +133,11 @@ class WishServiceTest {
         Wishlist.builder().id(2L).member(member).goods(goods2).build()
     );
 
-    when(wishRepository.findByMemberId(member.getId())).thenReturn(wishlist);
+    Page<Wishlist> wishlistPage = new PageImpl<>(wishlist);
+    when(wishRepository.findByMemberId(member.getId(),pageable)).thenReturn(wishlistPage);
     when(goodsRepository.findById(goods1.getId())).thenReturn(Optional.of(goods1));
     when(goodsRepository.findById(goods2.getId())).thenReturn(Optional.of(goods2));
     when((imageRepository.findByGoodsId(goods1.getId()))).thenReturn(List.of(image));
-    Pageable pageable = PageRequest.of(0, 10); // 페이지 정보
 
     //when
     Page<WishlistDto> result = wishService.getWishlist(member.getId(),pageable);
