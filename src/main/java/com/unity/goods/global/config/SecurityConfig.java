@@ -96,6 +96,8 @@ public class SecurityConfig {
     List<RequestMatcher> requestMatchers = List.of(
         antMatcher(POST, "/api/member/logout"), // 로그아웃
         antMatcher(PUT, "/api/member/resign"), // 회원탈퇴
+        antMatcher(PUT, "/api/member/password"), // 비밀번호 변경
+        antMatcher(PUT, "/api/member/trade-password"), // 거래 비밀번호 변경
         antMatcher(POST, "/api/goods/new"),
         antMatcher("/api/goods/**")
     );
