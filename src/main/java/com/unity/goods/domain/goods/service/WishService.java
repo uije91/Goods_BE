@@ -1,5 +1,10 @@
 package com.unity.goods.domain.goods.service;
 
+import static com.unity.goods.domain.goods.dto.GoodsStatus.SOLD_OUT;
+import static com.unity.goods.global.exception.ErrorCode.GOODS_NOT_FOUND;
+import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
+import static com.unity.goods.global.exception.ErrorCode.WISHLIST_NOT_FOUND;
+
 import com.unity.goods.domain.goods.dto.GoodsStatus;
 import com.unity.goods.domain.goods.dto.WishlistDto;
 import com.unity.goods.domain.goods.entity.Goods;
@@ -31,13 +36,13 @@ public class WishService {
 
   public void addWishlist(Long goodsId, Long memberId) {
     Member member = memberRepository.findById(memberId)
-        .orElseThrow(() -> new GoodsException(ErrorCode.USER_NOT_FOUND));
+        .orElseThrow(() -> new GoodsException(USER_NOT_FOUND));
 
     Goods goods = goodsRepository.findById(goodsId)
-        .orElseThrow(() -> new GoodsException(ErrorCode.GOODS_NOT_FOUND));
+        .orElseThrow(() -> new GoodsException(GOODS_NOT_FOUND));
 
     if (wishRepository.existsByGoodsAndMember(goods, member)) {
-      log.error("[WishService] Goods already wishList");
+      log.error("[WishService] {} 회원의 wishList에 {} Goods 가 이미 존재합니다.", member.getNickname(), goods.getGoodsName());
       throw new GoodsException(ErrorCode.GOODS_ALREADY_WISHLIST);
     }
 
@@ -51,30 +56,27 @@ public class WishService {
 
   public void deleteWishlist(Long goodsId, Long memberId) {
     Member member = memberRepository.findById(memberId)
-        .orElseThrow(() -> new GoodsException(ErrorCode.USER_NOT_FOUND));
+        .orElseThrow(() -> new GoodsException(USER_NOT_FOUND));
 
     Goods goods = goodsRepository.findById(goodsId)
-        .orElseThrow(() -> new GoodsException(ErrorCode.GOODS_NOT_FOUND));
+        .orElseThrow(() -> new GoodsException(GOODS_NOT_FOUND));
 
     Wishlist wishlist = wishRepository.findByGoodsAndMember(goods, member)
-        .orElseThrow(() -> new GoodsException(ErrorCode.WISHLIST_NOT_FOUND));
+        .orElseThrow(() -> new GoodsException(WISHLIST_NOT_FOUND));
 
     wishRepository.delete(wishlist);
   }
 
   public List<WishlistDto> getWishlist(Long id) {
-    List<Wishlist> wishlist = wishRepository.findByMemberId(id);
-    if (wishlist.isEmpty()) {
-      throw new GoodsException(ErrorCode.WISHLIST_NOT_FOUND);
-    }
 
     List<WishlistDto> goodsInWishlist = new ArrayList<>();
 
+    List<Wishlist> wishlist = wishRepository.findByMemberId(id);
     for (Wishlist item : wishlist) {
       Long goodsId = item.getId();
 
       Optional<Goods> optionalGoods = goodsRepository.findById(goodsId);
-      if (optionalGoods.isEmpty() || optionalGoods.get().getGoodsStatus() == GoodsStatus.SOLD_OUT) {
+      if (optionalGoods.isEmpty() || optionalGoods.get().getGoodsStatus() == SOLD_OUT) {
         log.info("[WishService] : Delete Wishlist for goodsId {}", goodsId);
         // TODO: 구현여부 결정
         //  1.조회시 SOLD_OUT 제품은 WishList 에서 삭제
@@ -101,25 +103,12 @@ public class WishService {
     return goodsInWishlist;
   }
 
-  private String calculateTimeAgo(LocalDateTime createdAt, LocalDateTime updatedAt) {
+  private Long calculateTimeAgo(LocalDateTime createdAt, LocalDateTime updatedAt) {
     java.time.LocalDateTime now = java.time.LocalDateTime.now();
 
     LocalDateTime referenceTime = (updatedAt != null) ? updatedAt : createdAt;
 
     Duration duration = Duration.between(referenceTime, now);
-    long seconds = duration.getSeconds();
-
-    if (seconds < 60) {
-      return seconds + "초 전";
-    } else if (seconds < 3600) {
-      long minutes = seconds / 60;
-      return minutes + "분 전";
-    } else if (seconds < 86400) {
-      long hours = seconds / 3600;
-      return hours + "시간 전";
-    } else {
-      long days = seconds / 86400;
-      return days + "일 전";
-    }
+    return duration.getSeconds();
   }
 }
