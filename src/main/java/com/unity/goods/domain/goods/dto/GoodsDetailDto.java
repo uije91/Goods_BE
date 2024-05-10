@@ -15,6 +15,7 @@ public class GoodsDetailDto {
   @Builder
   @Setter
   public static class GoodsDetailResponse {
+
     private String sellerName;
     private boolean sellerBadge; // TODO
     private boolean mannerBadge; // TODO
@@ -26,7 +27,7 @@ public class GoodsDetailDto {
     private boolean liked; // TODO
     private Duration uploadedBefore;
 
-    public static GoodsDetailResponse fromGoodsAndMember(Goods goods, Member member){
+    public static GoodsDetailResponse fromGoodsAndMember(Goods goods, Member member) {
       Duration duration = Duration.between(goods.getCreatedAt(), LocalDateTime.now());
 
       return GoodsDetailResponse.builder()

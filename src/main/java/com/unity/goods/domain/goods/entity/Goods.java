@@ -1,10 +1,9 @@
 package com.unity.goods.domain.goods.entity;
 
-import static com.unity.goods.domain.goods.dto.GoodsStatus.SALE;
+import static com.unity.goods.domain.goods.type.GoodsStatus.SALE;
 
-import com.unity.goods.domain.goods.dto.GoodsStatus;
 import com.unity.goods.domain.goods.dto.UploadGoodsDto.UploadGoodsRequest;
-import com.unity.goods.domain.image.entity.Image;
+import com.unity.goods.domain.goods.type.GoodsStatus;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.model.BaseEntity;
 import jakarta.persistence.Column;
@@ -36,6 +35,7 @@ public class Goods extends BaseEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "goods_id")
   private Long id;
 
   @Column(nullable = false, length = 50)
@@ -52,8 +52,6 @@ public class Goods extends BaseEntity {
   @Builder.Default
   private GoodsStatus goodsStatus = SALE;
 
-  private String thumbnailImageUrl;
-
   @Builder.Default
   private double star = 0.0;
 
@@ -67,14 +65,14 @@ public class Goods extends BaseEntity {
   private double lng; // 경도
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "member")
+  @JoinColumn(name = "member_id")
   private Member member;
 
   @OneToMany(mappedBy = "goods")
   @Builder.Default
   private List<Image> imageList = new ArrayList<>();
 
-  public static Goods fromUploadGoodsRequest(UploadGoodsRequest request){
+  public static Goods fromUploadGoodsRequest(UploadGoodsRequest request) {
     return Goods.builder()
         .goodsName(request.getGoodsName())
         .price(Long.parseLong(request.getPrice()))

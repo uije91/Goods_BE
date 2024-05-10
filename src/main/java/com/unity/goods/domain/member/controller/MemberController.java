@@ -1,9 +1,8 @@
 package com.unity.goods.domain.member.controller;
 
-import static com.unity.goods.domain.member.dto.ChangePasswordDto.*;
+import static com.unity.goods.domain.member.dto.ChangePasswordDto.ChangePasswordRequest;
 import static com.unity.goods.domain.member.dto.FindPasswordDto.FindPasswordRequest;
 
-import com.unity.goods.domain.member.dto.ChangePasswordDto;
 import com.unity.goods.domain.member.dto.LoginDto;
 import com.unity.goods.domain.member.dto.MemberProfileDto.MemberProfileResponse;
 import com.unity.goods.domain.member.dto.ResignDto;

@@ -1,6 +1,6 @@
-package com.unity.goods.domain.image.repository;
+package com.unity.goods.domain.goods.repository;
 
-import com.unity.goods.domain.image.entity.Image;
+import com.unity.goods.domain.goods.entity.Image;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
