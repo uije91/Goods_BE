@@ -279,6 +279,8 @@ class MemberServiceTest {
     given(memberRepository.findByEmail(anyString()))
         .willReturn(Optional.of(member));
     given(passwordEncoder.encode(changePasswordRequest.getNewPassword())).willReturn("new1234");
+    given(!passwordEncoder.matches(changePasswordRequest.getCurPassword(),
+        member.getPassword())).willReturn(true);
 
     //when
     memberService.changePassword(changePasswordRequest, userDetails);
@@ -310,7 +312,10 @@ class MemberServiceTest {
 
     given(memberRepository.findByEmail(anyString()))
         .willReturn(Optional.of(member));
-    given(passwordEncoder.encode(changeTradePasswordRequest.getNewTradePassword())).willReturn("222222");
+    given(passwordEncoder.encode(changeTradePasswordRequest.getNewTradePassword())).willReturn(
+        "222222");
+    given(!passwordEncoder.matches(changeTradePasswordRequest.getCurTradePassword(),
+        member.getTradePassword())).willReturn(true);
 
     //when
     memberService.changeTradePassword(changeTradePasswordRequest, userDetails);
