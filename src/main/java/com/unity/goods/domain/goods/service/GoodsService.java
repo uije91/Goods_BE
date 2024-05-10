@@ -22,6 +22,7 @@ import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.exception.MemberException;
 import com.unity.goods.domain.member.repository.MemberRepository;
 import com.unity.goods.global.jwt.UserDetailsImpl;
+import com.unity.goods.infra.service.GoodsSearchService;
 import com.unity.goods.infra.service.S3Service;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,7 @@ public class GoodsService {
   private final S3Service s3Service;
   private final ImageRepository imageRepository;
   private final GoodsRepository goodsRepository;
+  private final GoodsSearchService goodsSearchService;
 
   private final static int MAX_IMAGE_NUM = 10;
 
@@ -55,10 +57,11 @@ public class GoodsService {
       uploadSuccessFiles.add(s3Service.uploadFile(multipartFile, member.getUsername()));
     }
 
-    // Goods 생성 및 썸네일 url 설정
+    // Goods 생성 및 elasticsearch db에 저장
     Goods goods = Goods.fromUploadGoodsRequest(uploadGoodsRequest);
     goods.setMember(findMember);
     goodsRepository.save(goods);
+    goodsSearchService.saveGoods(goods, uploadSuccessFiles.get(0));
 
     // 이미지 url db에 저장
     for (String uploadSuccessFile : uploadSuccessFiles) {
@@ -139,5 +142,25 @@ public class GoodsService {
     }
 
     goods.setGoodsStatus(updateGoodsStateRequest.getGoodsStatus());
+  }
+
+  @Transactional
+  public void deleteGoods(UserDetailsImpl member, Long goodsId) {
+
+    Goods goods = goodsRepository.findById(goodsId)
+        .orElseThrow(() -> new GoodsException(GOODS_NOT_FOUND));
+
+    if (!goods.getMember().getEmail().equals(member.getUsername())) {
+      throw new GoodsException(MISMATCHED_SELLER);
+    }
+
+    for (Image goodsImageUrl : goods.getImageList()) {
+      imageRepository.deleteById(goodsImageUrl.getId());
+      s3Service.deleteFile(goodsImageUrl.getImageUrl());
+    }
+
+    log.info("[GoodsService][deleteGoods] : \"GoodsId: {}, GoodsName: {}\" 상품 삭제"
+        , goods.getId(), goods.getGoodsName());
+    goodsRepository.deleteById(goodsId);
   }
 }

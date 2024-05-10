@@ -1,0 +1,42 @@
+services:
+  mysql:
+    image: mysql:8.0.33
+    ports:
+      - "3306:3306"
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+
+  es:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
+    container_name: elastic-search-container
+    environment:
+      - node.name=single-node
+      - cluster.name=goods
+      - discovery.type=single-node
+    ports:
+      - 9200:9200
+      - 9300:9300
+
+  goodsapp:
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - mysql
+      - redis
+      - es
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/goodsDb
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: unity-goods
+      SPRING_SERVLET_MULTIPART_MAX-FILE-SIZE: 10MB
+      SPRING_SERVLET_MULTIPART_MAX-REQUEST-SIZE: 50MB
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PASSWORD: unity-goods
+
+    ports:
+      - "8080:8080"
