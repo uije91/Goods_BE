@@ -60,6 +60,7 @@ class WishServiceTest {
   private Member member;
   private Member member2;
   private Goods goods;
+  private Goods goods2;
 
   @BeforeEach
   void init() {
@@ -84,13 +85,21 @@ class WishServiceTest {
         .build();
 
     goods = Goods.builder()
-        .id(20L)
+        .id(1L)
         .goodsName("테스트상품")
         .price(20000L)
         .description("테스트 상품입니다.")
         .address("테스트 주소")
-        .lat(37.564)
-        .lng(127.001)
+        .member(member)
+        .goodsStatus(GoodsStatus.SALE)
+        .build();
+
+    goods2 = Goods.builder()
+        .id(2L)
+        .goodsName("테스트상품2")
+        .price(30000L)
+        .address("테스트 주소2")
+        .goodsStatus(GoodsStatus.RESERVATION)
         .member(member)
         .build();
   }
@@ -100,53 +109,32 @@ class WishServiceTest {
   void getWishlist_success() throws NoSuchFieldException, IllegalAccessException {
     //given
     Pageable pageable = Pageable.unpaged();
-    Goods goods1 = Goods.builder()
-        .id(1L)
-        .goodsName("테스트상품1")
-        .price(20000L)
-        .address("테스트 주소1")
-        .goodsStatus(GoodsStatus.SALE)
-        .member(member)
-        .build();
 
-    Goods goods2 = Goods.builder()
-        .id(2L)
-        .goodsName("테스트상품2")
-        .price(30000L)
-        .address("테스트 주소2")
-        .goodsStatus(GoodsStatus.RESERVATION)
-        .member(member)
-        .build();
-
-    Image image = Image.builder().id(1L).imageUrl("test_url").goods(goods1).build();
+    Image image = Image.builder().id(1L).imageUrl("test_url").goods(goods).build();
 
     // BaseEntity 시간 강제 설정
-    LocalDateTime goods1Time = LocalDateTime.of(2024, 4, 9, 23, 30);
-    LocalDateTime goods2Time = LocalDateTime.of(2024, 5, 10, 10, 40);
-    Field createdField = BaseEntity.class.getDeclaredField("createdAt");
+    LocalDateTime goodsTime = LocalDateTime.of(2024, 4, 9, 23, 30);
+    Field createdField = BaseEntity.class.getDeclaredField("updatedAt");
     createdField.setAccessible(true);
-    createdField.set(goods1, goods1Time);
-    createdField.set(goods2, goods2Time);
+    createdField.set(goods, goodsTime);
 
     List<Wishlist> wishlist = List.of(
-        Wishlist.builder().id(1L).member(member).goods(goods1).build(),
-        Wishlist.builder().id(2L).member(member).goods(goods2).build()
+        Wishlist.builder().id(1L).member(member).goods(goods).build()
     );
 
     Page<Wishlist> wishlistPage = new PageImpl<>(wishlist);
     when(wishRepository.findByMemberId(member.getId(),pageable)).thenReturn(wishlistPage);
-    when(goodsRepository.findById(goods1.getId())).thenReturn(Optional.of(goods1));
-    when(goodsRepository.findById(goods2.getId())).thenReturn(Optional.of(goods2));
-    when((imageRepository.findByGoodsId(goods1.getId()))).thenReturn(List.of(image));
+    when(goodsRepository.findById(goods.getId())).thenReturn(Optional.of(goods));
+    when((imageRepository.findByGoodsId(goods.getId()))).thenReturn(List.of(image));
 
     //when
     Page<WishlistDto> result = wishService.getWishlist(member.getId(),pageable);
 
     // then
-    assertEquals(2, result.getContent().size());
+    assertEquals(1, result.getContent().size());
     WishlistDto dto = result.getContent().get(0);
-    assertEquals("테스트상품1", dto.getGoodsName());
-    assertEquals("테스트 주소1", dto.getAddress());
+    assertEquals("테스트상품", dto.getGoodsName());
+    assertEquals("테스트 주소", dto.getAddress());
     assertEquals(20000L, dto.getPrice());
     assertEquals("test", dto.getSellerName());
     assertEquals("test_url",dto.getImageUrl());
@@ -198,17 +186,6 @@ class WishServiceTest {
   @DisplayName("위시리스트 등록 실패 - 이미 등록된 위시리스트")
   void addWishList_AlreadyInWishlist() {
     //given
-    Member member2 = Member.builder()
-        .id(11L)
-        .email("test@test.com")
-        .password("test1234")
-        .nickname("test")
-        .status(Status.ACTIVE)
-        .role(Role.USER)
-        .phoneNumber("010-1111-1111")
-        .build();
-
-
     when(memberRepository.findById(member2.getId())).thenReturn(Optional.of(member2));
     when(goodsRepository.findById(goods.getId())).thenReturn(Optional.of(goods));
     when(wishRepository.existsByGoodsAndMember(goods, member2)).thenReturn(true);
