@@ -16,6 +16,8 @@ public class GoodsDetailDto {
   @Setter
   public static class GoodsDetailResponse {
 
+    private Long sellerId;
+    private String sellerProfileImage;
     private String sellerName;
     private boolean sellerBadge; // TODO
     private boolean mannerBadge; // TODO
@@ -24,6 +26,9 @@ public class GoodsDetailDto {
     private String description;
     private List<String> goodsImages;
     private String status;
+    private double lat;
+    private double lng;
+    private String address;
     private boolean liked; // TODO
     private Duration uploadedBefore;
 
@@ -31,11 +36,16 @@ public class GoodsDetailDto {
       Duration duration = Duration.between(goods.getCreatedAt(), LocalDateTime.now());
 
       return GoodsDetailResponse.builder()
+          .sellerId(member.getId())
+          .sellerProfileImage(member.getProfileImage())
           .sellerName(goods.getMember().getNickname())
           .goodsName(goods.getGoodsName())
           .price(String.valueOf(goods.getPrice()))
           .description(goods.getDescription())
           .status(goods.getGoodsStatus().toString())
+          .lat(goods.getLat())
+          .lng(goods.getLng())
+          .address(goods.getAddress())
           .uploadedBefore(duration)
           .build();
     }
