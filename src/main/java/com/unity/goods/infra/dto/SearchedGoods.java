@@ -14,6 +14,8 @@ public class SearchedGoods {
   private Long price;
   private String tradeSpot;
   private String thumbnailUrl;
+  private double lat;
+  private double lng;
   private Integer uploadedBefore;
 
   public static SearchedGoods fromGoodsDocument(GoodsDocument goodsDocument) {
@@ -25,6 +27,8 @@ public class SearchedGoods {
         .tradeSpot(goodsDocument.getAddress())
         .thumbnailUrl(goodsDocument.getThumbnailUrl())
         .uploadedBefore(goodsDocument.getUploadedBefore())
+        .lat(goodsDocument.getLocation().lat())
+        .lng(goodsDocument.getLocation().lon())
         .build();
   }
 
