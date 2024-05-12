@@ -5,6 +5,7 @@ import static com.unity.goods.global.exception.ErrorCode.ALREADY_SOLD_OUT_GOODS;
 import static com.unity.goods.global.exception.ErrorCode.GOODS_NOT_FOUND;
 import static com.unity.goods.global.exception.ErrorCode.MAX_IMAGE_LIMIT_EXCEEDED;
 import static com.unity.goods.global.exception.ErrorCode.MISMATCHED_SELLER;
+import static com.unity.goods.global.exception.ErrorCode.NEED_LEAST_ONE_IMAGE;
 import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
 
 import com.unity.goods.domain.goods.dto.GoodsDetailDto.GoodsDetailResponse;
@@ -26,6 +27,8 @@ import com.unity.goods.infra.service.GoodsSearchService;
 import com.unity.goods.infra.service.S3Service;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -45,17 +48,26 @@ public class GoodsService {
 
   private final static int MAX_IMAGE_NUM = 10;
 
+  @Transactional
   public UploadGoodsResponse uploadGoods(UserDetailsImpl member,
       UploadGoodsRequest uploadGoodsRequest) {
+
+    // 빈 이미지 파일 등록 시 에러 처리
+    if (!uploadGoodsRequest.getGoodsImageFiles().isEmpty()
+        && Objects.equals(uploadGoodsRequest.getGoodsImageFiles().get(0).getOriginalFilename(),
+        "")) {
+      throw new GoodsException(NEED_LEAST_ONE_IMAGE);
+    }
 
     Member findMember = memberRepository.findByEmail(member.getUsername())
         .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
 
     // 이미지 s3 업로드
-    List<String> uploadSuccessFiles = new ArrayList<>();
-    for (MultipartFile multipartFile : uploadGoodsRequest.getGoodsImageFiles()) {
-      uploadSuccessFiles.add(s3Service.uploadFile(multipartFile, member.getUsername()));
-    }
+    List<String> uploadSuccessFiles = uploadGoodsRequest.getGoodsImageFiles().stream()
+        .filter(
+            multipartFile -> !Objects.requireNonNull(multipartFile.getOriginalFilename()).isEmpty())
+        .map(multipartFile -> s3Service.uploadFile(multipartFile, member.getUsername()))
+        .toList();
 
     // Goods 생성 및 elasticsearch db에 저장
     Goods goods = Goods.fromUploadGoodsRequest(uploadGoodsRequest);

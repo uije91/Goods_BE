@@ -63,6 +63,7 @@ public class UploadGoodsDto {
           .goodsName(goods.getGoodsName())
           .price(String.valueOf(goods.getPrice()))
           .description(goods.getDescription())
+          .address(goods.getAddress())
           .createdAt(goods.getCreatedAt())
           .build();
     }
