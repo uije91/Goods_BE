@@ -56,6 +56,9 @@ public class GoodsDocument {
   @GeoPointField
   private GeoPoint location;
 
+  @Field(type = FieldType.Long)
+  private Long likes = 0L;
+
   @Field(type = FieldType.Integer)
   private Integer uploadedBefore;
 

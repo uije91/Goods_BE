@@ -39,7 +39,7 @@ public class GoodsController {
   @GetMapping()
   public ResponseEntity<?> getNearbyGoods(@RequestParam double lat, @RequestParam double lng,
       @PageableDefault(value = 20) Pageable pageable) {
-    Page<GoodsDocument> goodsNearBy = goodsSearchService.findByGeoLocationLngLat(lat, lng, pageable);
+    Page<SearchedGoods> goodsNearBy = goodsSearchService.findByGeoLocationOrderByLikes(lat, lng, pageable);
     return ResponseEntity.ok(goodsNearBy);
   }
 
