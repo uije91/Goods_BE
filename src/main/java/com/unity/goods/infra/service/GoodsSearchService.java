@@ -24,10 +24,10 @@ public class GoodsSearchService {
   private final ElasticsearchOperations elasticsearchOperations;
 
   public void saveGoods(Goods goods, String thumbnailUrl) {
-      elasticsearchOperations.save(GoodsDocument.fromGoods(goods, thumbnailUrl));
+    elasticsearchOperations.save(GoodsDocument.fromGoods(goods, thumbnailUrl));
   }
 
-  public Page<GoodsDocument> search(String keyword, Pageable pageable) {
+  public Page<SearchedGoods> search(String keyword, Pageable pageable) {
 
     Query searchQuery = new NativeSearchQueryBuilder()
         .withQuery(QueryBuilders.queryStringQuery("*" + keyword + "*")
@@ -43,15 +43,16 @@ public class GoodsSearchService {
     List<SearchHits<GoodsDocument>> searchHitsList = elasticsearchOperations.multiSearch(queries,
         GoodsDocument.class);
 
-    List<GoodsDocument> goodsDocuments = new ArrayList<>();
+    List<SearchedGoods> searchedGoods = new ArrayList<>();
     long total = 0;
 
     // 모든 SearchHits 처리
     for (SearchHits<GoodsDocument> searchHits : searchHitsList) {
       total += searchHits.getTotalHits(); // 총 검색 결과 수 업데이트
-      searchHits.getSearchHits().forEach(searchHit -> goodsDocuments.add(searchHit.getContent()));
+      searchHits.getSearchHits().forEach(
+          searchHit -> searchedGoods.add(SearchedGoods.fromGoodsDocument(searchHit.getContent())));
     }
 
-    return new PageImpl<>(goodsDocuments, pageable, total);
+    return new PageImpl<>(searchedGoods, pageable, total);
   }
 }

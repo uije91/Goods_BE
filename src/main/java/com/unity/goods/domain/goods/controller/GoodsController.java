@@ -89,7 +89,7 @@ public class GoodsController {
   public ResponseEntity<?> search(
       @RequestParam(name = "keyword") String keyword,
       @PageableDefault Pageable pageable) {
-    Page<GoodsDocument> goodsDocumentPage = goodsSearchService.search(keyword, pageable);
+    Page<SearchedGoods> goodsDocumentPage = goodsSearchService.search(keyword, pageable);
     return ResponseEntity.ok(goodsDocumentPage);
   }
 
