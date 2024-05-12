@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.index.query.MultiMatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -30,10 +29,12 @@ public class GoodsSearchService {
 
   public Page<GoodsDocument> search(String keyword, Pageable pageable) {
 
-    MultiMatchQueryBuilder queryBuilder = QueryBuilders.multiMatchQuery(keyword, "goodsName",
-        "description", "goodsStatus", "address");
     Query searchQuery = new NativeSearchQueryBuilder()
-        .withQuery(queryBuilder)
+        .withQuery(QueryBuilders.queryStringQuery("*" + keyword + "*")
+            .field("goodsName")
+            .field("description")
+            .field("goodsStatus")
+            .field("address"))
         .withPageable(pageable)
         .build();
     List<Query> queries = new ArrayList<>();
