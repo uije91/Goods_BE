@@ -2,10 +2,13 @@ package com.unity.goods.infra.service;
 
 import com.unity.goods.domain.goods.entity.Goods;
 import com.unity.goods.infra.document.GoodsDocument;
+import com.unity.goods.infra.dto.SearchedGoods;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.common.unit.DistanceUnit;
+import org.elasticsearch.index.query.GeoDistanceQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -22,6 +25,8 @@ import org.springframework.stereotype.Service;
 public class GoodsSearchService {
 
   private final ElasticsearchOperations elasticsearchOperations;
+
+  private static final double SEARCH_DISTANCE = 2.0;
 
   public void saveGoods(Goods goods, String thumbnailUrl) {
     elasticsearchOperations.save(GoodsDocument.fromGoods(goods, thumbnailUrl));
@@ -54,5 +59,25 @@ public class GoodsSearchService {
     }
 
     return new PageImpl<>(searchedGoods, pageable, total);
+  }
+
+  public Page<GoodsDocument> findByGeoLocationLngLat(double lng, double lat, Pageable pageable) {
+
+    GeoDistanceQueryBuilder queryBuilder = QueryBuilders.geoDistanceQuery("location")
+        .point(lng, lat)
+        .distance(SEARCH_DISTANCE, DistanceUnit.KILOMETERS);
+
+    Query searchQuery = new NativeSearchQueryBuilder()
+        .withQuery(queryBuilder)
+        .withPageable(pageable)
+        .build();
+
+    SearchHits<GoodsDocument> searchHits = elasticsearchOperations.search(searchQuery,
+        GoodsDocument.class);
+
+    List<GoodsDocument> goodsDocuments = new ArrayList<>();
+    searchHits.getSearchHits().forEach(searchHit -> goodsDocuments.add(searchHit.getContent()));
+
+    return new PageImpl<>(goodsDocuments, pageable, searchHits.getTotalHits());
   }
 }

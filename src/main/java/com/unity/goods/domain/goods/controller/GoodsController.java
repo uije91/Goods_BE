@@ -8,6 +8,7 @@ import com.unity.goods.domain.goods.dto.UploadGoodsDto;
 import com.unity.goods.domain.goods.service.GoodsService;
 import com.unity.goods.global.jwt.UserDetailsImpl;
 import com.unity.goods.infra.document.GoodsDocument;
+import com.unity.goods.infra.dto.SearchedGoods;
 import com.unity.goods.infra.service.GoodsSearchService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,13 @@ public class GoodsController {
 
   private final GoodsService goodsService;
   private final GoodsSearchService goodsSearchService;
+
+  @GetMapping()
+  public ResponseEntity<?> getNearbyGoods(@RequestParam double lat, @RequestParam double lng,
+      @PageableDefault(value = 20) Pageable pageable) {
+    Page<GoodsDocument> goodsNearBy = goodsSearchService.findByGeoLocationLngLat(lat, lng, pageable);
+    return ResponseEntity.ok(goodsNearBy);
+  }
 
   @PostMapping("/new")
   public ResponseEntity<?> uploadGoods(
