@@ -7,6 +7,7 @@ import com.unity.goods.domain.email.exception.EmailException;
 import com.unity.goods.domain.goods.exception.GoodsException;
 import com.unity.goods.domain.member.exception.MemberException;
 import com.unity.goods.domain.oauth.exception.OAuthException;
+import com.unity.goods.domain.trade.exception.TradeException;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -17,6 +18,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+  @ExceptionHandler(TradeException.class)
+  public ErrorResponse handleTradeException(TradeException e) {
+    log.error("Exception \"{}({})\" is occurred.", e.getErrorCode(), e.getErrorCode().getMessage());
+
+    return new ErrorResponse(e.getErrorCode(), e.getErrorCode().getStatus(),
+        e.getErrorCode().getMessage());
+  }
 
   @ExceptionHandler(GoodsException.class)
   public ErrorResponse handleGoodsException(GoodsException e) {

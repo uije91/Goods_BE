@@ -99,7 +99,8 @@ public class SecurityConfig {
         antMatcher(PUT, "/api/member/password"), // 비밀번호 변경
         antMatcher(PUT, "/api/member/trade-password"), // 거래 비밀번호 변경
         antMatcher(POST, "/api/goods/new"),
-        antMatcher("/api/goods/**")
+        antMatcher("/api/goods/**"),
+        antMatcher("/api/trade/**")
     );
     return requestMatchers.toArray(RequestMatcher[]::new);
   }
