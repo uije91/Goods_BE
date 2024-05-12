@@ -66,7 +66,8 @@ public class GoodsService {
     List<String> uploadSuccessFiles = uploadGoodsRequest.getGoodsImageFiles().stream()
         .filter(
             multipartFile -> !Objects.requireNonNull(multipartFile.getOriginalFilename()).isEmpty())
-        .map(multipartFile -> s3Service.uploadFile(multipartFile, member.getUsername()))
+        .map(multipartFile -> s3Service.uploadFile(multipartFile,
+            member.getUsername() + "/" + uploadGoodsRequest.getGoodsName()))
         .toList();
 
     // Goods 생성 및 elasticsearch db에 저장

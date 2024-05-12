@@ -86,7 +86,8 @@ public class MemberService {
     // 이미지 있다면 s3 저장
     String imageUrl = null;
     if (signUpRequest.getProfileImage() != null) {
-      imageUrl = s3Service.uploadFile(signUpRequest.getProfileImage(), signUpRequest.getEmail());
+      imageUrl = s3Service.uploadFile(signUpRequest.getProfileImage(),
+          signUpRequest.getEmail() + "/" + "profileImage");
     }
 
     // 비밀번호 & 거래 비밀번호 암호화
@@ -353,14 +354,17 @@ public class MemberService {
     Member findMember = memberRepository.findByEmail(member.getUsername())
         .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
 
-    if (!passwordEncoder.matches(changeTradePasswordRequest.getCurTradePassword(), findMember.getTradePassword())) {
+    if (!passwordEncoder.matches(changeTradePasswordRequest.getCurTradePassword(),
+        findMember.getTradePassword())) {
       throw new MemberException(PASSWORD_NOT_MATCH);
     }
 
-    if (passwordEncoder.matches(changeTradePasswordRequest.getNewTradePassword(), findMember.getTradePassword())) {
+    if (passwordEncoder.matches(changeTradePasswordRequest.getNewTradePassword(),
+        findMember.getTradePassword())) {
       throw new MemberException(CURRENT_USED_PASSWORD);
     }
 
-    findMember.setTradePassword(passwordEncoder.encode(changeTradePasswordRequest.getNewTradePassword()));
+    findMember.setTradePassword(
+        passwordEncoder.encode(changeTradePasswordRequest.getNewTradePassword()));
   }
 }
