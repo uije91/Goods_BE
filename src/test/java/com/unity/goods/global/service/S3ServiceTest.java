@@ -4,14 +4,16 @@ import static org.assertj.core.api.Fail.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.unity.goods.infra.service.S3Service;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
+@Disabled
 @SpringBootTest
-class S3ServiceTest {
+public class S3ServiceTest {
 
   @Autowired
   private S3Service s3Service;

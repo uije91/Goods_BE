@@ -51,6 +51,12 @@ public class GoodsDocument {
   @Field(type = FieldType.Text)
   private String thumbnailUrl;
 
+  @Field(type = FieldType.Double)
+  private double lat;
+
+  @Field(type = FieldType.Double)
+  private double lng;
+
   @Field(type = FieldType.Integer)
   private Integer uploadedBefore;
 
@@ -67,6 +73,8 @@ public class GoodsDocument {
         .address(goods.getAddress())
         .price(goods.getPrice())
         .thumbnailUrl(thumbnailUrl)
+        .lat(goods.getLat())
+        .lng(goods.getLng())
         .uploadedBefore(minutesAgo)
         .build();
   }

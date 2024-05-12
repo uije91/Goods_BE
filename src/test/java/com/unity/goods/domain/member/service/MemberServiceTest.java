@@ -6,6 +6,7 @@ import static com.unity.goods.global.exception.ErrorCode.RESIGNED_ACCOUNT;
 import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -20,9 +21,12 @@ import com.unity.goods.domain.member.dto.FindPasswordDto.FindPasswordRequest;
 import com.unity.goods.domain.member.dto.MemberProfileDto.MemberProfileResponse;
 import com.unity.goods.domain.member.dto.ResignDto.ResignRequest;
 import com.unity.goods.domain.member.dto.SignUpDto.SignUpRequest;
+import com.unity.goods.domain.member.entity.Badge;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.exception.MemberException;
+import com.unity.goods.domain.member.repository.BadgeRepository;
 import com.unity.goods.domain.member.repository.MemberRepository;
+import com.unity.goods.domain.member.type.BadgeType;
 import com.unity.goods.domain.member.type.Role;
 import com.unity.goods.domain.member.type.SocialType;
 import com.unity.goods.domain.member.type.Status;
@@ -31,6 +35,9 @@ import com.unity.goods.global.exception.ErrorCode;
 import com.unity.goods.global.jwt.JwtTokenProvider;
 import com.unity.goods.global.jwt.UserDetailsImpl;
 import com.unity.goods.infra.service.RedisService;
+import io.jsonwebtoken.lang.Assert;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -54,6 +61,8 @@ class MemberServiceTest {
   @Mock
   private MemberRepository memberRepository;
   @Mock
+  private BadgeRepository badgeRepository;
+  @Mock
   private PasswordEncoder passwordEncoder;
   @Mock
   private RedisService redisService;
@@ -62,9 +71,11 @@ class MemberServiceTest {
   @Mock
   private MailSender mailSender;
 
+  private Member member;
+
   @BeforeEach
   public void setMember() {
-    Member member = Member.builder()
+    member = Member.builder()
         .nickname("test")
         .email("test@naver.com")
         .password("test1234")
@@ -324,5 +335,25 @@ class MemberServiceTest {
     assertEquals(member.getTradePassword(), "222222");
   }
 
+  @Test
+  @DisplayName("배지 조회 성공")
+  void getBadgeTest() {
+    //given
+    List<Badge> badgeList = Arrays.asList(
+        new Badge(1L, member, BadgeType.SELL),
+        new Badge(2L, member, BadgeType.MANNER)
+    );
+
+    when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
+    when(badgeRepository.findAllByMember_Id(member.getId())).thenReturn(badgeList);
+
+    //when
+    List<BadgeType> result = memberService.getBadge(member.getId());
+
+    //then
+    assertEquals(2,result.size());
+    assertTrue(result.contains(BadgeType.SELL));
+    assertTrue(result.contains(BadgeType.MANNER));
+  }
 
 }

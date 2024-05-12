@@ -77,11 +77,15 @@ public class Goods extends BaseEntity {
   private List<Trade> tradeList  = new ArrayList<>();
 
   public static Goods fromUploadGoodsRequest(UploadGoodsRequest request) {
+
+    String userDefinedLocation =
+        request.getUserDefinedLocation() == null ? "" : " " + request.getUserDefinedLocation();
+
     return Goods.builder()
         .goodsName(request.getGoodsName())
         .price(Long.parseLong(request.getPrice()))
         .description(request.getDescription())
-        .address(request.getAddress() + " " + request.getUserDefinedLocation())
+        .address(request.getAddress() + userDefinedLocation)
         .lat(request.getLat())
         .lng(request.getLng())
         .build();
