@@ -36,17 +36,17 @@ public class WishController {
     return ResponseEntity.ok(wishlist);
   }
 
-  @PostMapping("/{goodsId}/likes")
+  @PostMapping("/likes")
   public ResponseEntity<?> addWishlist(
-      @PathVariable Long goodsId, @AuthenticationPrincipal UserDetailsImpl principal) {
+      @RequestParam Long goodsId, @AuthenticationPrincipal UserDetailsImpl principal) {
 
     wishService.addWishlist(goodsId, principal.getId());
     return ResponseEntity.ok().build();
   }
 
-  @DeleteMapping("/{goodsId}/likes")
+  @DeleteMapping("/likes")
   public ResponseEntity<?> deleteWishlist(
-      @PathVariable Long goodsId, @AuthenticationPrincipal UserDetailsImpl principal) {
+      @RequestParam Long goodsId, @AuthenticationPrincipal UserDetailsImpl principal) {
     wishService.deleteWishlist(goodsId, principal.getId());
     return ResponseEntity.ok().build();
   }
