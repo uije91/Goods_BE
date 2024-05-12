@@ -30,10 +30,10 @@ public class GoodsDetailDto {
     private double lng;
     private String address;
     private boolean liked; // TODO
-    private Duration uploadedBefore;
+    private long uploadedBefore;
 
     public static GoodsDetailResponse fromGoodsAndMember(Goods goods, Member member) {
-      Duration duration = Duration.between(goods.getCreatedAt(), LocalDateTime.now());
+      long duration = Duration.between(goods.getCreatedAt(), LocalDateTime.now()).getSeconds();
 
       return GoodsDetailResponse.builder()
           .sellerId(member.getId())
