@@ -18,8 +18,8 @@ import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.repository.MemberRepository;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -77,44 +77,40 @@ public class WishService {
     wishRepository.delete(wishlist);
   }
 
+
   public Page<WishlistDto> getWishlist(Long memberId, Pageable pageable) {
-    List<WishlistDto> goodsInWishlist = new ArrayList<>();
-
     Page<Wishlist> wishlists = wishRepository.findByMemberId(memberId, pageable);
-    wishlists.getContent().forEach(item -> {
-      Long goodsId = item.getId();
-      Optional<Goods> optionalGoods = goodsRepository.findById(goodsId);
 
-      optionalGoods.ifPresent(goods -> {
-        String image = null;
-        List<Image> images = imageRepository.findByGoodsId(goodsId);
-        if (images != null && !images.isEmpty()) {
-          image = imageRepository.findByGoodsId(goodsId).get(0).getImageUrl();
-        }
-
-        WishlistDto wishlistDto = WishlistDto.builder()
-            .imageUrl(image)
-            .goodsName(goods.getGoodsName())
-            .address(goods.getAddress())
-            .price(goods.getPrice())
-            .sellerName(goods.getMember().getNickname())
-            .goodsStatus(goods.getGoodsStatus())
-            .uploadBefore(calculateTimeAgo(goods.getCreatedAt(), goods.getUpdatedAt()))
-            .build();
-
-        goodsInWishlist.add(wishlistDto);
-      });
-    });
+    List<WishlistDto> goodsInWishlist = wishlists.getContent().stream()
+        .map(item -> {
+          Optional<Goods> optionalGoods = goodsRepository.findById(item.getId());
+          return optionalGoods.map(this::getWishlistDto).orElse(null);
+        })
+        .filter(Objects::nonNull).toList();
 
     return new PageImpl<>(goodsInWishlist, pageable, wishlists.getTotalElements());
   }
 
-  private Long calculateTimeAgo(LocalDateTime createdAt, LocalDateTime updatedAt) {
-    java.time.LocalDateTime now = java.time.LocalDateTime.now();
+  private WishlistDto getWishlistDto(Goods goods) {
+    // 대표이미지 가져오기
+    String image = null;
+    List<Image> images = imageRepository.findByGoodsId(goods.getId());
+    if (images != null && !images.isEmpty()) {
+      image = imageRepository.findByGoodsId(goods.getId()).get(0).getImageUrl();
+    }
 
-    LocalDateTime referenceTime = (updatedAt != null) ? updatedAt : createdAt;
+    // 날짜 계산 최근 -> 갱신일로 부터 몇일 지났는지 체크
+    long uploadBefore = Duration.between(goods.getUpdatedAt(), LocalDateTime.now()).getSeconds();
 
-    Duration duration = Duration.between(referenceTime, now);
-    return duration.getSeconds();
+    return WishlistDto.builder()
+        .imageUrl(image)
+        .goodsName(goods.getGoodsName())
+        .address(goods.getAddress())
+        .price(goods.getPrice())
+        .sellerName(goods.getMember().getNickname())
+        .goodsStatus(goods.getGoodsStatus())
+        .uploadBefore(uploadBefore)
+        .build();
   }
+
 }

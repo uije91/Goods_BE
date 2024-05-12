@@ -26,9 +26,12 @@ import com.unity.goods.domain.member.dto.SignUpDto.SignUpRequest;
 import com.unity.goods.domain.member.dto.SignUpDto.SignUpResponse;
 import com.unity.goods.domain.member.dto.UpdateProfileDto.UpdateProfileRequest;
 import com.unity.goods.domain.member.dto.UpdateProfileDto.UpdateProfileResponse;
+import com.unity.goods.domain.member.entity.Badge;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.exception.MemberException;
+import com.unity.goods.domain.member.repository.BadgeRepository;
 import com.unity.goods.domain.member.repository.MemberRepository;
+import com.unity.goods.domain.member.type.BadgeType;
 import com.unity.goods.domain.model.TokenDto;
 import com.unity.goods.global.jwt.JwtTokenProvider;
 import com.unity.goods.global.jwt.UserDetailsImpl;
@@ -36,6 +39,7 @@ import com.unity.goods.infra.service.RedisService;
 import com.unity.goods.infra.service.S3Service;
 import java.security.SecureRandom;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -60,6 +64,7 @@ public class MemberService {
 
   private final PasswordEncoder passwordEncoder;
   private final MemberRepository memberRepository;
+  private final BadgeRepository badgeRepository;
   private final RedisService redisService;
   private final S3Service s3Service;
   private final JwtTokenProvider jwtTokenProvider;
@@ -366,5 +371,14 @@ public class MemberService {
 
     findMember.setTradePassword(
         passwordEncoder.encode(changeTradePasswordRequest.getNewTradePassword()));
+  }
+
+  public List<BadgeType> getBadge(Long id) {
+    Member member = memberRepository.findById(id)
+        .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
+
+    List<Badge> badgeList = badgeRepository.findAllByMember_Id(member.getId());
+
+    return badgeList.stream().map(Badge::getBadge).toList();
   }
 }

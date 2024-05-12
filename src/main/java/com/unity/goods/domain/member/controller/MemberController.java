@@ -127,4 +127,9 @@ public class MemberController {
     return ResponseEntity.ok()
         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken).build();
   }
+
+  @GetMapping("/badge")
+  public ResponseEntity<?> getBadge(@AuthenticationPrincipal UserDetailsImpl principal) {
+    return ResponseEntity.ok(memberService.getBadge(principal.getId()));
+  }
 }
