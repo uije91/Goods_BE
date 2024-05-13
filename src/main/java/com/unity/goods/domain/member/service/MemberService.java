@@ -313,10 +313,6 @@ public class MemberService {
       findMember.setNickname(updateProfileRequest.getNickName());
     }
 
-    if (updateProfileRequest.getTradePassword() != null) {
-      findMember.setTradePassword(updateProfileRequest.getTradePassword());
-    }
-
     if (updateProfileRequest.getPhoneNumber() != null) {
       findMember.setPhoneNumber(updateProfileRequest.getPhoneNumber());
     }
