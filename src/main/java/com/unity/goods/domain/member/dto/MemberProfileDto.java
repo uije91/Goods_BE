@@ -10,6 +10,7 @@ public class MemberProfileDto {
   @Builder
   public static class MemberProfileResponse {
 
+    private Long memberId;
     private String nickName;
     private String phoneNumber;
     private String profileImage;
@@ -18,6 +19,7 @@ public class MemberProfileDto {
     public static MemberProfileResponse fromMember(Member member) {
 
       return MemberProfileResponse.builder()
+          .memberId(member.getId())
           .nickName(member.getNickname())
           .phoneNumber(member.getPhoneNumber())
           .profileImage(member.getProfileImage())
