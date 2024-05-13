@@ -101,11 +101,11 @@ public class GoodsSearchService {
         .orElseThrow(() -> new GoodsException(GOODS_NOT_FOUND));
 
     document.setLikes(document.getLikes() + change);
-    Document updateDocument = elasticsearchOperations.getElasticsearchConverter()
+    Document esDocument = elasticsearchOperations.getElasticsearchConverter()
         .mapObject(document);
 
     elasticsearchOperations.update(UpdateQuery.builder(document.getId().toString())
-        .withDocument(updateDocument)
+        .withDocument(esDocument)
         .withDocAsUpsert(true)
         .build(), IndexCoordinates.of("keyword"));
   }

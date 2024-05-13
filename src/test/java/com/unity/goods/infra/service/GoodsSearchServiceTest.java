@@ -5,25 +5,25 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.unity.goods.infra.document.GoodsDocument;
 import com.unity.goods.infra.dto.SearchedGoods;
+import com.unity.goods.infra.repository.GoodsSearchRepository;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import org.elasticsearch.common.geo.GeoPoint;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -31,6 +31,8 @@ import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.SearchHitsImpl;
 import org.springframework.data.elasticsearch.core.TotalHitsRelation;
+import org.springframework.data.elasticsearch.core.convert.ElasticsearchConverter;
+import org.springframework.data.elasticsearch.core.document.Document;
 import org.springframework.data.elasticsearch.core.query.Query;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,6 +43,9 @@ class GoodsSearchServiceTest {
 
   @InjectMocks
   private GoodsSearchService goodsSearchService;
+
+  @Mock
+  private GoodsSearchRepository goodsSearchRepository;
 
   @Test
   void testSearchGoods() {
@@ -131,6 +136,39 @@ class GoodsSearchServiceTest {
     // 반경 2km 내, 인기 상품 : goods2 우선 출력
     assertEquals(goods2.getId(), result.getContent().get(0).getGoodsId());
     assertEquals(goods1.getId(), result.getContent().get(1).getGoodsId());
+  }
+
+  @Test
+  @DisplayName("ES document 관심 수 수정 성공 테스트")
+  public void updateGoodsLikesTest() {
+    // given
+    Long goodsId = 1L;
+    int change = 1;
+    GoodsDocument mockDocument = GoodsDocument.builder()
+        .id(goodsId)
+        .likes(10L)
+        .build();
+
+    ElasticsearchConverter mockConverter = Mockito.mock(ElasticsearchConverter.class);
+    ElasticsearchOperations mockOperations = Mockito.mock(ElasticsearchOperations.class);
+
+    // Converter 반환 설정
+    when(mockOperations.getElasticsearchConverter()).thenReturn(mockConverter);
+
+    Document esDocument = Document.create();
+    when(mockConverter.mapObject(mockDocument)).thenReturn(esDocument);
+    when(goodsSearchRepository.findById(goodsId)).thenReturn(Optional.of(mockDocument));
+    when(mockOperations.update(any(), any())).thenReturn(null); // update 호출을 모킹
+
+    // ElasticsearchOperations를 사용하는 클래스에 모의 객체 주입
+    GoodsSearchService service = new GoodsSearchService(mockOperations, goodsSearchRepository);
+
+
+    // When
+    service.updateGoodsLikes(goodsId, change);
+
+    // Then
+    assertEquals(11L, mockDocument.getLikes());
   }
 
 }
