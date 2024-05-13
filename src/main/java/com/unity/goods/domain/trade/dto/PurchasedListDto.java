@@ -10,6 +10,7 @@ public class PurchasedListDto {
   @Builder
   public static class PurchasedListResponse {
 
+    private Long memberId;
     private Long goodsId;
     private String sellerName;
     private String goodsName;

@@ -38,6 +38,7 @@ public class TradeService {
               goods.getImageList().isEmpty() ? null : goods.getImageList().get(0).getImageUrl();
 
           return PurchasedListResponse.builder()
+              .memberId(member.getId())
               .goodsId(goods.getId())
               .sellerName(goods.getMember().getNickname())
               .goodsName(goods.getGoodsName())
