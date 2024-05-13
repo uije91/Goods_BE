@@ -86,7 +86,7 @@ public class SecurityConfig {
         antMatcher(POST, "/api/member/reissue"), // 토큰 재발급
         antMatcher(GET,"/api/member/badge"), // 배지 조회
         antMatcher(POST, "/api/email/**"), // 이메일 인증
-        antMatcher(GET, "/api/goods/search"), // 검색
+        antMatcher(POST, "/api/goods/search"), // 검색
         antMatcher(GET, "/api/goods")
     );
     return requestMatchers.toArray(RequestMatcher[]::new);

@@ -10,7 +10,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.unity.goods.infra.document.GoodsDocument;
-import com.unity.goods.infra.dto.SearchedGoods;
+import com.unity.goods.infra.dto.SearchDto.SearchedGoods;
 import com.unity.goods.infra.repository.GoodsSearchRepository;
 import java.util.Arrays;
 import java.util.List;

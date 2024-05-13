@@ -5,7 +5,7 @@ import static com.unity.goods.global.exception.ErrorCode.GOODS_NOT_FOUND;
 import com.unity.goods.domain.goods.entity.Goods;
 import com.unity.goods.domain.goods.exception.GoodsException;
 import com.unity.goods.infra.document.GoodsDocument;
-import com.unity.goods.infra.dto.SearchedGoods;
+import com.unity.goods.infra.dto.SearchDto.SearchedGoods;
 import com.unity.goods.infra.repository.GoodsSearchRepository;
 import java.util.ArrayList;
 import java.util.List;
