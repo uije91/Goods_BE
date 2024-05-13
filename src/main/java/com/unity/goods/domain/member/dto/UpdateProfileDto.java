@@ -17,7 +17,8 @@ public class UpdateProfileDto {
 
     private String phoneNumber;
 
-    private MultipartFile profileImage;
+    private String profileImageUrl;
+    private MultipartFile profileImageFile;
 
   }
 
