@@ -3,6 +3,7 @@ package com.unity.goods.domain.goods.entity;
 import static com.unity.goods.domain.goods.type.GoodsStatus.SALE;
 
 import com.unity.goods.domain.goods.dto.UploadGoodsDto.UploadGoodsRequest;
+import com.unity.goods.domain.goods.dto.WishlistDto;
 import com.unity.goods.domain.goods.type.GoodsStatus;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.model.BaseEntity;
@@ -71,6 +72,9 @@ public class Goods extends BaseEntity {
   @OneToMany(mappedBy = "goods")
   @Builder.Default
   private List<Image> imageList = new ArrayList<>();
+
+  @OneToMany(mappedBy = "goods")
+  private List<Wishlist> wishList = new ArrayList<>();
 
   public static Goods fromUploadGoodsRequest(UploadGoodsRequest request) {
 
