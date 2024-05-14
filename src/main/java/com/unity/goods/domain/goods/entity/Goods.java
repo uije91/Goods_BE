@@ -6,6 +6,7 @@ import com.unity.goods.domain.goods.dto.UploadGoodsDto.UploadGoodsRequest;
 import com.unity.goods.domain.goods.type.GoodsStatus;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.model.BaseEntity;
+import com.unity.goods.domain.trade.entity.Trade;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -71,6 +72,9 @@ public class Goods extends BaseEntity {
   @OneToMany(mappedBy = "goods")
   @Builder.Default
   private List<Image> imageList = new ArrayList<>();
+
+  @OneToMany(mappedBy = "goods")
+  private List<Trade> tradeList  = new ArrayList<>();
 
   public static Goods fromUploadGoodsRequest(UploadGoodsRequest request) {
 
