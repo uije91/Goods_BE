@@ -20,5 +20,12 @@ public class EmailVerificationCheckDto {
     private String verificationNumber;
   }
 
+  @Getter
+  @Builder
+  public static class EmailVerificationCheckResponse {
+    private String verifiedEmail;
+    private boolean isVerified;
+  }
+
 
 }
