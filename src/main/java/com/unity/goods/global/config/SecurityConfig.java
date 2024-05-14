@@ -86,7 +86,8 @@ public class SecurityConfig {
         antMatcher(POST, "/api/member/reissue"), // 토큰 재발급
         antMatcher(GET,"/api/member/badge"), // 배지 조회
         antMatcher(POST, "/api/email/**"), // 이메일 인증
-        antMatcher(GET, "/api/goods/search")
+        antMatcher(POST, "/api/goods/search"), // 검색
+        antMatcher(GET, "/api/goods")
     );
     return requestMatchers.toArray(RequestMatcher[]::new);
   }
@@ -99,7 +100,8 @@ public class SecurityConfig {
         antMatcher(PUT, "/api/member/password"), // 비밀번호 변경
         antMatcher(PUT, "/api/member/trade-password"), // 거래 비밀번호 변경
         antMatcher(POST, "/api/goods/new"),
-        antMatcher("/api/goods/**")
+        antMatcher("/api/goods/**"),
+        antMatcher("/api/trade/**")
     );
     return requestMatchers.toArray(RequestMatcher[]::new);
   }
