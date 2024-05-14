@@ -10,9 +10,11 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.elasticsearch.common.geo.GeoPoint;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.GeoPointField;
 
 @Getter
 @Setter
@@ -51,11 +53,11 @@ public class GoodsDocument {
   @Field(type = FieldType.Text)
   private String thumbnailUrl;
 
-  @Field(type = FieldType.Double)
-  private double lat;
+  @GeoPointField
+  private GeoPoint location;
 
-  @Field(type = FieldType.Double)
-  private double lng;
+  @Field(type = FieldType.Long)
+  private Long likes = 0L;
 
   @Field(type = FieldType.Integer)
   private Integer uploadedBefore;
@@ -63,6 +65,8 @@ public class GoodsDocument {
   public static GoodsDocument fromGoods(Goods goods, String thumbnailUrl) {
 
     int minutesAgo = (int) Duration.between(goods.getCreatedAt(), LocalDateTime.now()).toMinutes();
+
+    GeoPoint geoPoint = new GeoPoint(goods.getLat(), goods.getLng());
 
     return GoodsDocument.builder()
         .id(goods.getId())
@@ -73,8 +77,7 @@ public class GoodsDocument {
         .address(goods.getAddress())
         .price(goods.getPrice())
         .thumbnailUrl(thumbnailUrl)
-        .lat(goods.getLat())
-        .lng(goods.getLng())
+        .location(geoPoint)
         .uploadedBefore(minutesAgo)
         .build();
   }

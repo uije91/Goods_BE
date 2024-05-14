@@ -8,7 +8,8 @@ import com.unity.goods.domain.goods.dto.UpdateGoodsStateDto.UpdateGoodsStateRequ
 import com.unity.goods.domain.goods.dto.UploadGoodsDto;
 import com.unity.goods.domain.goods.service.GoodsService;
 import com.unity.goods.global.jwt.UserDetailsImpl;
-import com.unity.goods.infra.document.GoodsDocument;
+import com.unity.goods.infra.dto.SearchDto.SearchRequest;
+import com.unity.goods.infra.dto.SearchDto.SearchedGoods;
 import com.unity.goods.infra.service.GoodsSearchService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,13 @@ public class GoodsController {
 
   private final GoodsService goodsService;
   private final GoodsSearchService goodsSearchService;
+
+  @GetMapping()
+  public ResponseEntity<?> getNearbyGoods(@RequestParam double lat, @RequestParam double lng,
+      @PageableDefault(value = 20) Pageable pageable) {
+    Page<SearchedGoods> goodsNearBy = goodsSearchService.findByGeoLocationOrderByLikes(lat, lng, pageable);
+    return ResponseEntity.ok(goodsNearBy);
+  }
 
   @PostMapping("/new")
   public ResponseEntity<?> uploadGoods(
@@ -86,11 +94,12 @@ public class GoodsController {
     return ResponseEntity.ok().build();
   }
 
-  @GetMapping("/search")
+  @PostMapping("/search")
   public ResponseEntity<?> search(
-      @RequestParam(name = "keyword") String keyword,
+      @RequestBody SearchRequest searchRequest,
       @PageableDefault Pageable pageable) {
-    Page<GoodsDocument> goodsDocumentPage = goodsSearchService.search(keyword, pageable);
+    String keyword = searchRequest.getKeyword();
+    Page<SearchedGoods> goodsDocumentPage = goodsSearchService.search(keyword, pageable);
     return ResponseEntity.ok(goodsDocumentPage);
   }
 
