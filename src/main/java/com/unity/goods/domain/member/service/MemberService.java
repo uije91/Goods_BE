@@ -22,6 +22,7 @@ import com.unity.goods.domain.member.dto.FindPasswordDto.FindPasswordRequest;
 import com.unity.goods.domain.member.dto.LoginDto;
 import com.unity.goods.domain.member.dto.MemberProfileDto.MemberProfileResponse;
 import com.unity.goods.domain.member.dto.ResignDto.ResignRequest;
+import com.unity.goods.domain.member.dto.SellerProfileDto.SellerProfileResponse;
 import com.unity.goods.domain.member.dto.SignUpDto.SignUpRequest;
 import com.unity.goods.domain.member.dto.SignUpDto.SignUpResponse;
 import com.unity.goods.domain.member.dto.UpdateProfileDto.UpdateProfileRequest;
@@ -298,6 +299,19 @@ public class MemberService {
     }
 
     return MemberProfileResponse.fromMember(findMember);
+  }
+
+  // 판매자 프로필 조회
+  public SellerProfileResponse getSellerProfile(Long sellerId) {
+
+    Member findMember = memberRepository.findById(sellerId)
+        .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
+
+    if (findMember.getStatus() == RESIGN) {
+      throw new MemberException(RESIGNED_ACCOUNT);
+    }
+
+    return SellerProfileResponse.fromMember(findMember);
   }
 
   // 회원 프로필 수정

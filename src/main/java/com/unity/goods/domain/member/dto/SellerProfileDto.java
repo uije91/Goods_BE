@@ -6,24 +6,21 @@ import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 
-public class MemberProfileDto {
+public class SellerProfileDto {
 
   @Getter
   @Builder
-  public static class MemberProfileResponse {
+  public static class SellerProfileResponse {
 
     private String nickName;
-    private String phoneNumber;
     private String profileImage;
     private double star;
     private List<Badge> badgeList;
 
+    public static SellerProfileResponse fromMember(Member member) {
 
-    public static MemberProfileResponse fromMember(Member member) {
-
-      return MemberProfileResponse.builder()
+      return SellerProfileResponse.builder()
           .nickName(member.getNickname())
-          .phoneNumber(member.getPhoneNumber())
           .profileImage(member.getProfileImage())
           .star(member.getStar())
           .badgeList(member.getBadgeList())

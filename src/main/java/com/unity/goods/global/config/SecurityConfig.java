@@ -1,6 +1,5 @@
 package com.unity.goods.global.config;
 
-import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpMethod.PUT;
@@ -84,7 +83,8 @@ public class SecurityConfig {
         antMatcher(POST, "/api/member/signup"), // 회원가입
         antMatcher(POST, "/api/member/login"),  // 로그인
         antMatcher(POST, "/api/member/reissue"), // 토큰 재발급
-        antMatcher(GET,"/api/member/badge"), // 배지 조회
+        antMatcher(GET, "/api/member/badge"), // 배지 조회
+        antMatcher(GET, "/api/member/{sellerId}/profile"), // 판매자 정보 조회
         antMatcher(POST, "/api/email/**"), // 이메일 인증
         antMatcher(POST, "/api/goods/search"), // 검색
         antMatcher(GET, "/api/goods")
@@ -105,5 +105,5 @@ public class SecurityConfig {
     );
     return requestMatchers.toArray(RequestMatcher[]::new);
   }
-  
+
 }

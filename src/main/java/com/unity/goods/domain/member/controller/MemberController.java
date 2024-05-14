@@ -7,6 +7,7 @@ import static com.unity.goods.domain.member.dto.FindPasswordDto.FindPasswordRequ
 import com.unity.goods.domain.member.dto.LoginDto;
 import com.unity.goods.domain.member.dto.MemberProfileDto.MemberProfileResponse;
 import com.unity.goods.domain.member.dto.ResignDto;
+import com.unity.goods.domain.member.dto.SellerProfileDto.SellerProfileResponse;
 import com.unity.goods.domain.member.dto.SignUpDto;
 import com.unity.goods.domain.member.dto.UpdateProfileDto.UpdateProfileRequest;
 import com.unity.goods.domain.member.dto.UpdateProfileDto.UpdateProfileResponse;
@@ -23,6 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -86,6 +88,12 @@ public class MemberController {
   public ResponseEntity<?> getProfile(@AuthenticationPrincipal UserDetailsImpl member) {
     MemberProfileResponse memberProfile = memberService.getMemberProfile(member);
     return ResponseEntity.ok(memberProfile);
+  }
+
+  @GetMapping("/{sellerId}/profile")
+  public ResponseEntity<?> getProfile(@PathVariable Long sellerId) {
+    SellerProfileResponse sellerProfile = memberService.getSellerProfile(sellerId);
+    return ResponseEntity.ok(sellerProfile);
   }
 
   @PutMapping("/profile")
