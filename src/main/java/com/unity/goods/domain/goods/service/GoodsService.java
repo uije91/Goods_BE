@@ -123,6 +123,14 @@ public class GoodsService {
 
     updateGoodsInfoRequest.updateGoodsEntity(goods);
 
+    imageCheckAndDelete(member.getUsername(), updateGoodsInfoRequest, goods);
+
+    return UpdateGoodsInfoResponse.fromGoods(goods);
+  }
+
+  private void imageCheckAndDelete(String email,
+      UpdateGoodsInfoRequest updateGoodsInfoRequest, Goods goods) {
+
     Set<String> requestImageUrls = new HashSet<>(updateGoodsInfoRequest.getGoodsImageUrl());
     List<Image> currentImages = goods.getImageList();
 
@@ -135,6 +143,13 @@ public class GoodsService {
       s3Service.deleteFile(image.getImageUrl());
     });
 
+    imageCheckAndSave(email, updateGoodsInfoRequest, goods, currentImages, imagesToDelete);
+  }
+
+  private void imageCheckAndSave(String email,
+      UpdateGoodsInfoRequest updateGoodsInfoRequest,
+      Goods goods, List<Image> currentImages, List<Image> imagesToDelete) {
+
     int remainingImageCount = currentImages.size() - imagesToDelete.size();
 
     List<MultipartFile> newImageFiles = updateGoodsInfoRequest.getGoodsImageFile();
@@ -146,12 +161,10 @@ public class GoodsService {
     if (newImageFiles != null) {
       newImageFiles.stream()
           .map(multipart -> s3Service.uploadFile(multipart,
-              member.getUsername() + "/" + goods.getGoodsName()))
+              email + "/" + goods.getGoodsName()))
           .map(url -> Image.builder().imageUrl(url).goods(goods).build())
           .forEach(imageRepository::save);
     }
-
-    return UpdateGoodsInfoResponse.fromGoods(goods);
   }
 
   @Transactional
