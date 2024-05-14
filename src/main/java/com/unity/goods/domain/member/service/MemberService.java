@@ -317,23 +317,15 @@ public class MemberService {
       findMember.setPhoneNumber(updateProfileRequest.getPhoneNumber());
     }
 
-    // 기존에 프로필 이미지가 없고, 새로운 프로필 이미지 요청 왔을 떄
-    if (updateProfileRequest.getProfileImageUrl() == null
-        && updateProfileRequest.getProfileImageFile() != null) {
-
-      findMember.setProfileImage(
-          s3Service.uploadFile(
-              updateProfileRequest.getProfileImageFile(), member.getUsername()));
-    }
-
-    // 기존에 프로필 이미지가 있고, 새로운 프로필 이미지 요청 왔을 떄
-    if (updateProfileRequest.getProfileImageUrl() != null
-        && updateProfileRequest.getProfileImageFile() != null) {
-
-      s3Service.deleteFile(findMember.getProfileImage());
-      findMember.setProfileImage(
-          s3Service.uploadFile(
-              updateProfileRequest.getProfileImageFile(), member.getUsername()));
+    if (updateProfileRequest.getProfileImageFile() != null) {
+      if (updateProfileRequest.getProfileImageUrl() != null) {
+        s3Service.deleteFile(findMember.getProfileImage());
+        log.info("[updateMemberProfile] : {} 기존 프로필 이미지 삭제 완료", member.getUsername());
+      }
+      String uploadedUrl = s3Service.uploadFile(updateProfileRequest.getProfileImageFile(),
+          member.getUsername() + "/" + "profileImage");
+      log.info("[updateMemberProfile] : {} 프로필 이미지 업로드 완료", member.getUsername());
+      findMember.setProfileImage(uploadedUrl);
     }
 
     return UpdateProfileResponse.fromMember(findMember);
