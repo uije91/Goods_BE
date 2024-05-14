@@ -1,6 +1,7 @@
 package com.unity.goods.domain.email.controller;
 
 import com.unity.goods.domain.email.dto.EmailVerificationCheckDto.EmailVerificationCheckRequest;
+import com.unity.goods.domain.email.dto.EmailVerificationCheckDto.EmailVerificationCheckResponse;
 import com.unity.goods.domain.email.dto.EmailVerificationDto.EmailVerificationRequest;
 import com.unity.goods.domain.email.service.EmailService;
 import jakarta.validation.Valid;
@@ -28,8 +29,9 @@ public class EmailController {
   @PostMapping("/verification/check")
   public ResponseEntity<?> checkIsVerified(
       @RequestBody @Valid EmailVerificationCheckRequest checkRequest) {
-    emailService.checkIsVerified(checkRequest);
-    return ResponseEntity.ok().build();
+    EmailVerificationCheckResponse emailVerificationCheckResponse =
+        emailService.checkIsVerified(checkRequest);
+    return ResponseEntity.ok(emailVerificationCheckResponse);
   }
 
 }
