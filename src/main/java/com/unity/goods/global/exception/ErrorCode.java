@@ -27,6 +27,7 @@ public enum ErrorCode {
   ALREADY_SOLD_OUT_GOODS(400, "이미 판매가 완료된 상품입니다."),
   MAX_IMAGE_LIMIT_EXCEEDED(404, "등록할 수 있는 이미지의 최대 개수를 초과하였습니다."),
   NEED_LEAST_ONE_IMAGE(400, "상품 등록 시 최소 1개의 이미지를 올려야 합니다."),
+  CANNOT_DELETE_SOLD_ITEM(400, "판매완료된 상품은 삭제할 수 없습니다."),
 
   // WishList Error
   GOODS_ALREADY_WISHLIST(400,"이미 찜한 상품입니다."),

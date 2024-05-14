@@ -2,6 +2,7 @@ package com.unity.goods.domain.goods.service;
 
 import static com.unity.goods.domain.goods.type.GoodsStatus.SOLDOUT;
 import static com.unity.goods.global.exception.ErrorCode.ALREADY_SOLD_OUT_GOODS;
+import static com.unity.goods.global.exception.ErrorCode.CANNOT_DELETE_SOLD_ITEM;
 import static com.unity.goods.global.exception.ErrorCode.GOODS_NOT_FOUND;
 import static com.unity.goods.global.exception.ErrorCode.MAX_IMAGE_LIMIT_EXCEEDED;
 import static com.unity.goods.global.exception.ErrorCode.MISMATCHED_SELLER;
@@ -19,6 +20,7 @@ import com.unity.goods.domain.goods.entity.Image;
 import com.unity.goods.domain.goods.exception.GoodsException;
 import com.unity.goods.domain.goods.repository.GoodsRepository;
 import com.unity.goods.domain.goods.repository.ImageRepository;
+import com.unity.goods.domain.goods.type.GoodsStatus;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.exception.MemberException;
 import com.unity.goods.domain.member.repository.MemberRepository;
@@ -164,6 +166,11 @@ public class GoodsService {
 
     if (!goods.getMember().getEmail().equals(member.getUsername())) {
       throw new GoodsException(MISMATCHED_SELLER);
+    }
+
+    // 판매완료 상품은 삭제 불가능
+    if (goods.getGoodsStatus() == SOLDOUT) {
+      throw new GoodsException(CANNOT_DELETE_SOLD_ITEM);
     }
 
     for (Image goodsImageUrl : goods.getImageList()) {
