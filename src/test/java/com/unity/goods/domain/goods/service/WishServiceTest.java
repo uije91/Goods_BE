@@ -114,7 +114,7 @@ class WishServiceTest {
 
     // BaseEntity 시간 강제 설정
     LocalDateTime goodsTime = LocalDateTime.of(2024, 4, 9, 23, 30);
-    Field createdField = BaseEntity.class.getDeclaredField("updatedAt");
+    Field createdField = BaseEntity.class.getDeclaredField("createdAt");
     createdField.setAccessible(true);
     createdField.set(goods, goodsTime);
 
@@ -133,6 +133,7 @@ class WishServiceTest {
     // then
     assertEquals(1, result.getContent().size());
     WishlistDto dto = result.getContent().get(0);
+    assertEquals(1L,dto.getGoodsId());
     assertEquals("테스트상품", dto.getGoodsName());
     assertEquals("테스트 주소", dto.getAddress());
     assertEquals(20000L, dto.getPrice());
