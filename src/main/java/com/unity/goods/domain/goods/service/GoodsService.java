@@ -2,6 +2,7 @@ package com.unity.goods.domain.goods.service;
 
 import static com.unity.goods.domain.goods.type.GoodsStatus.SOLDOUT;
 import static com.unity.goods.global.exception.ErrorCode.ALREADY_SOLD_OUT_GOODS;
+import static com.unity.goods.global.exception.ErrorCode.CANNOT_DELETE_SOLD_ITEM;
 import static com.unity.goods.global.exception.ErrorCode.GOODS_NOT_FOUND;
 import static com.unity.goods.global.exception.ErrorCode.MAX_IMAGE_LIMIT_EXCEEDED;
 import static com.unity.goods.global.exception.ErrorCode.MISMATCHED_SELLER;
@@ -21,7 +22,6 @@ import com.unity.goods.domain.goods.exception.GoodsException;
 import com.unity.goods.domain.goods.repository.GoodsRepository;
 import com.unity.goods.domain.goods.repository.ImageRepository;
 import com.unity.goods.domain.goods.repository.WishRepository;
-import com.unity.goods.domain.member.entity.Badge;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.exception.MemberException;
 import com.unity.goods.domain.member.repository.BadgeRepository;
@@ -34,6 +34,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +46,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Service
@@ -146,26 +146,32 @@ public class GoodsService {
       throw new GoodsException(ALREADY_SOLD_OUT_GOODS);
     }
 
-    updateGoodsInfoRequest.updateGoodsEntity(goods);
+    int deleteImageCnt = (updateGoodsInfoRequest.getImagesToDelete()) == null ? 0
+        : updateGoodsInfoRequest.getImagesToDelete().size();
 
-    if (updateGoodsInfoRequest.getGoodsImages() != null) {
-      if (goods.getImageList().size() + updateGoodsInfoRequest.getGoodsImages().size()
-          > MAX_IMAGE_NUM) {
-        log.error("[GoodsService][updateGoodsInfo] : \"{}\" 상품 이미지 등록 개수 초과", goods.getGoodsName());
-        throw new GoodsException(MAX_IMAGE_LIMIT_EXCEEDED);
-      }
+    int addImageCnt = (updateGoodsInfoRequest.getImagesToUpdate()) == null ? 0
+        : updateGoodsInfoRequest.getImagesToUpdate().size();
 
-      for (MultipartFile multipart : updateGoodsInfoRequest.getGoodsImages()) {
-        String goodsImageUrl = s3Service.uploadFile(multipart, goods.getMember().getEmail());
-
-        imageRepository.save(
-            Image.builder()
-                .imageUrl(goodsImageUrl)
-                .goods(goods)
-                .build()
-        );
-      }
+    if (goods.getImageList().size() - deleteImageCnt + addImageCnt > MAX_IMAGE_NUM) {
+      log.error("[GoodsService][updateGoodsInfo] : \"{}\" 상품 이미지 등록 개수 초과", goods.getGoodsName());
+      throw new GoodsException(MAX_IMAGE_LIMIT_EXCEEDED);
     }
+
+    Optional.ofNullable(updateGoodsInfoRequest.getImagesToDelete())
+        .ifPresent(urls -> urls.forEach(goodsUrl -> {
+          imageRepository.deleteImageByImageUrl(goodsUrl);
+          s3Service.deleteFile(goodsUrl);
+        }));
+
+    Optional.ofNullable(updateGoodsInfoRequest.getImagesToUpdate())
+        .ifPresent(files ->
+            files.stream()
+                .map(multipart -> s3Service.uploadFile(multipart, member.getUsername() + "/" + goods.getGoodsName()))
+                .map(url -> Image.builder().imageUrl(url).goods(goods).build())
+                .forEach(imageRepository::save)
+        );
+
+    updateGoodsInfoRequest.updateGoodsEntity(goods);
 
     return UpdateGoodsInfoResponse.fromGoods(goods);
   }
@@ -192,6 +198,11 @@ public class GoodsService {
 
     if (!goods.getMember().getEmail().equals(member.getUsername())) {
       throw new GoodsException(MISMATCHED_SELLER);
+    }
+
+    // 판매완료 상품은 삭제 불가능
+    if (goods.getGoodsStatus() == SOLDOUT) {
+      throw new GoodsException(CANNOT_DELETE_SOLD_ITEM);
     }
 
     for (Image goodsImageUrl : goods.getImageList()) {

@@ -10,6 +10,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -36,4 +38,10 @@ public class Badge {
 
   @CreatedDate
   private LocalDateTime createdAt;
+
+  public static List<String> badgeToString(List<Badge> badges) {
+    return badges.stream()
+        .map(badge -> badge.getBadge().getDescription())
+        .collect(Collectors.toList());
+  }
 }
