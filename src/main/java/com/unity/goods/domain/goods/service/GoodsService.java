@@ -109,10 +109,10 @@ public class GoodsService {
 
     Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-    if(!principal.equals("anonymousUser")) {
+    if (!principal.equals("anonymousUser")) {
       String loginVisitor = ((UserDetailsImpl) principal).getUsername();
       Member member = memberRepository.findMemberByEmail(loginVisitor);
-      if(wishRepository.existsByGoodsAndMember(goods, member)) {
+      if (wishRepository.existsByGoodsAndMember(goods, member)) {
         goodsDetailResponse.setLiked(true);
       }
     }
@@ -123,9 +123,9 @@ public class GoodsService {
     }
     goodsDetailResponse.setGoodsImages(goodsImages);
 
-    List<Badge> badgeList = badgeRepository.findAllByMember(goods.getMember());
-    List<String> badgeListString = new ArrayList<>();
-    badgeList.forEach(badge -> badgeListString.add(badge.getBadge().getDescription()));
+    List<String> badgeListString = badgeRepository.findAllByMember(goods.getMember()).stream()
+        .map(badge -> badge.getBadge().getDescription())
+        .collect(Collectors.toList());
 
     goodsDetailResponse.setBadgeList(badgeListString);
     return goodsDetailResponse;
