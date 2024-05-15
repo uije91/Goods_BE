@@ -11,13 +11,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class WishlistDto {
-
-  private String sellerName;
+  private Long goodsId;
   private String goodsName;
+  private String sellerName;
   private Long price;
   private String imageUrl;
   private GoodsStatus goodsStatus;
   private Long uploadBefore;
   private String address;
-
 }

@@ -6,6 +6,7 @@ import static com.unity.goods.domain.member.type.Status.INACTIVE;
 import static com.unity.goods.domain.member.type.Status.RESIGN;
 
 import com.unity.goods.domain.goods.entity.Goods;
+import com.unity.goods.domain.goods.entity.Wishlist;
 import com.unity.goods.domain.member.dto.SignUpDto.SignUpRequest;
 import com.unity.goods.domain.member.type.Role;
 import com.unity.goods.domain.member.type.SocialType;
@@ -67,16 +68,23 @@ public class Member extends BaseEntity {
   @Enumerated(EnumType.STRING)
   private SocialType socialType;
 
+  @Column(nullable = false)
+  @Builder.Default
+  private Long balance = 0L;
+
   @OneToMany(mappedBy = "member")
   @Builder.Default
   private List<Goods> goodsList = new ArrayList<>();
 
   @OneToMany(mappedBy = "member")
-  private List<Trade> tradeList = new ArrayList<>();
+  @Builder.Default
+  private List<Wishlist> wishList = new ArrayList<>();
 
   @OneToMany(mappedBy = "member")
-  @Builder.Default
   private List<Badge> badgeList = new ArrayList<>();
+
+  @OneToMany(mappedBy = "member")
+  private List<Trade> tradeList  = new ArrayList<>();
 
   public static Member fromSignUpRequest(SignUpRequest signUpRequest, String imageUrl) {
 

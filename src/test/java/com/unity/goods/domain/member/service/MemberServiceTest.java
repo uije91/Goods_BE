@@ -334,26 +334,4 @@ class MemberServiceTest {
     //then
     assertEquals(member.getTradePassword(), "222222");
   }
-
-  @Test
-  @DisplayName("배지 조회 성공")
-  void getBadgeTest() {
-    //given
-    List<Badge> badgeList = Arrays.asList(
-        new Badge(1L, member, BadgeType.SELL),
-        new Badge(2L, member, BadgeType.MANNER)
-    );
-
-    when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
-    when(badgeRepository.findAllByMember_Id(member.getId())).thenReturn(badgeList);
-
-    //when
-    List<BadgeType> result = memberService.getBadge(member.getId());
-
-    //then
-    assertEquals(2,result.size());
-    assertTrue(result.contains(BadgeType.SELL));
-    assertTrue(result.contains(BadgeType.MANNER));
-  }
-
 }

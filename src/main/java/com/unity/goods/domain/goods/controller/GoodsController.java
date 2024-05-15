@@ -56,11 +56,10 @@ public class GoodsController {
 
   @GetMapping("/{goodsId}")
   public ResponseEntity<?> getDetailGoods(
-      @AuthenticationPrincipal UserDetailsImpl member,
       @PathVariable Long goodsId
   ) {
     GoodsDetailDto.GoodsDetailResponse goodsDetailResponse =
-        goodsService.getDetailGoods(member, goodsId);
+        goodsService.getDetailGoods(goodsId);
     return ResponseEntity.ok(goodsDetailResponse);
   }
 

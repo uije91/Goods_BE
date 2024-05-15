@@ -369,13 +369,4 @@ public class MemberService {
     findMember.setTradePassword(
         passwordEncoder.encode(changeTradePasswordRequest.getNewTradePassword()));
   }
-
-  public List<BadgeType> getBadge(Long id) {
-    Member member = memberRepository.findById(id)
-        .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
-
-    List<Badge> badgeList = badgeRepository.findAllByMember_Id(member.getId());
-
-    return badgeList.stream().map(Badge::getBadge).toList();
-  }
 }

@@ -21,8 +21,11 @@ import com.unity.goods.domain.goods.entity.Image;
 import com.unity.goods.domain.goods.exception.GoodsException;
 import com.unity.goods.domain.goods.repository.GoodsRepository;
 import com.unity.goods.domain.goods.repository.ImageRepository;
+import com.unity.goods.domain.goods.repository.WishRepository;
+import com.unity.goods.domain.member.entity.Badge;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.exception.MemberException;
+import com.unity.goods.domain.member.repository.BadgeRepository;
 import com.unity.goods.domain.member.repository.MemberRepository;
 import com.unity.goods.global.jwt.UserDetailsImpl;
 import com.unity.goods.infra.service.GoodsSearchService;
@@ -30,12 +33,9 @@ import com.unity.goods.infra.service.S3Service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +44,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -57,6 +58,8 @@ public class GoodsService {
   private final S3Service s3Service;
   private final ImageRepository imageRepository;
   private final GoodsRepository goodsRepository;
+  private final BadgeRepository badgeRepository;
+  private final WishRepository wishRepository;
   private final GoodsSearchService goodsSearchService;
 
   private final static int MAX_IMAGE_NUM = 10;
@@ -98,22 +101,35 @@ public class GoodsService {
     return UploadGoodsResponse.fromGoods(goods);
   }
 
-  public GoodsDetailResponse getDetailGoods(UserDetailsImpl member, Long goodsId) {
-
-    Member findMember = memberRepository.findByEmail(member.getUsername())
-        .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
+  public GoodsDetailResponse getDetailGoods(Long goodsId) {
 
     Goods goods = goodsRepository.findById(goodsId)
         .orElseThrow(() -> new GoodsException(GOODS_NOT_FOUND));
 
     GoodsDetailResponse goodsDetailResponse = GoodsDetailResponse.fromGoodsAndMember(goods,
-        findMember);
+        goods.getMember());
+
+    Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+    if (!principal.equals("anonymousUser")) {
+      String loginVisitor = ((UserDetailsImpl) principal).getUsername();
+      Member member = memberRepository.findMemberByEmail(loginVisitor);
+      if (wishRepository.existsByGoodsAndMember(goods, member)) {
+        goodsDetailResponse.setLiked(true);
+      }
+    }
 
     List<String> goodsImages = new ArrayList<>();
     for (Image image : goods.getImageList()) {
       goodsImages.add(image.getImageUrl());
     }
     goodsDetailResponse.setGoodsImages(goodsImages);
+
+    List<String> badgeListString = badgeRepository.findAllByMember(goods.getMember()).stream()
+        .map(badge -> badge.getBadge().getDescription())
+        .collect(Collectors.toList());
+
+    goodsDetailResponse.setBadgeList(badgeListString);
     return goodsDetailResponse;
   }
 
@@ -151,18 +167,18 @@ public class GoodsService {
 
     Optional.ofNullable(updateGoodsInfoRequest.getGoodsImageFile())
         .ifPresent(files ->
-        files.stream()
-            .map(multipart -> s3Service.uploadFile(multipart, member.getUsername() + "/" + goods.getGoodsName()))
-            .map(url -> Image.builder().imageUrl(url).goods(goods).build())
-            .forEach(imageRepository::save)
-    );
+            files.stream()
+                .map(multipart -> s3Service.uploadFile(multipart, member.getUsername() + "/" + goods.getGoodsName()))
+                .map(url -> Image.builder().imageUrl(url).goods(goods).build())
+                .forEach(imageRepository::save)
+        );
 
     updateGoodsInfoRequest.updateGoodsEntity(goods);
 
     return UpdateGoodsInfoResponse.fromGoods(goods);
   }
 
-   @Transactional
+  @Transactional
   public void updateState(UserDetailsImpl member, Long goodsId,
       UpdateGoodsStateRequest updateGoodsStateRequest) {
 

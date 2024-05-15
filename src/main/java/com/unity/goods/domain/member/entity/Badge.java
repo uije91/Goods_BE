@@ -9,12 +9,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
 
 @Entity
 @Getter
@@ -33,6 +35,9 @@ public class Badge {
 
   @Enumerated(EnumType.STRING)
   private BadgeType badge;
+
+  @CreatedDate
+  private LocalDateTime createdAt;
 
   public static List<String> badgeToString(List<Badge> badges) {
     return badges.stream()
