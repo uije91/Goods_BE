@@ -22,7 +22,6 @@ import com.unity.goods.domain.goods.exception.GoodsException;
 import com.unity.goods.domain.goods.repository.GoodsRepository;
 import com.unity.goods.domain.goods.repository.ImageRepository;
 import com.unity.goods.domain.goods.repository.WishRepository;
-import com.unity.goods.domain.member.entity.Badge;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.exception.MemberException;
 import com.unity.goods.domain.member.repository.BadgeRepository;
@@ -47,7 +46,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Service
@@ -148,24 +146,24 @@ public class GoodsService {
       throw new GoodsException(ALREADY_SOLD_OUT_GOODS);
     }
 
-    int deleteImageCnt = (updateGoodsInfoRequest.getGoodsImageUrl()) == null ? 0
-        : updateGoodsInfoRequest.getGoodsImageUrl().size();
+    int deleteImageCnt = (updateGoodsInfoRequest.getImagesToDelete()) == null ? 0
+        : updateGoodsInfoRequest.getImagesToDelete().size();
 
-    int addImageCnt = (updateGoodsInfoRequest.getGoodsImageFile()) == null ? 0
-        : updateGoodsInfoRequest.getGoodsImageFile().size();
+    int addImageCnt = (updateGoodsInfoRequest.getImagesToUpdate()) == null ? 0
+        : updateGoodsInfoRequest.getImagesToUpdate().size();
 
     if (goods.getImageList().size() - deleteImageCnt + addImageCnt > MAX_IMAGE_NUM) {
       log.error("[GoodsService][updateGoodsInfo] : \"{}\" 상품 이미지 등록 개수 초과", goods.getGoodsName());
       throw new GoodsException(MAX_IMAGE_LIMIT_EXCEEDED);
     }
 
-    Optional.ofNullable(updateGoodsInfoRequest.getGoodsImageUrl())
+    Optional.ofNullable(updateGoodsInfoRequest.getImagesToDelete())
         .ifPresent(urls -> urls.forEach(goodsUrl -> {
           imageRepository.deleteImageByImageUrl(goodsUrl);
           s3Service.deleteFile(goodsUrl);
         }));
 
-    Optional.ofNullable(updateGoodsInfoRequest.getGoodsImageFile())
+    Optional.ofNullable(updateGoodsInfoRequest.getImagesToUpdate())
         .ifPresent(files ->
             files.stream()
                 .map(multipart -> s3Service.uploadFile(multipart, member.getUsername() + "/" + goods.getGoodsName()))
