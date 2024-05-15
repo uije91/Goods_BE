@@ -81,10 +81,7 @@ public class Member extends BaseEntity {
   private List<Wishlist> wishList = new ArrayList<>();
 
   @OneToMany(mappedBy = "member")
-  private List<Badge> badgeList = new ArrayList<>();
-
-  @OneToMany(mappedBy = "member")
-  private List<Trade> tradeList  = new ArrayList<>();
+  private List<Trade> tradeList = new ArrayList<>();
 
   @OneToMany(mappedBy = "member")
   @Builder.Default
