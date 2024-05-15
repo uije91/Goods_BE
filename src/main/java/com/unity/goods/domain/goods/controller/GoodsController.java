@@ -54,13 +54,13 @@ public class GoodsController {
     return ResponseEntity.ok(uploadGoodsResponse);
   }
 
-  @GetMapping("/{id}")
+  @GetMapping("/{goodsId}")
   public ResponseEntity<?> getDetailGoods(
       @AuthenticationPrincipal UserDetailsImpl member,
-      @PathVariable Long id
+      @PathVariable Long goodsId
   ) {
     GoodsDetailDto.GoodsDetailResponse goodsDetailResponse =
-        goodsService.getDetailGoods(member, id);
+        goodsService.getDetailGoods(member, goodsId);
     return ResponseEntity.ok(goodsDetailResponse);
   }
 

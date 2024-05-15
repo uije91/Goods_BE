@@ -96,12 +96,12 @@ public class GoodsService {
     return UploadGoodsResponse.fromGoods(goods);
   }
 
-  public GoodsDetailResponse getDetailGoods(UserDetailsImpl member, Long id) {
+  public GoodsDetailResponse getDetailGoods(UserDetailsImpl member, Long goodsId) {
 
     Member findMember = memberRepository.findByEmail(member.getUsername())
         .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
 
-    Goods goods = goodsRepository.findById(id)
+    Goods goods = goodsRepository.findById(goodsId)
         .orElseThrow(() -> new GoodsException(GOODS_NOT_FOUND));
 
     GoodsDetailResponse goodsDetailResponse = GoodsDetailResponse.fromGoodsAndMember(goods,
