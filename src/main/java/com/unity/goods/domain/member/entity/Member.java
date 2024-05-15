@@ -68,6 +68,10 @@ public class Member extends BaseEntity {
   @Enumerated(EnumType.STRING)
   private SocialType socialType;
 
+  @Column(nullable = false)
+  @Builder.Default
+  private Long balance = 0L;
+
   @OneToMany(mappedBy = "member")
   @Builder.Default
   private List<Goods> goodsList = new ArrayList<>();
