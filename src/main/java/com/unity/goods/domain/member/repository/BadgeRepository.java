@@ -7,7 +7,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BadgeRepository extends JpaRepository<Badge, Long> {
-
-  List<Badge> findAllByMember_Id(Long id);
-
 }
