@@ -30,9 +30,11 @@ import com.unity.goods.infra.service.S3Service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -130,49 +132,37 @@ public class GoodsService {
       throw new GoodsException(ALREADY_SOLD_OUT_GOODS);
     }
 
-    imageCheck(member.getUsername(), updateGoodsInfoRequest, goods);
+    int deleteImageCnt = (updateGoodsInfoRequest.getGoodsImageUrl()) == null ? 0
+        : updateGoodsInfoRequest.getGoodsImageUrl().size();
+
+    int addImageCnt = (updateGoodsInfoRequest.getGoodsImageFile()) == null ? 0
+        : updateGoodsInfoRequest.getGoodsImageFile().size();
+
+    if (goods.getImageList().size() - deleteImageCnt + addImageCnt > MAX_IMAGE_NUM) {
+      log.error("[GoodsService][updateGoodsInfo] : \"{}\" 상품 이미지 등록 개수 초과", goods.getGoodsName());
+      throw new GoodsException(MAX_IMAGE_LIMIT_EXCEEDED);
+    }
+
+    Optional.ofNullable(updateGoodsInfoRequest.getGoodsImageUrl())
+        .ifPresent(urls -> urls.forEach(goodsUrl -> {
+          imageRepository.deleteImageByImageUrl(goodsUrl);
+          s3Service.deleteFile(goodsUrl);
+        }));
+
+    Optional.ofNullable(updateGoodsInfoRequest.getGoodsImageFile())
+        .ifPresent(files ->
+        files.stream()
+            .map(multipart -> s3Service.uploadFile(multipart, member.getUsername() + "/" + goods.getGoodsName()))
+            .map(url -> Image.builder().imageUrl(url).goods(goods).build())
+            .forEach(imageRepository::save)
+    );
 
     updateGoodsInfoRequest.updateGoodsEntity(goods);
 
     return UpdateGoodsInfoResponse.fromGoods(goods);
   }
 
-  private void imageCheck(String email,
-      UpdateGoodsInfoRequest updateGoodsInfoRequest, Goods goods) {
-
-    Set<String> requestImageUrls = (updateGoodsInfoRequest.getGoodsImageUrl() == null)
-        ? new HashSet<>()
-        : new HashSet<>(updateGoodsInfoRequest.getGoodsImageUrl());
-
-    List<Image> currentImages = goods.getImageList();
-
-    List<Image> imagesToDelete = currentImages.stream()
-        .filter(image -> !requestImageUrls.contains(image.getImageUrl()))
-        .toList();
-
-    imagesToDelete.forEach(image -> {
-      imageRepository.delete(image);
-      s3Service.deleteFile(image.getImageUrl());
-    });
-
-    int remainingImageCount = currentImages.size() - imagesToDelete.size();
-
-    List<MultipartFile> newImageFiles = updateGoodsInfoRequest.getGoodsImageFile();
-    if (newImageFiles != null && remainingImageCount + newImageFiles.size() > MAX_IMAGE_NUM) {
-      log.error("[GoodsService][updateGoodsInfo] : \"{}\" 상품 이미지 등록 개수 초과", goods.getGoodsName());
-      throw new GoodsException(MAX_IMAGE_LIMIT_EXCEEDED);
-    }
-
-    if (newImageFiles != null) {
-      newImageFiles.stream()
-          .map(multipart -> s3Service.uploadFile(multipart,
-              email + "/" + goods.getGoodsName()))
-          .map(url -> Image.builder().imageUrl(url).goods(goods).build())
-          .forEach(imageRepository::save);
-    }
-  }
-
-  @Transactional
+   @Transactional
   public void updateState(UserDetailsImpl member, Long goodsId,
       UpdateGoodsStateRequest updateGoodsStateRequest) {
 
