@@ -19,8 +19,7 @@ public class GoodsDetailDto {
     private Long sellerId;
     private String sellerProfileImage;
     private String sellerName;
-    private boolean sellerBadge; // TODO
-    private boolean mannerBadge; // TODO
+    private List<String> badgeList;
     private String goodsName;
     private String price;
     private String description;
@@ -29,7 +28,7 @@ public class GoodsDetailDto {
     private double lat;
     private double lng;
     private String address;
-    private boolean liked; // TODO
+    private boolean liked;
     private long uploadedBefore;
 
     public static GoodsDetailResponse fromGoodsAndMember(Goods goods, Member member) {

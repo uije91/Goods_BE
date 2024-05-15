@@ -44,6 +44,16 @@ public class GoodsController {
     return ResponseEntity.ok(goodsNearBy);
   }
 
+  @GetMapping("/{goodsId}")
+  public ResponseEntity<?> getDetailGoods(
+      @PathVariable Long goodsId
+  ) {
+    GoodsDetailDto.GoodsDetailResponse goodsDetailResponse =
+        goodsService.getDetailGoods(goodsId);
+    return ResponseEntity.ok(goodsDetailResponse);
+  }
+
+
   @PostMapping("/new")
   public ResponseEntity<?> uploadGoods(
       @AuthenticationPrincipal UserDetailsImpl member,
@@ -52,16 +62,6 @@ public class GoodsController {
     UploadGoodsDto.UploadGoodsResponse uploadGoodsResponse = goodsService.uploadGoods(member,
         uploadGoodsRequest);
     return ResponseEntity.ok(uploadGoodsResponse);
-  }
-
-  @GetMapping("/{id}")
-  public ResponseEntity<?> getDetailGoods(
-      @AuthenticationPrincipal UserDetailsImpl member,
-      @PathVariable Long id
-  ) {
-    GoodsDetailDto.GoodsDetailResponse goodsDetailResponse =
-        goodsService.getDetailGoods(member, id);
-    return ResponseEntity.ok(goodsDetailResponse);
   }
 
   @PutMapping("/{goodsId}")

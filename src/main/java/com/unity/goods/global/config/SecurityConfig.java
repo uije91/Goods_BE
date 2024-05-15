@@ -87,7 +87,8 @@ public class SecurityConfig {
         antMatcher(GET,"/api/member/badge"), // 배지 조회
         antMatcher(POST, "/api/email/**"), // 이메일 인증
         antMatcher(POST, "/api/goods/search"), // 검색
-        antMatcher(GET, "/api/goods"),
+        antMatcher(GET, "/api/goods"), // 첫 화면
+        antMatcher(GET, "/api/goods/**"), // 상품 상세 페이지
         antMatcher(GET, "/api/goods/sell-list/**")
     );
     return requestMatchers.toArray(RequestMatcher[]::new);
