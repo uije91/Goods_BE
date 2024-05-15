@@ -25,7 +25,7 @@ public class AuthenticationEntryPointHandler implements AuthenticationEntryPoint
       AuthenticationException authException)
       throws IOException {
 
-    log.debug("[JwtAuthenticationEntryPoint] : 인증 실패");
+    log.error("[JwtAuthenticationEntryPoint] : 인증 실패");
     setResponse(response);
   }
 
@@ -34,8 +34,11 @@ public class AuthenticationEntryPointHandler implements AuthenticationEntryPoint
     // HTTP 응답 response 생성
     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     response.setContentType("application/json;charset=UTF-8");
-    JwtFilterAuthenticationException exception = new JwtFilterAuthenticationException(UNAUTHORIZED);
-    String jsonResponse = objectMapper.writeValueAsString(exception);
+    String jsonResponse = objectMapper.writeValueAsString(ErrorResponse.builder()
+        .message(UNAUTHORIZED.getMessage())
+        .status(401)
+        .errorCode(UNAUTHORIZED)
+        .build());
 
     // JSON 응답 전송
     response.getWriter().write(jsonResponse);
