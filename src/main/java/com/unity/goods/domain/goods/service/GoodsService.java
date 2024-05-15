@@ -9,6 +9,7 @@ import static com.unity.goods.global.exception.ErrorCode.NEED_LEAST_ONE_IMAGE;
 import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
 
 import com.unity.goods.domain.goods.dto.GoodsDetailDto.GoodsDetailResponse;
+import com.unity.goods.domain.goods.dto.SellerSalesListDto.SellerSalesListResponse;
 import com.unity.goods.domain.goods.dto.UpdateGoodsInfoDto.UpdateGoodsInfoRequest;
 import com.unity.goods.domain.goods.dto.UpdateGoodsInfoDto.UpdateGoodsInfoResponse;
 import com.unity.goods.domain.goods.dto.UpdateGoodsStateDto.UpdateGoodsStateRequest;
@@ -25,11 +26,19 @@ import com.unity.goods.domain.member.repository.MemberRepository;
 import com.unity.goods.global.jwt.UserDetailsImpl;
 import com.unity.goods.infra.service.GoodsSearchService;
 import com.unity.goods.infra.service.S3Service;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -174,5 +183,36 @@ public class GoodsService {
     log.info("[GoodsService][deleteGoods] : \"GoodsId: {}, GoodsName: {}\" 상품 삭제"
         , goods.getId(), goods.getGoodsName());
     goodsRepository.deleteById(goodsId);
+  }
+
+  public Page<SellerSalesListResponse> getSellerSalesList(Long sellerId, int page, int size) {
+
+    Member seller = memberRepository.findById(sellerId)
+        .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
+
+    Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+    Page<Goods> salesPage = goodsRepository.findByMemberId(sellerId, pageable);
+
+    List<SellerSalesListResponse> salesList = salesPage.getContent().stream()
+        .map(goods -> {
+          String imageUrl =
+              goods.getImageList().isEmpty() ? null : goods.getImageList().get(0).getImageUrl();
+
+          return SellerSalesListResponse.builder()
+              .goodsId(goods.getId())
+              .sellerName(seller.getNickname())
+              .goodsName(goods.getGoodsName())
+              .price(String.valueOf(goods.getPrice()))
+              .goodsThumbnail(imageUrl)
+              .goodsStatus(goods.getGoodsStatus())
+              .uploadedBefore(getTradedBeforeSeconds(goods.getCreatedAt()))
+              .build();
+        }).collect(Collectors.toList());
+
+    return new PageImpl<>(salesList, pageable, salesPage.getTotalElements());
+  }
+
+  private static long getTradedBeforeSeconds(LocalDateTime tradedDateTime) {
+    return Duration.between(tradedDateTime, LocalDateTime.now()).getSeconds();
   }
 }
