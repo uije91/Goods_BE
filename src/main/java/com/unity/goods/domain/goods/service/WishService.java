@@ -16,6 +16,7 @@ import com.unity.goods.domain.goods.repository.ImageRepository;
 import com.unity.goods.domain.goods.repository.WishRepository;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.repository.MemberRepository;
+import com.unity.goods.infra.service.GoodsSearchService;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,6 +38,7 @@ public class WishService {
   private final MemberRepository memberRepository;
   private final WishRepository wishRepository;
   private final ImageRepository imageRepository;
+  private final GoodsSearchService goodsSearchService;
 
 
   public void addWishlist(Long goodsId, Long memberId) {
@@ -61,6 +63,8 @@ public class WishService {
         .goods(goods)
         .build();
 
+    // elastic search의 좋아요 수 증가
+    goodsSearchService.updateGoodsLikes(goodsId, 1);
     wishRepository.save(wishList);
   }
 
@@ -74,6 +78,8 @@ public class WishService {
     Wishlist wishlist = wishRepository.findByGoodsAndMember(goods, member)
         .orElseThrow(() -> new GoodsException(WISHLIST_NOT_FOUND));
 
+    // elastic search의 좋아요 수 감소
+    goodsSearchService.updateGoodsLikes(goodsId, -1);
     wishRepository.delete(wishlist);
   }
 

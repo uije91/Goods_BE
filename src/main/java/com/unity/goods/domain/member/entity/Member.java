@@ -12,6 +12,7 @@ import com.unity.goods.domain.member.type.Role;
 import com.unity.goods.domain.member.type.SocialType;
 import com.unity.goods.domain.member.type.Status;
 import com.unity.goods.domain.model.BaseEntity;
+import com.unity.goods.domain.trade.entity.Trade;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -76,8 +77,10 @@ public class Member extends BaseEntity {
   private List<Wishlist> wishList = new ArrayList<>();
 
   @OneToMany(mappedBy = "member")
-  @Builder.Default
   private List<Badge> badgeList = new ArrayList<>();
+
+  @OneToMany(mappedBy = "member")
+  private List<Trade> tradeList  = new ArrayList<>();
 
   public static Member fromSignUpRequest(SignUpRequest signUpRequest, String imageUrl) {
 
