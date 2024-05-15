@@ -33,8 +33,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -130,17 +130,20 @@ public class GoodsService {
       throw new GoodsException(ALREADY_SOLD_OUT_GOODS);
     }
 
-    updateGoodsInfoRequest.updateGoodsEntity(goods);
+    imageCheck(member.getUsername(), updateGoodsInfoRequest, goods);
 
-    imageCheckAndDelete(member.getUsername(), updateGoodsInfoRequest, goods);
+    updateGoodsInfoRequest.updateGoodsEntity(goods);
 
     return UpdateGoodsInfoResponse.fromGoods(goods);
   }
 
-  private void imageCheckAndDelete(String email,
+  private void imageCheck(String email,
       UpdateGoodsInfoRequest updateGoodsInfoRequest, Goods goods) {
 
-    Set<String> requestImageUrls = new HashSet<>(updateGoodsInfoRequest.getGoodsImageUrl());
+    Set<String> requestImageUrls = (updateGoodsInfoRequest.getGoodsImageUrl() == null)
+        ? new HashSet<>()
+        : new HashSet<>(updateGoodsInfoRequest.getGoodsImageUrl());
+
     List<Image> currentImages = goods.getImageList();
 
     List<Image> imagesToDelete = currentImages.stream()
@@ -151,13 +154,6 @@ public class GoodsService {
       imageRepository.delete(image);
       s3Service.deleteFile(image.getImageUrl());
     });
-
-    imageCheckAndSave(email, updateGoodsInfoRequest, goods, currentImages, imagesToDelete);
-  }
-
-  private void imageCheckAndSave(String email,
-      UpdateGoodsInfoRequest updateGoodsInfoRequest,
-      Goods goods, List<Image> currentImages, List<Image> imagesToDelete) {
 
     int remainingImageCount = currentImages.size() - imagesToDelete.size();
 
