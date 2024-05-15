@@ -1,6 +1,7 @@
 package com.unity.goods.domain.goods.controller;
 
 import com.unity.goods.domain.goods.dto.GoodsDetailDto;
+import com.unity.goods.domain.goods.dto.SellerSalesListDto.SellerSalesListResponse;
 import com.unity.goods.domain.goods.dto.UpdateGoodsInfoDto.UpdateGoodsInfoRequest;
 import com.unity.goods.domain.goods.dto.UpdateGoodsInfoDto.UpdateGoodsInfoResponse;
 import com.unity.goods.domain.goods.dto.UpdateGoodsStateDto.UpdateGoodsStateRequest;
@@ -53,13 +54,12 @@ public class GoodsController {
     return ResponseEntity.ok(uploadGoodsResponse);
   }
 
-  @GetMapping("/{id}")
+  @GetMapping("/{goodsId}")
   public ResponseEntity<?> getDetailGoods(
-      @AuthenticationPrincipal UserDetailsImpl member,
-      @PathVariable Long id
+      @PathVariable Long goodsId
   ) {
     GoodsDetailDto.GoodsDetailResponse goodsDetailResponse =
-        goodsService.getDetailGoods(member, id);
+        goodsService.getDetailGoods(goodsId);
     return ResponseEntity.ok(goodsDetailResponse);
   }
 
@@ -74,7 +74,7 @@ public class GoodsController {
 
     return ResponseEntity.ok(updateGoodsInfoResponse);
   }
-  
+
   @PutMapping("/{goodsId}/state")
   public ResponseEntity<?> updateState(
       @AuthenticationPrincipal UserDetailsImpl member,
@@ -100,6 +100,18 @@ public class GoodsController {
     String keyword = searchRequest.getKeyword();
     Page<SearchedGoods> goodsDocumentPage = goodsSearchService.search(keyword, pageable);
     return ResponseEntity.ok(goodsDocumentPage);
+  }
+
+  @GetMapping("/sell-list/{sellerId}")
+  public ResponseEntity<?> salesGoodsList(
+      @PathVariable Long sellerId,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size) {
+
+    Page<SellerSalesListResponse> sellerSalesList
+        = goodsService.getSellerSalesList(sellerId, page, size);
+
+    return ResponseEntity.ok(sellerSalesList);
   }
 
 }

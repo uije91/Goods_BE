@@ -29,7 +29,8 @@ public class UpdateGoodsInfoDto {
     private String description;
 
 
-    private List<MultipartFile> goodsImages;
+    private List<String> imagesToDelete;
+    private List<MultipartFile> imagesToUpdate;
 
     @NotNull
     private Double lat;

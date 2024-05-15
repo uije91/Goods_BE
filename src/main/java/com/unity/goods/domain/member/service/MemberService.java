@@ -327,22 +327,19 @@ public class MemberService {
       findMember.setNickname(updateProfileRequest.getNickName());
     }
 
-    if (updateProfileRequest.getTradePassword() != null) {
-      findMember.setTradePassword(updateProfileRequest.getTradePassword());
-    }
-
     if (updateProfileRequest.getPhoneNumber() != null) {
       findMember.setPhoneNumber(updateProfileRequest.getPhoneNumber());
     }
 
-    if (updateProfileRequest.getProfileImage() != null) {
-      // 기존에 프로필 이미지가 있다면 S3에서 파일 삭제
-      if (findMember.getProfileImage() != null) {
-        s3Service.deleteFile(findMember.getProfileImage());
-      }
-      findMember.setProfileImage(
-          s3Service.uploadFile(
-              updateProfileRequest.getProfileImage(), member.getUsername()));
+    // 프로필 이미지를 교체하는 경우 기존 프로필 이미지 삭제 후 저장
+    if (updateProfileRequest.getProfileImageFile() != null) {
+      s3Service.deleteFile(findMember.getProfileImage());
+      log.info("[updateMemberProfile] : {} 기존 프로필 이미지 삭제 완료", member.getUsername());
+
+      String uploadedUrl = s3Service.uploadFile(updateProfileRequest.getProfileImageFile(),
+          member.getUsername() + "/" + "profileImage");
+      log.info("[updateMemberProfile] : {} 프로필 이미지 업로드 완료", member.getUsername());
+      findMember.setProfileImage(uploadedUrl);
     }
 
     return UpdateProfileResponse.fromMember(findMember);
@@ -385,14 +382,5 @@ public class MemberService {
 
     findMember.setTradePassword(
         passwordEncoder.encode(changeTradePasswordRequest.getNewTradePassword()));
-  }
-
-  public List<BadgeType> getBadge(Long id) {
-    Member member = memberRepository.findById(id)
-        .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
-
-    List<Badge> badgeList = badgeRepository.findAllByMember_Id(member.getId());
-
-    return badgeList.stream().map(Badge::getBadge).toList();
   }
 }

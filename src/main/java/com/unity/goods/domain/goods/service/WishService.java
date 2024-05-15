@@ -106,11 +106,12 @@ public class WishService {
     }
 
     // 날짜 계산 최근 -> 갱신일로 부터 몇일 지났는지 체크
-    long uploadBefore = Duration.between(goods.getUpdatedAt(), LocalDateTime.now()).getSeconds();
+    long uploadBefore = Duration.between(goods.getCreatedAt(), LocalDateTime.now()).getSeconds();
 
     return WishlistDto.builder()
-        .imageUrl(image)
+        .goodsId(goods.getId())
         .goodsName(goods.getGoodsName())
+        .imageUrl(image)
         .address(goods.getAddress())
         .price(goods.getPrice())
         .sellerName(goods.getMember().getNickname())
