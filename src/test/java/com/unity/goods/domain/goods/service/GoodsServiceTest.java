@@ -5,13 +5,11 @@ import static com.unity.goods.global.exception.ErrorCode.MAX_IMAGE_LIMIT_EXCEEDE
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import com.unity.goods.domain.goods.dto.UpdateGoodsInfoDto.UpdateGoodsInfoRequest;
 import com.unity.goods.domain.goods.dto.UpdateGoodsInfoDto.UpdateGoodsInfoResponse;
@@ -97,7 +95,7 @@ class GoodsServiceTest {
         .description("테스트 상품의 새로운 설명 입니다.")
         .lat(11.564)
         .lng(27.001)
-        .goodsImages(goodsImages)
+        .imagesToUpdate(goodsImages)
         .address("서울시 강남구")
         .detailLocation("새로운 테스트 건물 앞")
         .build();
@@ -173,7 +171,7 @@ class GoodsServiceTest {
         .description("테스트 상품의 새로운 설명 입니다.")
         .lat(11.564)
         .lng(27.001)
-        .goodsImages(goodsImages)
+        .imagesToUpdate(goodsImages)
         .address("서울시 강남구")
         .detailLocation("새로운 테스트 건물 앞")
         .build();
