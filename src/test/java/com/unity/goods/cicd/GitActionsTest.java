@@ -6,9 +6,6 @@ public class GitActionsTest {
 
   @Test
   void ciTest() {
-    //given
-    //when
-    //then
   }
 
 }
