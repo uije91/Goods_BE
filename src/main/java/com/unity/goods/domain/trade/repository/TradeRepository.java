@@ -1,5 +1,6 @@
 package com.unity.goods.domain.trade.repository;
 
+import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.trade.entity.Trade;
 import com.unity.goods.domain.trade.type.TradePurpose;
 import org.springframework.data.domain.Page;
@@ -14,4 +15,6 @@ public interface TradeRepository extends JpaRepository<Trade, Long> {
   @EntityGraph(attributePaths = {"goods", "goods.member"})
   Page<Trade> findByMemberIdAndTradePurpose(Long memberId, TradePurpose tradePurpose,
       Pageable pageable);
+
+  Page<Trade> findAllByMember(Member member, Pageable pageable);
 }

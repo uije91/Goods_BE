@@ -1,5 +1,6 @@
 package com.unity.goods.domain.trade.controller;
 
+import com.unity.goods.domain.trade.dto.PointTradeHistoryDto.PointTradeHistoryResponse;
 import com.unity.goods.domain.trade.dto.PointTradeDto;
 import com.unity.goods.domain.trade.dto.PointTradeDto.PointTradeResponse;
 import com.unity.goods.domain.trade.dto.PurchasedListDto.PurchasedListResponse;
@@ -42,5 +43,17 @@ public class TradeController {
       @Valid @RequestBody PointTradeDto.PointTradeRequest pointTradeRequest) {
     PointTradeResponse pointTradeResponse = tradeService.tradePoint(member, pointTradeRequest);
     return ResponseEntity.ok(pointTradeResponse);
+  }
+
+  @GetMapping("/history")
+  public ResponseEntity<?> getPointUsageHistory(
+      @AuthenticationPrincipal UserDetailsImpl member,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size) {
+
+    Page<PointTradeHistoryResponse> tradeHistoryResponse =
+        tradeService.getPointUsageHistory(member, page, size);
+
+    return ResponseEntity.ok(tradeHistoryResponse);
   }
 }

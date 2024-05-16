@@ -22,6 +22,8 @@ import com.unity.goods.domain.member.exception.MemberException;
 import com.unity.goods.domain.member.repository.MemberRepository;
 import com.unity.goods.domain.trade.dto.PointTradeDto.PointTradeRequest;
 import com.unity.goods.domain.trade.dto.PointTradeDto.PointTradeResponse;
+import com.unity.goods.domain.trade.dto.PointTradeHistoryDto;
+import com.unity.goods.domain.trade.dto.PointTradeHistoryDto.PointTradeHistoryResponse;
 import com.unity.goods.domain.trade.dto.PurchasedListDto.PurchasedListResponse;
 import com.unity.goods.domain.trade.entity.Trade;
 import com.unity.goods.domain.trade.exception.TradeException;
@@ -154,5 +156,17 @@ public class TradeService {
         .tradePoint(pointTradeRequest.getPrice())
         .remainPoint(String.valueOf(authenticatedUser.getBalance()))
         .build();
+  }
+
+  public Page<PointTradeHistoryResponse> getPointUsageHistory(UserDetailsImpl member, int page,
+      int size) {
+
+    Member authenticatedUser = memberRepository.findByEmail(member.getUsername())
+        .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
+
+    Pageable pageable = PageRequest.of(page, size, Sort.by("tradedAt").descending());
+    Page<Trade> usageHistory = tradeRepository.findAllByMember(authenticatedUser, pageable);
+
+    return usageHistory.map(PointTradeHistoryDto::fromTrade);
   }
 }
