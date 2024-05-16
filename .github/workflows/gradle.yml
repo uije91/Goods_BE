@@ -2,11 +2,11 @@ name: Goods Project CI/CD
 
 on:
   push:
-    # branches: [ "main", "develop", "goods" ]
-    branches: [ "goods" ]
+    # branches: [ "main", "develop", "feat/goods" ]
+    branches: [ "feat/goods"]
   pull_request:
-    # branches: [ "main", "develop", "goods" ] 
-    branches: [ "goods" ] 
+    # branches: [ "main", "develop", "feat/goods" ] 
+    branches: [ "feat/goods" ] 
   
 jobs:
   build:
