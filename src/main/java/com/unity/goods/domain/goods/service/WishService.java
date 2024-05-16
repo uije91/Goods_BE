@@ -113,7 +113,7 @@ public class WishService {
         .goodsName(goods.getGoodsName())
         .imageUrl(image)
         .address(goods.getAddress())
-        .price(goods.getPrice())
+        .price(String.valueOf(goods.getPrice()))
         .sellerName(goods.getMember().getNickname())
         .goodsStatus(goods.getGoodsStatus())
         .uploadBefore(uploadBefore)
