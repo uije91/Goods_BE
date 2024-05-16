@@ -97,7 +97,7 @@ class GoodsServiceTest {
         .description("테스트 상품의 새로운 설명 입니다.")
         .lat(11.564)
         .lng(27.001)
-        .goodsImages(goodsImages)
+        .imagesToUpdate(goodsImages)
         .address("서울시 강남구")
         .detailLocation("새로운 테스트 건물 앞")
         .build();
@@ -173,7 +173,7 @@ class GoodsServiceTest {
         .description("테스트 상품의 새로운 설명 입니다.")
         .lat(11.564)
         .lng(27.001)
-        .goodsImages(goodsImages)
+        .imagesToUpdate(goodsImages)
         .address("서울시 강남구")
         .detailLocation("새로운 테스트 건물 앞")
         .build();
