@@ -105,7 +105,8 @@ public class SecurityConfig {
         antMatcher(PUT, "/api/member/profile"), // 회원정보 수정
         antMatcher(POST, "/api/goods/new"),
         antMatcher("/api/goods/**"),
-        antMatcher("/api/trade/**")
+        antMatcher("/api/trade/**"),
+        antMatcher("/api/point/**")
     );
     return requestMatchers.toArray(RequestMatcher[]::new);
   }
