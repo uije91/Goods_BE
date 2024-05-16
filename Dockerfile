@@ -1,5 +1,5 @@
-FROM openjdk:17-slim
+FROM openjdk:17-jdk
 ARG JAR_FILE=build/libs/*.jar
 COPY ${JAR_FILE} app.jar
-ENV TZ=Asia/Seoul
-ENTRYPOINT ["java", "-jar", "app.jar"]
+EXPOSE 8080
+ENTRYPOINT ["java", "-DSpring.profiles.active=prod", "-jar", "app.jar"]
