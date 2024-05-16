@@ -28,6 +28,14 @@ public enum ErrorCode {
   MAX_IMAGE_LIMIT_EXCEEDED(404, "등록할 수 있는 이미지의 최대 개수를 초과하였습니다."),
   NEED_LEAST_ONE_IMAGE(400, "상품 등록 시 최소 1개의 이미지를 올려야 합니다."),
   CANNOT_DELETE_SOLD_ITEM(400, "판매완료된 상품은 삭제할 수 없습니다."),
+  UNMATCHED_SELLER(400, "해당 상품의 판매자가 아닙니다."),
+
+  // Trade Error
+  OUT_RANGED_COST(400, "해당 금액은 송금 범위를 초과하였습니다. 다시 확인 부탁드립니다."),
+  SELLER_NOT_FOUND(400, "해당 판매자는 존재하지 않습니다. "),
+  UNMATCHED_PRICE(400, "거래 금액이 상품 가격과 일치하지 않습니다."),
+  ALREADY_SOLD(400, "이미 거래 완료된 상품입니다."),
+  INSUFFICIENT_AMOUNT(400, "거래를 진행할 잔액이 부족합니다."),
 
   // WishList Error
   GOODS_ALREADY_WISHLIST(400,"이미 찜한 상품입니다."),
