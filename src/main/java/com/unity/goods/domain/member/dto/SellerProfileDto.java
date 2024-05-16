@@ -1,30 +1,27 @@
 package com.unity.goods.domain.member.dto;
 
 import static com.unity.goods.domain.member.entity.Badge.badgeToString;
+
 import com.unity.goods.domain.member.entity.Member;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 
-public class MemberProfileDto {
+public class SellerProfileDto {
 
   @Getter
   @Builder
-  public static class MemberProfileResponse {
+  public static class SellerProfileResponse {
 
-    private Long memberId;
     private String nickName;
-    private String phoneNumber;
     private String profileImage;
     private double star;
     private List<String> badgeList;
 
-    public static MemberProfileResponse fromMember(Member member) {
+    public static SellerProfileResponse fromMember(Member member) {
 
-      return MemberProfileResponse.builder()
-          .memberId(member.getId())
+      return SellerProfileResponse.builder()
           .nickName(member.getNickname())
-          .phoneNumber(member.getPhoneNumber())
           .profileImage(member.getProfileImage())
           .star(member.getStar())
           .badgeList(badgeToString(member.getBadgeList()))

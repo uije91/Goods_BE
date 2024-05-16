@@ -81,10 +81,11 @@ public class Member extends BaseEntity {
   private List<Wishlist> wishList = new ArrayList<>();
 
   @OneToMany(mappedBy = "member")
-  private List<Badge> badgeList = new ArrayList<>();
+  private List<Trade> tradeList = new ArrayList<>();
 
   @OneToMany(mappedBy = "member")
-  private List<Trade> tradeList  = new ArrayList<>();
+  @Builder.Default
+  private List<Badge> badgeList = new ArrayList<>();
 
   public static Member fromSignUpRequest(SignUpRequest signUpRequest, String imageUrl) {
 
