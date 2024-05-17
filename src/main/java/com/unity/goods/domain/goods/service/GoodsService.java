@@ -7,6 +7,7 @@ import static com.unity.goods.global.exception.ErrorCode.GOODS_NOT_FOUND;
 import static com.unity.goods.global.exception.ErrorCode.MAX_IMAGE_LIMIT_EXCEEDED;
 import static com.unity.goods.global.exception.ErrorCode.MISMATCHED_SELLER;
 import static com.unity.goods.global.exception.ErrorCode.NEED_LEAST_ONE_IMAGE;
+import static com.unity.goods.global.exception.ErrorCode.OUT_RANGED_COST;
 import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
 
 import com.unity.goods.domain.goods.dto.GoodsDetailDto.GoodsDetailResponse;
@@ -26,6 +27,7 @@ import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.exception.MemberException;
 import com.unity.goods.domain.member.repository.BadgeRepository;
 import com.unity.goods.domain.member.repository.MemberRepository;
+import com.unity.goods.domain.trade.exception.TradeException;
 import com.unity.goods.global.jwt.UserDetailsImpl;
 import com.unity.goods.infra.service.GoodsSearchService;
 import com.unity.goods.infra.service.S3Service;
@@ -65,6 +67,11 @@ public class GoodsService {
   @Transactional
   public UploadGoodsResponse uploadGoods(UserDetailsImpl member,
       UploadGoodsRequest uploadGoodsRequest) {
+
+    // 가격 제한 확인
+    if (Long.parseLong(uploadGoodsRequest.getPrice()) > 10_000_000L) {
+      throw new TradeException(OUT_RANGED_COST);
+    }
 
     // 빈 이미지 파일 등록 시 에러 처리
     if (!uploadGoodsRequest.getGoodsImageFiles().isEmpty()
@@ -144,6 +151,11 @@ public class GoodsService {
 
     if (goods.getGoodsStatus() == SOLDOUT) {
       throw new GoodsException(ALREADY_SOLD_OUT_GOODS);
+    }
+
+    // 가격 제한 확인
+    if (Long.parseLong(updateGoodsInfoRequest.getPrice()) > 10_000_000L) {
+      throw new TradeException(OUT_RANGED_COST);
     }
 
     int deleteImageCnt = (updateGoodsInfoRequest.getImagesToDelete()) == null ? 0
