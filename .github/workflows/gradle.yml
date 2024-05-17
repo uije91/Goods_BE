@@ -103,6 +103,9 @@ jobs:
           # 기존 docker 이미지 삭제
           sudo docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}
 
+          # docker-compose.yml 파일 삭제
+          sudo rm docker-compose.yml
+
           # Application Docker image pull
           sudo docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
           sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}
@@ -112,7 +115,7 @@ jobs:
 
           # docker-compose를 사용하여 컨테이너 실행
           sudo docker-compose up -d --build
-          # sudo docker run -p ${{ secrets.APP_PORT }}:${{ secrets.APP_PORT }} --name ${{ secrets.PROJECT_NAME }} -d ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}
+          # sudo docker run -p ${{ secrets.APP_PORT }}:${{ secrets.APP_PORT }} --name ${{ secrets.PROJECT_NAME }} -d ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}:latest
 
     # Remove Github Actions IP From Security Group
     - name: Remove Github Actions IP From Security Group
