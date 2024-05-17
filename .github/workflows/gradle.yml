@@ -101,7 +101,7 @@ jobs:
           sudo docker-compose down
 
           # 기존 docker 이미지 삭제
-          sudo docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}
+          # sudo docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}
 
           # docker-compose.yml 파일 삭제
           # sudo rm docker-compose.yml
