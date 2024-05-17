@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - "main"
+      - "feat/goods"
   pull_request:
     branches:
       - "main"
+      - "feat/goods"
   
 jobs:
   build:
@@ -100,6 +102,9 @@ jobs:
 
           # 기존 컨테이너 종료 및 제거
           sudo docker-compose down
+
+          # 기존 docker 이미지 삭제
+          sudo docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}
           
           # docker-compose.yml 파일을 생성
           echo "${{ secrets.DOCKER_COMPOSE_FILE }}" > docker-compose.yml
