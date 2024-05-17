@@ -6,6 +6,7 @@ public class GitActionsTest {
 
   @Test
   void ciTest() {
+
   }
 
 }
