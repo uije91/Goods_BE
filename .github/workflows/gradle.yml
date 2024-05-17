@@ -109,7 +109,7 @@ jobs:
 
           # docker-compose를 사용하여 컨테이너 실행
           sudo docker-compose up -d --build
-          # sudo docker run -p ${{ secrets.APP_PORT }}:${{ secrets.APP_PORT }} --name ${{ secrets.PROJECT_NAME }} -d ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}
+          # sudo docker run -p ${{ secrets.APP_PORT }}:${{ secrets.APP_PORT }} --name ${{ secrets.PROJECT_NAME }} -d ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}:latest
 
     # Remove Github Actions IP From Security Group
     - name: Remove Github Actions IP From Security Group
