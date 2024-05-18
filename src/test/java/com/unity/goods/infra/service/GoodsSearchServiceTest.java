@@ -54,17 +54,26 @@ class GoodsSearchServiceTest {
     Pageable pageable = PageRequest.of(0, 10);
 
     // 목 데이터 설정
-    GoodsDocument mockDocument1 = new GoodsDocument();
-    mockDocument1.setGoodsName("담요");
-    mockDocument1.setDescription("거의 안 씀");
+    GoodsDocument mockDocument1 = GoodsDocument.builder()
+        .id(1L)
+        .location(new GeoPoint(37.0, 127.21))
+        .goodsName("담요")
+        .description("거의 안 씀")
+        .build();
 
-    GoodsDocument mockDocument2 = new GoodsDocument();
-    mockDocument2.setGoodsName("텀블러");
-    mockDocument2.setDescription("신상 한 번도 안 씀!~");
+    GoodsDocument mockDocument2 = GoodsDocument.builder()
+        .id(2L)
+        .location(new GeoPoint(37.234, 127.22452341))
+        .goodsName("텀블러")
+        .description("신상 한 번도 안 씀!~")
+        .build();
 
-    GoodsDocument mockDocument3 = new GoodsDocument();
-    mockDocument3.setGoodsName("스타벅스 텀블러");
-    mockDocument3.setDescription("2022ss 버전");
+    GoodsDocument mockDocument3 = GoodsDocument.builder()
+        .id(3L)
+        .location(new GeoPoint(37.312310, 127.22342341))
+        .goodsName("스타벅스 텀블러")
+        .description("2022ss 버전")
+        .build();
 
     SearchHit<GoodsDocument> searchHit1 = mock(SearchHit.class);
     SearchHit<GoodsDocument> searchHit2 = mock(SearchHit.class);
