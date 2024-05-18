@@ -8,6 +8,7 @@ import lombok.Getter;
 public class PointTradeDto {
 
   @Getter
+  @Builder
   public static class PointTradeRequest {
 
     private Long sellerId;
