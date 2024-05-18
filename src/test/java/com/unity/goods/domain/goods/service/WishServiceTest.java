@@ -22,10 +22,10 @@ import com.unity.goods.domain.member.type.Role;
 import com.unity.goods.domain.member.type.Status;
 import com.unity.goods.domain.model.BaseEntity;
 import com.unity.goods.global.exception.ErrorCode;
+import com.unity.goods.infra.service.GoodsSearchService;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,7 +36,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,6 +46,9 @@ class WishServiceTest {
 
   @Mock
   private GoodsRepository goodsRepository;
+
+  @Mock
+  private GoodsSearchService goodsSearchService;
 
   @Mock
   private MemberRepository memberRepository;
@@ -136,7 +138,7 @@ class WishServiceTest {
     assertEquals(1L,dto.getGoodsId());
     assertEquals("테스트상품", dto.getGoodsName());
     assertEquals("테스트 주소", dto.getAddress());
-    assertEquals(20000L, dto.getPrice());
+    assertEquals("20000", dto.getPrice());
     assertEquals("test", dto.getSellerName());
     assertEquals("test_url",dto.getImageUrl());
     assertEquals(GoodsStatus.SALE, dto.getGoodsStatus());
