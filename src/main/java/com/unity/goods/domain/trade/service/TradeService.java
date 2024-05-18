@@ -137,6 +137,7 @@ public class TradeService {
         .tradePurpose(BUY)
         .member(authenticatedUser)
         .goods(goods)
+        .balanceAfterTrade(authenticatedUser.getBalance())
         .build();
     tradeRepository.save(buyer);
     memberRepository.save(authenticatedUser);
@@ -147,6 +148,7 @@ public class TradeService {
         .tradePurpose(SELL)
         .member(goodsSeller)
         .goods(goods)
+        .balanceAfterTrade(goodsSeller.getBalance())
         .build();
     tradeRepository.save(seller);
     memberRepository.save(goodsSeller);

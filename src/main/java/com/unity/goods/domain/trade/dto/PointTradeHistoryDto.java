@@ -18,6 +18,7 @@ public class PointTradeHistoryDto {
     private String tradePoint;
     private LocalDateTime tradeAt;
     private String tradePurpose;
+    private String balanceAfterTrade;
   }
 
   public static PointTradeHistoryResponse fromTrade(Trade trade) {
@@ -26,6 +27,7 @@ public class PointTradeHistoryDto {
         .tradePoint(String.valueOf(trade.getTradePoint()))
         .tradeAt(trade.getTradedAt())
         .tradePurpose(String.valueOf(trade.getTradePurpose()))
+        .balanceAfterTrade(String.valueOf(trade.getBalanceAfterTrade()))
         .build();
   }
 

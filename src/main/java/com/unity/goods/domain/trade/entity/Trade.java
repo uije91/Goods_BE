@@ -49,6 +49,9 @@ public class Trade {
   @Column(nullable = false)
   private TradePurpose tradePurpose;
 
+  @Column(nullable = false)
+  private Long balanceAfterTrade;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "member_id")
   private Member member;
