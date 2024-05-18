@@ -217,11 +217,16 @@ class MemberServiceTest {
   @DisplayName("회원 프로필 조회 성공 테스트")
   void getMemberProfileSuccess() {
     //given
+    Badge badge = Badge.builder()
+        .badge(BadgeType.SELL)
+        .build();
+
     Member member = Member.builder()
         .email("test@naver.com")
         .password("test1234")
         .nickname("test")
         .status(ACTIVE)
+        .badgeList(List.of(new Badge[]{badge}))
         .phoneNumber("010-1111-1111")
         .profileImage("http://amazonS3/test.jpg")
         .build();
