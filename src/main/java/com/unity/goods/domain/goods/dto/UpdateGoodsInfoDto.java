@@ -30,7 +30,7 @@ public class UpdateGoodsInfoDto {
 
 
     private List<String> imagesToDelete;
-    private List<MultipartFile> imagesToUpdate;
+    private List<MultipartFile> goodsImageFiles;
 
     @NotNull
     private Double lat;
@@ -41,7 +41,7 @@ public class UpdateGoodsInfoDto {
     @NotBlank
     private String address;
 
-    private String detailLocation;
+    private String userDefinedLocation;
 
     public void updateGoodsEntity(Goods goods) {
       goods.setGoodsName(this.goodsName);
@@ -49,7 +49,7 @@ public class UpdateGoodsInfoDto {
       goods.setDescription(this.description);
       goods.setLat(this.lat);
       goods.setLng(this.lng);
-      goods.setAddress(this.address + " " + this.detailLocation);
+      goods.setAddress(this.address + " " + this.userDefinedLocation);
     }
 
   }

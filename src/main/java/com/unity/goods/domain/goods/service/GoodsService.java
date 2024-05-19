@@ -161,8 +161,8 @@ public class GoodsService {
     int deleteImageCnt = (updateGoodsInfoRequest.getImagesToDelete()) == null ? 0
         : updateGoodsInfoRequest.getImagesToDelete().size();
 
-    int addImageCnt = (updateGoodsInfoRequest.getImagesToUpdate()) == null ? 0
-        : updateGoodsInfoRequest.getImagesToUpdate().size();
+    int addImageCnt = (updateGoodsInfoRequest.getGoodsImageFiles()) == null ? 0
+        : updateGoodsInfoRequest.getGoodsImageFiles().size();
 
     if (goods.getImageList().size() - deleteImageCnt + addImageCnt > MAX_IMAGE_NUM) {
       log.error("[GoodsService][updateGoodsInfo] : \"{}\" 상품 이미지 등록 개수 초과", goods.getGoodsName());
@@ -175,7 +175,7 @@ public class GoodsService {
           s3Service.deleteFile(goodsUrl);
         }));
 
-    Optional.ofNullable(updateGoodsInfoRequest.getImagesToUpdate())
+    Optional.ofNullable(updateGoodsInfoRequest.getGoodsImageFiles())
         .ifPresent(files ->
             files.stream()
                 .map(multipart -> s3Service.uploadFile(multipart, member.getUsername() + "/" + goods.getGoodsName()))
