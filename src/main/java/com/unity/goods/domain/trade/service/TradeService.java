@@ -1,5 +1,6 @@
 package com.unity.goods.domain.trade.service;
 
+import static com.unity.goods.domain.goods.type.GoodsStatus.SOLDOUT;
 import static com.unity.goods.domain.trade.type.TradePurpose.BUY;
 import static com.unity.goods.domain.trade.type.TradePurpose.SELL;
 import static com.unity.goods.global.exception.ErrorCode.ALREADY_SOLD;
@@ -15,7 +16,6 @@ import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
 import com.unity.goods.domain.goods.entity.Goods;
 import com.unity.goods.domain.goods.exception.GoodsException;
 import com.unity.goods.domain.goods.repository.GoodsRepository;
-import com.unity.goods.domain.goods.type.GoodsStatus;
 import com.unity.goods.domain.goods.type.PaymentStatus;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.exception.MemberException;
@@ -25,6 +25,7 @@ import com.unity.goods.domain.trade.dto.PointTradeDto.PointTradeResponse;
 import com.unity.goods.domain.trade.dto.PointTradeHistoryDto;
 import com.unity.goods.domain.trade.dto.PointTradeHistoryDto.PointTradeHistoryResponse;
 import com.unity.goods.domain.trade.dto.PurchasedListDto.PurchasedListResponse;
+import com.unity.goods.domain.trade.dto.StarRateDto.StarRateRequest;
 import com.unity.goods.domain.trade.entity.Trade;
 import com.unity.goods.domain.trade.exception.TradeException;
 import com.unity.goods.domain.trade.repository.TradeRepository;
@@ -125,7 +126,7 @@ public class TradeService {
     }
 
     // 상품 이미 거래 완료된 SOLD OUT 상태인지 확인
-    if (goods.getGoodsStatus().equals(GoodsStatus.SOLDOUT)) {
+    if (goods.getGoodsStatus().equals(SOLDOUT)) {
       throw new TradeException(ALREADY_SOLD);
     }
 
@@ -170,5 +171,33 @@ public class TradeService {
     Page<Trade> usageHistory = tradeRepository.findAllByMember(authenticatedUser, pageable);
 
     return usageHistory.map(PointTradeHistoryDto::fromTrade);
+  }
+
+  @Transactional
+  public void rateStar(UserDetailsImpl member, Long goodsId, StarRateRequest starRateRequest) {
+
+    memberRepository.findByEmail(member.getUsername())
+        .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
+
+    Goods goods = goodsRepository.findById(goodsId)
+        .orElseThrow(() -> new GoodsException(GOODS_NOT_FOUND));
+
+    // 상품 이미 거래 완료된 SOLD OUT 상태인지 확인
+    if (goods.getGoodsStatus().equals(SOLDOUT)) {
+      throw new TradeException(ALREADY_SOLD);
+    }
+
+    goods.setStar(starRateRequest.getStar());
+    Member seller = goods.getMember();
+
+    // SOLD OUT된 상품들 + 현재 별점 매긴 상품들의 최종 평점 계산
+    List<Goods> allByMemberAndGoodsStatus = goodsRepository.findAllByMemberAndGoodsStatus(seller,
+        SOLDOUT);
+    double totalRate = allByMemberAndGoodsStatus.stream().mapToDouble(Goods::getStar).sum()
+        + starRateRequest.getStar();
+    seller.setStar(totalRate / (allByMemberAndGoodsStatus.size() + 1));
+
+    // 상품 상태 변경
+    goods.setGoodsStatus(SOLDOUT);
   }
 }

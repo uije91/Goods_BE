@@ -1,9 +1,10 @@
 package com.unity.goods.domain.trade.controller;
 
-import com.unity.goods.domain.trade.dto.PointTradeHistoryDto.PointTradeHistoryResponse;
 import com.unity.goods.domain.trade.dto.PointTradeDto;
 import com.unity.goods.domain.trade.dto.PointTradeDto.PointTradeResponse;
+import com.unity.goods.domain.trade.dto.PointTradeHistoryDto.PointTradeHistoryResponse;
 import com.unity.goods.domain.trade.dto.PurchasedListDto.PurchasedListResponse;
+import com.unity.goods.domain.trade.dto.StarRateDto.StarRateRequest;
 import com.unity.goods.domain.trade.service.TradeService;
 import com.unity.goods.global.jwt.UserDetailsImpl;
 import jakarta.validation.Valid;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,5 +57,15 @@ public class TradeController {
         tradeService.getPointUsageHistory(member, page, size);
 
     return ResponseEntity.ok(tradeHistoryResponse);
+  }
+
+  @PostMapping("/goods/{goodsId}/star")
+  public ResponseEntity<ResponseEntity.BodyBuilder> rateStar(
+      @AuthenticationPrincipal UserDetailsImpl member,
+      @PathVariable Long goodsId,
+      @RequestBody StarRateRequest starRateRequest
+  ) {
+    tradeService.rateStar(member, goodsId, starRateRequest);
+    return ResponseEntity.ok().build();
   }
 }
