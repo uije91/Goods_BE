@@ -58,7 +58,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         30 * 24 * 60 * 60);
     response.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + tokenDto.getAccessToken());
     response.addCookie(cookie);
-    response.sendRedirect("http://localhost:5173/auth/kakao"); //TODO: 프론트 주소로 변경
+    response.sendRedirect("http://localhost:5173"); //TODO: 프론트 주소로 변경
   }
 }
 
