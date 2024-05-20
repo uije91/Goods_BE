@@ -178,7 +178,8 @@ public class GoodsService {
     Optional.ofNullable(updateGoodsInfoRequest.getGoodsImageFiles())
         .ifPresent(files ->
             files.stream()
-                .map(multipart -> s3Service.uploadFile(multipart, member.getUsername() + "/" + goods.getGoodsName()))
+                .map(multipart -> s3Service.uploadFile(multipart,
+                    member.getUsername() + "/" + goods.getGoodsName()))
                 .map(url -> Image.builder().imageUrl(url).goods(goods).build())
                 .forEach(imageRepository::save)
         );
