@@ -174,10 +174,7 @@ public class TradeService {
   }
 
   @Transactional
-  public void rateStar(UserDetailsImpl member, Long goodsId, StarRateRequest starRateRequest) {
-
-    memberRepository.findByEmail(member.getUsername())
-        .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
+  public void rateStar(Long goodsId, StarRateRequest starRateRequest) {
 
     Goods goods = goodsRepository.findById(goodsId)
         .orElseThrow(() -> new GoodsException(GOODS_NOT_FOUND));

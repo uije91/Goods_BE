@@ -61,11 +61,10 @@ public class TradeController {
 
   @PostMapping("/goods/{goodsId}/star")
   public ResponseEntity<ResponseEntity.BodyBuilder> rateStar(
-      @AuthenticationPrincipal UserDetailsImpl member,
       @PathVariable Long goodsId,
       @RequestBody StarRateRequest starRateRequest
   ) {
-    tradeService.rateStar(member, goodsId, starRateRequest);
+    tradeService.rateStar(goodsId, starRateRequest);
     return ResponseEntity.ok().build();
   }
 }
