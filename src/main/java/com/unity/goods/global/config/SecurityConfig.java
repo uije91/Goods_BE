@@ -11,7 +11,6 @@ import com.unity.goods.domain.oauth.service.OAuth2UserService;
 import com.unity.goods.global.exception.AuthenticationEntryPointHandler;
 import com.unity.goods.global.jwt.JwtAuthenticationFilter;
 import com.unity.goods.global.jwt.JwtTokenProvider;
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -55,15 +54,13 @@ public class SecurityConfig {
             .configurationSource(request -> {
               CorsConfiguration config = new CorsConfiguration();
 
-              config.setAllowedOrigins(
-                  Collections.singletonList("http://localhost:5173")); //TODO: 프론트엔드 서버 URL로 변경
+              config.setAllowedOrigins(List.of("http://localhost:5173")); //TODO: 프론트엔드 서버 URL로 변경
               config.setAllowedMethods(Collections.singletonList("*"));
               config.setAllowCredentials(true);
               config.setAllowedHeaders(Collections.singletonList("*"));
               config.setMaxAge(3600L);
 
               config.setExposedHeaders(Arrays.asList("Authorization","Set_Cookie"));
-              config.addExposedHeader("Authorization");
               return config;
             }))
 
@@ -78,20 +75,18 @@ public class SecurityConfig {
         )
         // OAuth2
         .oauth2Login(oauth2 -> oauth2
-            .authorizationEndpoint(endpoint -> endpoint
-                .baseUri("/oauth2/authorization"))
             .redirectionEndpoint(endpoint -> endpoint
                 .baseUri("/api/oauth/code/*"))
             .userInfoEndpoint(endpoint -> endpoint.userService(oAuth2UserService))
             .successHandler(successHandler)
             .failureHandler(failHandler))
-        // JWT Filter
-        .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
-            UsernamePasswordAuthenticationFilter.class)
         // 인가되지 않은 사용자 접근 에러 핸들링
         .exceptionHandling(exceptionHandling ->
             exceptionHandling
                 .authenticationEntryPoint(authenticationEntryPointHandler))
+        // JWT Filter
+        .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
+            UsernamePasswordAuthenticationFilter.class)
     ;
     return http.build();
   }
