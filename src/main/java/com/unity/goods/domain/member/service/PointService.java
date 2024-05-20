@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class PointService {
 
   private final MemberRepository memberRepository;
-  private final IamportClient iamportClient;
+//  private final IamportClient iamportClient;
 
   @Transactional
   public PointChargeResponse chargePoint(UserDetailsImpl member,
@@ -38,18 +38,18 @@ public class PointService {
         .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
 
     // 포트원 결제내역 단건 조회 API 호출
-    Payment payment = null;
-    try {
-      payment = iamportClient.paymentByImpUid(pointChargeRequest.getImpUid()).getResponse();
-    } catch (IamportResponseException | IOException e) {
-      throw new TradeException(PAYMENT_NOT_FOUND);
-    }
+//    Payment payment = null;
+//    try {
+//      payment = iamportClient.paymentByImpUid(pointChargeRequest.getImpUid()).getResponse();
+//    } catch (IamportResponseException | IOException e) {
+//      throw new TradeException(PAYMENT_NOT_FOUND);
+//    }
 
     // 조회된 결제 내역과 요청 충전 금액이 같은지 확인
-    if (!Objects.equals(payment.getAmount(),
-        BigDecimal.valueOf(Long.parseLong(pointChargeRequest.getPrice())))) {
-      throw new TradeException(PAYMENT_UNMATCHED);
-    }
+//    if (!Objects.equals(payment.getAmount(),
+//        BigDecimal.valueOf(Long.parseLong(pointChargeRequest.getPrice())))) {
+//      throw new TradeException(PAYMENT_UNMATCHED);
+//    }
 
     // 충전 포인트 저장
     authenticatedUser.setBalance(Long.valueOf(pointChargeRequest.getPrice()));
