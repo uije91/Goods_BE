@@ -331,18 +331,38 @@ public class MemberService {
       findMember.setPhoneNumber(updateProfileRequest.getPhoneNumber());
     }
 
-    // 프로필 이미지를 교체하는 경우 기존 프로필 이미지 삭제 후 저장
-    if (updateProfileRequest.getProfileImageFile() != null) {
-      s3Service.deleteFile(findMember.getProfileImage());
-      log.info("[updateMemberProfile] : {} 기존 프로필 이미지 삭제 완료", member.getUsername());
+    // 새로운 프로필 이미지로 교체
+    if (updateProfileRequest.getProfileImageUrl() == null
+        && updateProfileRequest.getProfileImageFile() != null) {
 
-      String uploadedUrl = s3Service.uploadFile(updateProfileRequest.getProfileImageFile(),
-          member.getUsername() + "/" + "profileImage");
-      log.info("[updateMemberProfile] : {} 프로필 이미지 업로드 완료", member.getUsername());
+      deleteCurrentProfileImageIfExists(member, findMember);
+      String uploadedUrl = uploadProfileImageToS3(member, updateProfileRequest);
       findMember.setProfileImage(uploadedUrl);
     }
 
+    // 기본 이미지 사용
+    if (updateProfileRequest.getProfileImageUrl() == null
+        && updateProfileRequest.getProfileImageFile() == null) {
+
+      deleteCurrentProfileImageIfExists(member, findMember);
+      findMember.setProfileImage(null);
+    }
+
     return UpdateProfileResponse.fromMember(findMember);
+  }
+
+  private String uploadProfileImageToS3(UserDetailsImpl member, UpdateProfileRequest updateProfileRequest) {
+    String uploadedUrl = s3Service.uploadFile(updateProfileRequest.getProfileImageFile(),
+        member.getUsername() + "/" + "profileImage");
+    log.info("[updateMemberProfile] : {} 프로필 이미지 업로드 완료", member.getUsername());
+    return uploadedUrl;
+  }
+
+  private void deleteCurrentProfileImageIfExists(UserDetailsImpl member, Member findMember) {
+    if (findMember.getProfileImage() != null) {
+      s3Service.deleteFile(findMember.getProfileImage());
+      log.info("[updateMemberProfile] : {} 기존 프로필 이미지 삭제 완료", member.getUsername());
+    }
   }
 
   // 비밀번호 변경
