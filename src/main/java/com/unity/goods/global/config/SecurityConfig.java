@@ -11,6 +11,8 @@ import com.unity.goods.domain.oauth.service.OAuth2UserService;
 import com.unity.goods.global.exception.AuthenticationEntryPointHandler;
 import com.unity.goods.global.jwt.JwtAuthenticationFilter;
 import com.unity.goods.global.jwt.JwtTokenProvider;
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -60,9 +62,8 @@ public class SecurityConfig {
               config.setAllowedHeaders(Collections.singletonList("*"));
               config.setMaxAge(3600L);
 
-              config.setExposedHeaders(Collections.singletonList("Set-Cookie"));
-              config.setExposedHeaders(Collections.singletonList("Authorization"));
-
+              config.setExposedHeaders(Arrays.asList("Authorization","Set_Cookie"));
+              config.addExposedHeader("Authorization");
               return config;
             }))
 
