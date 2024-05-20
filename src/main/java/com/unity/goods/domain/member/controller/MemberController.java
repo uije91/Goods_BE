@@ -52,10 +52,10 @@ public class MemberController {
     TokenDto login = memberService.login(request);
     Cookie cookie = CookieUtil.addCookie("refresh", login.getRefreshToken(),
         COOKIE_EXPIRATION);
+    System.out.println(login);
     return ResponseEntity.ok()
         .header(HttpHeaders.SET_COOKIE, cookie.getName() + "=" + cookie.getValue())
-        .header(HttpHeaders.AUTHORIZATION, "Bearer " + login.getAccessToken())
-        .build();
+        .body(login);
   }
 
   @PostMapping("/logout")

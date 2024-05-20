@@ -1,6 +1,5 @@
 package com.unity.goods.global.config;
 
-import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpMethod.PUT;
@@ -12,6 +11,9 @@ import com.unity.goods.domain.oauth.service.OAuth2UserService;
 import com.unity.goods.global.exception.AuthenticationEntryPointHandler;
 import com.unity.goods.global.jwt.JwtAuthenticationFilter;
 import com.unity.goods.global.jwt.JwtTokenProvider;
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -26,6 +28,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
 
 @Configuration
 @EnableWebSecurity
@@ -48,6 +51,22 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http
+        .cors(cors -> cors
+            .configurationSource(request -> {
+              CorsConfiguration config = new CorsConfiguration();
+
+              config.setAllowedOrigins(
+                  Collections.singletonList("http://localhost:5173")); //TODO: 프론트엔드 서버 URL로 변경
+              config.setAllowedMethods(Collections.singletonList("*"));
+              config.setAllowCredentials(true);
+              config.setAllowedHeaders(Collections.singletonList("*"));
+              config.setMaxAge(3600L);
+
+              config.setExposedHeaders(Arrays.asList("Authorization","Set_Cookie"));
+              config.addExposedHeader("Authorization");
+              return config;
+            }))
+
         .csrf(AbstractHttpConfigurer::disable)
         .httpBasic(AbstractHttpConfigurer::disable)
         .formLogin(AbstractHttpConfigurer::disable)
@@ -112,5 +131,5 @@ public class SecurityConfig {
     );
     return requestMatchers.toArray(RequestMatcher[]::new);
   }
-  
+
 }

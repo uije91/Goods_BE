@@ -228,7 +228,7 @@ public class MemberService {
     }
 
     // db password 임시 비밀번호로 변경
-    findMember.changePassword(tempPassword);
+    findMember.setPassword(passwordEncoder.encode(tempPassword));
 
   }
 

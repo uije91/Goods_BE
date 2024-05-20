@@ -95,9 +95,9 @@ class GoodsServiceTest {
         .description("테스트 상품의 새로운 설명 입니다.")
         .lat(11.564)
         .lng(27.001)
-        .imagesToUpdate(goodsImages)
+        .goodsImageFiles(goodsImages)
         .address("서울시 강남구")
-        .detailLocation("새로운 테스트 건물 앞")
+        .userDefinedLocation("새로운 테스트 건물 앞")
         .build();
 
     given(goodsRepository.findById(1L))
@@ -171,9 +171,9 @@ class GoodsServiceTest {
         .description("테스트 상품의 새로운 설명 입니다.")
         .lat(11.564)
         .lng(27.001)
-        .imagesToUpdate(goodsImages)
+        .goodsImageFiles(goodsImages)
         .address("서울시 강남구")
-        .detailLocation("새로운 테스트 건물 앞")
+        .userDefinedLocation("새로운 테스트 건물 앞")
         .build();
 
     //when
