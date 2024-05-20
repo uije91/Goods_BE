@@ -115,4 +115,7 @@ logging:
             client:
               WIRE=DEBUG:
 
+iamport:
+  key:
+  secret:
 
