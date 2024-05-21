@@ -3,6 +3,7 @@ package com.unity.goods.global.exception;
 import static com.unity.goods.global.exception.ErrorCode.BAD_REQUEST_VALID_ERROR;
 import static com.unity.goods.global.exception.ErrorCode.INTERNAL_SERVER_ERROR;
 
+import com.unity.goods.domain.chat.exception.ChatException;
 import com.unity.goods.domain.email.exception.EmailException;
 import com.unity.goods.domain.goods.exception.GoodsException;
 import com.unity.goods.domain.member.exception.MemberException;
@@ -21,6 +22,14 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(TradeException.class)
   public ErrorResponse handleTradeException(TradeException e) {
+    log.error("Exception \"{}({})\" is occurred.", e.getErrorCode(), e.getErrorCode().getMessage());
+
+    return new ErrorResponse(e.getErrorCode(), e.getErrorCode().getStatus(),
+        e.getErrorCode().getMessage());
+  }
+
+  @ExceptionHandler(ChatException.class)
+  public ErrorResponse handleChatException(ChatException e) {
     log.error("Exception \"{}({})\" is occurred.", e.getErrorCode(), e.getErrorCode().getMessage());
 
     return new ErrorResponse(e.getErrorCode(), e.getErrorCode().getStatus(),

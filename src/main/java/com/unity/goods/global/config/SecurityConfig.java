@@ -54,7 +54,7 @@ public class SecurityConfig {
             .configurationSource(request -> {
               CorsConfiguration config = new CorsConfiguration();
 
-              config.setAllowedOrigins(List.of("http://localhost:5173")); //TODO: 프론트엔드 서버 URL로 변경
+              config.setAllowedOrigins(List.of("http://localhost:5173","https://apic.app"));
               config.setAllowedMethods(Collections.singletonList("*"));
               config.setAllowCredentials(true);
               config.setAllowedHeaders(Collections.singletonList("*"));
@@ -105,7 +105,8 @@ public class SecurityConfig {
         antMatcher(POST, "/api/goods/search"), // 검색
         antMatcher(GET, "/api/goods"), // 첫 화면
         antMatcher(GET, "/api/goods/**"), // 상품 상세 페이지
-        antMatcher(GET, "/api/goods/sell-list/**")
+        antMatcher(GET, "/api/goods/sell-list/**"),
+        antMatcher("/api/chat/**")
     );
     return requestMatchers.toArray(RequestMatcher[]::new);
   }
