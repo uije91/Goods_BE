@@ -1,6 +1,8 @@
 package com.unity.goods.domain.trade.service;
 
+import static com.unity.goods.domain.goods.type.GoodsStatus.RESERVATION;
 import static com.unity.goods.domain.goods.type.GoodsStatus.SALE;
+import static com.unity.goods.domain.goods.type.GoodsStatus.SOLDOUT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -12,11 +14,13 @@ import static org.mockito.Mockito.when;
 
 import com.unity.goods.domain.goods.entity.Goods;
 import com.unity.goods.domain.goods.repository.GoodsRepository;
+import com.unity.goods.domain.goods.type.GoodsStatus;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.repository.MemberRepository;
 import com.unity.goods.domain.trade.dto.PointTradeDto.PointTradeRequest;
 import com.unity.goods.domain.trade.dto.PointTradeDto.PointTradeResponse;
 import com.unity.goods.domain.trade.dto.PointTradeHistoryDto.PointTradeHistoryResponse;
+import com.unity.goods.domain.trade.dto.StarRateDto.StarRateRequest;
 import com.unity.goods.domain.trade.entity.Trade;
 import com.unity.goods.domain.trade.repository.TradeRepository;
 import com.unity.goods.domain.trade.type.TradePurpose;
@@ -37,6 +41,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 
 @ExtendWith(MockitoExtension.class)
 class TradeServiceTest {
@@ -159,6 +164,57 @@ class TradeServiceTest {
     assertEquals(actualPage.getContent().get(0).getTradePoint(), "1000");
     assertEquals(actualPage.getContent().get(1).getTradePoint(), "2000");
     assertEquals(actualPage.getContent().get(2).getTradePoint(), "10000");
+  }
+
+  @Test
+  @DisplayName("구매자 별점 반영 및 최종 별점 산출 기능 테스트")
+  @Transactional
+  public void rateStarTest() {
+    // given
+    Member seller = Member.builder()
+        .build();
+
+    Goods goods1 = Goods.builder()
+        .id(1L)
+        .member(seller)
+        .goodsStatus(SOLDOUT)
+        .star(4.0)
+        .build();
+
+    Goods goods2 = Goods.builder()
+        .id(2L)
+        .member(seller)
+        .goodsStatus(SOLDOUT)
+        .star(5.0)
+        .build();
+
+    Goods goods3 = Goods.builder()
+        .id(3L)
+        .member(seller)
+        .goodsStatus(SOLDOUT)
+        .star(3.5)
+        .build();
+
+    Goods tradeGoods = Goods.builder()
+        .id(4L)
+        .member(seller)
+        .goodsStatus(RESERVATION)
+        .build();
+
+    StarRateRequest starRateRequest = StarRateRequest.builder()
+        .star(4.5)
+        .build();
+
+    given(goodsRepository.findById(any(Long.class))).willReturn(Optional.of(tradeGoods));
+    given(goodsRepository.findAllByMemberAndGoodsStatus(any(Member.class), any(GoodsStatus.class)))
+        .willReturn(List.of(goods1, goods2, goods3));
+
+    // when
+    tradeService.rateStar(tradeGoods.getId(), starRateRequest);
+
+    // then
+    double expectedStar = (4.0 + 5.0 + 3.5 + 4.5) / 4; // 예상 평균 계산
+    assertEquals(expectedStar, seller.getStar(), 0.01, "판매자 별점이 올바르게 업데이트되어야 합니다.");
   }
 
 }
