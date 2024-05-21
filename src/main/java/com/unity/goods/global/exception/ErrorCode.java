@@ -6,6 +6,9 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum ErrorCode {
+  //Chat Error
+  CHAT_ROOM_NOT_FOUND(400,"채팅방이 존재하지 않습니다."),
+
   // OAuth Error
   INVALID_SOCIAL_TYPE(400, "잘못된 소셜 타입입니다"),
   USE_SERVER_LOGIN(400, "기존 회원입니다. 자체 로그인을 이용해주세요."),
