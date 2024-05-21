@@ -39,6 +39,8 @@ public enum ErrorCode {
   UNMATCHED_PRICE(400, "거래 금액이 상품 가격과 일치하지 않습니다."),
   ALREADY_SOLD(400, "이미 거래 완료된 상품입니다."),
   INSUFFICIENT_AMOUNT(400, "거래를 진행할 잔액이 부족합니다."),
+  PAYMENT_NOT_FOUND(400, "조회되지 않는 결제 내역입니다."),
+  PAYMENT_UNMATCHED(400, "결제 내역이 불일치합니다."),
 
   // WishList Error
   GOODS_ALREADY_WISHLIST(400,"이미 찜한 상품입니다."),

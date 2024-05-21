@@ -14,4 +14,11 @@ public class LoginDto {
     private String email;
     private String password;
   }
+
+  @Getter
+  @AllArgsConstructor
+  @Builder
+  public static class LoginResponse {
+    private String accessToken;
+  }
 }

@@ -18,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Slf4j
 @Component
@@ -53,12 +54,16 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     redisService.setDataExpire("RT:" + email, tokenDto.getRefreshToken(), expiration);
 
-    // 쿠키 만료 시간 : 30일
-    Cookie cookie = CookieUtil.addCookie("refresh", tokenDto.getRefreshToken(),
-        30 * 24 * 60 * 60);
-    response.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + tokenDto.getAccessToken());
-    response.addCookie(cookie);
-    response.sendRedirect("http://localhost:8080"); //TODO: 프론트 주소로 변경
+    Cookie token =
+        CookieUtil.addCookie("refresh", tokenDto.getRefreshToken(), 30 * 24 * 60 * 60);
+
+    response.addCookie(token);
+    response.addHeader(HttpHeaders.SET_COOKIE, token.getName() + "=" + token.getValue());
+
+    String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:5173/auth/kakao")
+        .queryParam("access", tokenDto.getAccessToken())
+        .build().toUriString();
+    getRedirectStrategy().sendRedirect(request, response, targetUrl);
   }
 }
 

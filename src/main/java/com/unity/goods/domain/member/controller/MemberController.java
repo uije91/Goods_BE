@@ -5,6 +5,7 @@ import static com.unity.goods.domain.member.dto.ChangeTradePasswordDto.ChangeTra
 import static com.unity.goods.domain.member.dto.FindPasswordDto.FindPasswordRequest;
 
 import com.unity.goods.domain.member.dto.LoginDto;
+import com.unity.goods.domain.member.dto.LoginDto.LoginResponse;
 import com.unity.goods.domain.member.dto.MemberProfileDto.MemberProfileResponse;
 import com.unity.goods.domain.member.dto.ResignDto;
 import com.unity.goods.domain.member.dto.SellerProfileDto.SellerProfileResponse;
@@ -38,7 +39,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberController {
 
   private final MemberService memberService;
-  private final int COOKIE_EXPIRATION = 30 * 24 * 60 * 60; // 30일
 
   @PostMapping("/signup")
   public ResponseEntity<?> signUp(
@@ -50,12 +50,12 @@ public class MemberController {
   @PostMapping("/login")
   public ResponseEntity<?> login(@RequestBody @Valid LoginDto.LoginRequest request) {
     TokenDto login = memberService.login(request);
+
     Cookie cookie = CookieUtil.addCookie("refresh", login.getRefreshToken(),
-        COOKIE_EXPIRATION);
+        30 * 24 * 60 * 60);
     return ResponseEntity.ok()
         .header(HttpHeaders.SET_COOKIE, cookie.getName() + "=" + cookie.getValue())
-        .header(HttpHeaders.AUTHORIZATION, "Bearer " + login.getAccessToken())
-        .build();
+        .body(LoginResponse.builder().accessToken(login.getAccessToken()).build());
   }
 
   @PostMapping("/logout")
@@ -131,8 +131,6 @@ public class MemberController {
         .build();
 
     String accessToken = memberService.reissue(tokenDto);
-
-    return ResponseEntity.ok()
-        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken).build();
+    return ResponseEntity.ok().body(LoginResponse.builder().accessToken(accessToken).build());
   }
 }
