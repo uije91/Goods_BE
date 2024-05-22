@@ -33,7 +33,7 @@ public class SignUpDto {
 
     private String phoneNumber;
 
-    @Pattern(regexp = "^[0-9]{6}$", message = "거래 비밀번호는 6자리 숫자로 작성해주세요.")
+    @Pattern(regexp = "^$|^[0-9]{6}$", message = "거래 비밀번호는 6자리 숫자로 작성해주세요.")
     private String tradePassword;
 
   }
@@ -47,7 +47,7 @@ public class SignUpDto {
     private String nickName;
     private String phoneNumber;
 
-    public static SignUpResponse fromMember(Member member){
+    public static SignUpResponse fromMember(Member member) {
       return SignUpResponse.builder()
           .email(member.getEmail())
           .nickName(member.getNickname())
