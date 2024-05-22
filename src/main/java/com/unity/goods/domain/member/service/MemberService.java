@@ -395,9 +395,11 @@ public class MemberService {
     Member findMember = memberRepository.findByEmail(member.getUsername())
         .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
 
-    if (!passwordEncoder.matches(changeTradePasswordRequest.getCurTradePassword(),
-        findMember.getTradePassword())) {
-      throw new MemberException(PASSWORD_NOT_MATCH);
+    if (changeTradePasswordRequest.getCurTradePassword() != null) {
+      if (!passwordEncoder.matches(changeTradePasswordRequest.getCurTradePassword(),
+          findMember.getTradePassword())) {
+        throw new MemberException(PASSWORD_NOT_MATCH);
+      }
     }
 
     if (passwordEncoder.matches(changeTradePasswordRequest.getNewTradePassword(),
