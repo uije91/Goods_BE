@@ -115,7 +115,7 @@ public class WishService {
         .address(goods.getAddress())
         .price(String.valueOf(goods.getPrice()))
         .sellerName(goods.getMember().getNickname())
-        .goodsStatus(goods.getGoodsStatus())
+        .goodsStatus(goods.getGoodsStatus().getDescription())
         .uploadBefore(uploadBefore)
         .build();
   }

@@ -73,7 +73,7 @@ public class TradeService {
               .goodsName(goods.getGoodsName())
               .price(String.valueOf(goods.getPrice()))
               .goodsThumbnail(imageUrl)
-              .goodsStatus(goods.getGoodsStatus())
+              .goodsStatus(goods.getGoodsStatus().getDescription())
               .tradedBefore(getTradedBeforeSeconds(trade.getTradedAt()))
               .build();
         }).collect(Collectors.toList());
