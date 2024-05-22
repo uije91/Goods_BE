@@ -95,10 +95,10 @@ public class MemberService {
 
     // 비밀번호 & 거래 비밀번호 암호화
     signUpRequest.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
-    if (!signUpRequest.getTradePassword().isEmpty()) {
-      signUpRequest.setTradePassword(passwordEncoder.encode(signUpRequest.getTrade_password()));
+    if (!signUpRequest.getTrade_password().isEmpty()) {
+      signUpRequest.setTrade_password(passwordEncoder.encode(signUpRequest.getTrade_password()));
     } else {
-      signUpRequest.setTradePassword(null);
+      signUpRequest.setTrade_password(null);
     }
     
     Member member = Member.fromSignUpRequest(signUpRequest, imageUrl);
