@@ -1,5 +1,7 @@
 package com.unity.goods.domain.trade.dto;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.unity.goods.domain.trade.entity.Trade;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
@@ -13,6 +15,7 @@ public class PointTradeHistoryDto {
   @Builder
   @NoArgsConstructor
   @AllArgsConstructor
+  @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
   public static class PointTradeHistoryResponse {
     private String goodsId;
     private String tradePoint;

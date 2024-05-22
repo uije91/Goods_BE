@@ -75,18 +75,20 @@ public class Goods extends BaseEntity {
   private List<Image> imageList = new ArrayList<>();
 
   @OneToMany(mappedBy = "goods")
+  @Builder.Default
   private List<Wishlist> wishList = new ArrayList<>();
 
   @OneToMany(mappedBy = "goods")
+  @Builder.Default
   private List<Trade> tradeList  = new ArrayList<>();
 
   public static Goods fromUploadGoodsRequest(UploadGoodsRequest request) {
 
     String userDefinedLocation =
-        request.getUserDefinedLocation() == null ? "" : " " + request.getUserDefinedLocation();
+        request.getUser_defined_location() == null ? "" : " " + request.getUser_defined_location();
 
     return Goods.builder()
-        .goodsName(request.getGoodsName())
+        .goodsName(request.getGoods_name())
         .price(Long.parseLong(request.getPrice()))
         .description(request.getDescription())
         .address(request.getAddress() + userDefinedLocation)

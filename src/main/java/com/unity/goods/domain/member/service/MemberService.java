@@ -72,7 +72,7 @@ public class MemberService {
 
   public SignUpResponse signUp(SignUpRequest signUpRequest) {
     // 비밀번호와 비밀번화 확인 일치 검사 (안전성을 위해 프론트에 이어 한번 더 검사)
-    if (!signUpRequest.getPassword().equals(signUpRequest.getChkPassword())) {
+    if (!signUpRequest.getPassword().equals(signUpRequest.getChk_password())) {
       throw new MemberException(PASSWORD_NOT_MATCH);
     }
 
@@ -82,25 +82,25 @@ public class MemberService {
     }
 
     // nickname 중복 검사
-    if (memberRepository.existsByNickname(signUpRequest.getNickName())) {
+    if (memberRepository.existsByNickname(signUpRequest.getNick_name())) {
       throw new MemberException(NICKNAME_ALREADY_EXISTS);
     }
 
     // 이미지 있다면 s3 저장
     String imageUrl = null;
-    if (signUpRequest.getProfileImage() != null) {
-      imageUrl = s3Service.uploadFile(signUpRequest.getProfileImage(),
+    if (signUpRequest.getProfile_image() != null) {
+      imageUrl = s3Service.uploadFile(signUpRequest.getProfile_image(),
           signUpRequest.getEmail() + "/" + "profileImage");
     }
 
     // 비밀번호 & 거래 비밀번호 암호화
     signUpRequest.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
     if (!signUpRequest.getTradePassword().isEmpty()) {
-      signUpRequest.setTradePassword(passwordEncoder.encode(signUpRequest.getTradePassword()));
+      signUpRequest.setTradePassword(passwordEncoder.encode(signUpRequest.getTrade_password()));
     } else {
       signUpRequest.setTradePassword(null);
     }
-
+    
     Member member = Member.fromSignUpRequest(signUpRequest, imageUrl);
     memberRepository.save(member);
 
@@ -327,17 +327,17 @@ public class MemberService {
         .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
 
     // 변경 사항 있는 필드만 프로필 변경
-    if (updateProfileRequest.getNickName() != null) {
-      findMember.setNickname(updateProfileRequest.getNickName());
+    if (updateProfileRequest.getNick_name() != null) {
+      findMember.setNickname(updateProfileRequest.getNick_name());
     }
 
-    if (updateProfileRequest.getPhoneNumber() != null) {
-      findMember.setPhoneNumber(updateProfileRequest.getPhoneNumber());
+    if (updateProfileRequest.getPhone_number() != null) {
+      findMember.setPhoneNumber(updateProfileRequest.getPhone_number());
     }
 
     // 새로운 프로필 이미지로 교체
-    if (updateProfileRequest.getProfileImageUrl() == null
-        && updateProfileRequest.getProfileImageFile() != null) {
+    if (updateProfileRequest.getProfile_image_url() == null
+        && updateProfileRequest.getProfile_image_file() != null) {
 
       deleteCurrentProfileImageIfExists(member, findMember);
       String uploadedUrl = uploadProfileImageToS3(member, updateProfileRequest);
@@ -345,8 +345,8 @@ public class MemberService {
     }
 
     // 기본 이미지 사용
-    if (updateProfileRequest.getProfileImageUrl() == null
-        && updateProfileRequest.getProfileImageFile() == null) {
+    if (updateProfileRequest.getProfile_image_url() == null
+        && updateProfileRequest.getProfile_image_file() == null) {
 
       deleteCurrentProfileImageIfExists(member, findMember);
       findMember.setProfileImage(null);
@@ -355,9 +355,9 @@ public class MemberService {
     return UpdateProfileResponse.fromMember(findMember);
   }
 
-  private String uploadProfileImageToS3(UserDetailsImpl member,
-      UpdateProfileRequest updateProfileRequest) {
-    String uploadedUrl = s3Service.uploadFile(updateProfileRequest.getProfileImageFile(),
+
+  private String uploadProfileImageToS3(UserDetailsImpl member, UpdateProfileRequest updateProfileRequest) {
+    String uploadedUrl = s3Service.uploadFile(updateProfileRequest.getProfile_image_file(),
         member.getUsername() + "/" + "profileImage");
     log.info("[updateMemberProfile] : {} 프로필 이미지 업로드 완료", member.getUsername());
     return uploadedUrl;

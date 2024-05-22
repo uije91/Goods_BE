@@ -2,6 +2,8 @@ package com.unity.goods.domain.member.dto;
 
 import static com.unity.goods.domain.member.entity.Badge.badgeToString;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.unity.goods.domain.member.entity.Member;
 import java.util.List;
 import lombok.Builder;
@@ -11,6 +13,7 @@ public class MemberProfileDto {
 
   @Getter
   @Builder
+  @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
   public static class MemberProfileResponse {
 
     private Long memberId;

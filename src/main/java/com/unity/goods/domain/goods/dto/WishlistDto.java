@@ -16,7 +16,7 @@ public class WishlistDto {
   private String sellerName;
   private String price;
   private String imageUrl;
-  private GoodsStatus goodsStatus;
+  private String goodsStatus;
   private Long uploadBefore;
   private String address;
 }
