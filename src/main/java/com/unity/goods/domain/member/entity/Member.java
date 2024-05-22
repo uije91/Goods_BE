@@ -90,14 +90,14 @@ public class Member extends BaseEntity {
   public static Member fromSignUpRequest(SignUpRequest signUpRequest, String imageUrl) {
 
     return Member.builder()
-        .nickname(signUpRequest.getNickName())
+        .nickname(signUpRequest.getNick_name())
         .email(signUpRequest.getEmail())
         .password(signUpRequest.getPassword())
-        .phoneNumber(signUpRequest.getPhoneNumber())
+        .phoneNumber(signUpRequest.getPhone_number())
         .profileImage(imageUrl)
         .role(Role.USER)
         .status(ACTIVE)
-        .tradePassword(signUpRequest.getTradePassword())
+        .tradePassword(signUpRequest.getTrade_password())
         .socialType(SERVER)
         .build();
   }

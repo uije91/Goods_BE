@@ -1,5 +1,7 @@
 package com.unity.goods.domain.trade.dto;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
@@ -9,6 +11,7 @@ public class PointTradeDto {
 
   @Getter
   @Builder
+  @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
   public static class PointTradeRequest {
 
     private Long sellerId;
@@ -26,6 +29,7 @@ public class PointTradeDto {
 
   @Getter
   @Builder
+  @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
   public static class PointTradeResponse {
 
     private String paymentStatus;

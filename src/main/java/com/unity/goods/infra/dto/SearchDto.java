@@ -1,5 +1,7 @@
 package com.unity.goods.infra.dto;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.unity.goods.infra.document.GoodsDocument;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,6 +20,7 @@ public class SearchDto {
 
   @Getter
   @Builder
+  @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
   public static class SearchedGoods {
 
     private long goodsId;
