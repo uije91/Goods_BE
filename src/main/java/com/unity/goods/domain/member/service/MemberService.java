@@ -300,7 +300,9 @@ public class MemberService {
       throw new MemberException(RESIGNED_ACCOUNT);
     }
 
-    return MemberProfileResponse.fromMember(findMember);
+    boolean tradePasswordExists = findMember.getTradePassword() != null;
+
+    return MemberProfileResponse.fromMember(findMember, tradePasswordExists);
   }
 
   // 판매자 프로필 조회
@@ -353,7 +355,8 @@ public class MemberService {
     return UpdateProfileResponse.fromMember(findMember);
   }
 
-  private String uploadProfileImageToS3(UserDetailsImpl member, UpdateProfileRequest updateProfileRequest) {
+  private String uploadProfileImageToS3(UserDetailsImpl member,
+      UpdateProfileRequest updateProfileRequest) {
     String uploadedUrl = s3Service.uploadFile(updateProfileRequest.getProfileImageFile(),
         member.getUsername() + "/" + "profileImage");
     log.info("[updateMemberProfile] : {} 프로필 이미지 업로드 완료", member.getUsername());
