@@ -35,7 +35,7 @@ public class SignUpDto {
 
     private String phone_number;
 
-    @Pattern(regexp = "^[0-9]{6}$", message = "거래 비밀번호는 6자리 숫자로 작성해주세요.")
+    @Pattern(regexp = "^$|^[0-9]{6}$", message = "거래 비밀번호는 6자리 숫자로 작성해주세요.")
     private String trade_password;
 
   }
