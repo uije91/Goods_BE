@@ -1,5 +1,7 @@
 package com.unity.goods.domain.goods.dto;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.unity.goods.domain.goods.entity.Goods;
 import com.unity.goods.domain.member.entity.Member;
 import java.time.Duration;
@@ -14,6 +16,7 @@ public class GoodsDetailDto {
   @Getter
   @Builder
   @Setter
+  @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
   public static class GoodsDetailResponse {
 
     private Long sellerId;
@@ -41,7 +44,7 @@ public class GoodsDetailDto {
           .goodsName(goods.getGoodsName())
           .price(String.valueOf(goods.getPrice()))
           .description(goods.getDescription())
-          .status(goods.getGoodsStatus().toString())
+          .status(goods.getGoodsStatus().getDescription())
           .lat(goods.getLat())
           .lng(goods.getLng())
           .address(goods.getAddress())

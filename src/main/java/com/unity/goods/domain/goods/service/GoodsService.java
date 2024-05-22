@@ -74,8 +74,8 @@ public class GoodsService {
     }
 
     // 빈 이미지 파일 등록 시 에러 처리
-    if (!uploadGoodsRequest.getGoodsImageFiles().isEmpty()
-        && Objects.equals(uploadGoodsRequest.getGoodsImageFiles().get(0).getOriginalFilename(),
+    if (!uploadGoodsRequest.getGoods_image_files().isEmpty()
+        && Objects.equals(uploadGoodsRequest.getGoods_image_files().get(0).getOriginalFilename(),
         "")) {
       throw new GoodsException(NEED_LEAST_ONE_IMAGE);
     }
@@ -84,11 +84,11 @@ public class GoodsService {
         .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
 
     // 이미지 s3 업로드
-    List<String> uploadSuccessFiles = uploadGoodsRequest.getGoodsImageFiles().stream()
+    List<String> uploadSuccessFiles = uploadGoodsRequest.getGoods_image_files().stream()
         .filter(
             multipartFile -> !Objects.requireNonNull(multipartFile.getOriginalFilename()).isEmpty())
         .map(multipartFile -> s3Service.uploadFile(multipartFile,
-            member.getUsername() + "/" + uploadGoodsRequest.getGoodsName()))
+            member.getUsername() + "/" + uploadGoodsRequest.getGoods_name()))
         .toList();
 
     // Goods 생성 및 elasticsearch db에 저장
@@ -158,24 +158,24 @@ public class GoodsService {
       throw new TradeException(OUT_RANGED_COST);
     }
 
-    int deleteImageCnt = (updateGoodsInfoRequest.getImagesToDelete()) == null ? 0
-        : updateGoodsInfoRequest.getImagesToDelete().size();
+    int deleteImageCnt = (updateGoodsInfoRequest.getImages_to_delete()) == null ? 0
+        : updateGoodsInfoRequest.getImages_to_delete().size();
 
-    int addImageCnt = (updateGoodsInfoRequest.getGoodsImageFiles()) == null ? 0
-        : updateGoodsInfoRequest.getGoodsImageFiles().size();
+    int addImageCnt = (updateGoodsInfoRequest.getGoods_image_files()) == null ? 0
+        : updateGoodsInfoRequest.getGoods_image_files().size();
 
     if (goods.getImageList().size() - deleteImageCnt + addImageCnt > MAX_IMAGE_NUM) {
       log.error("[GoodsService][updateGoodsInfo] : \"{}\" 상품 이미지 등록 개수 초과", goods.getGoodsName());
       throw new GoodsException(MAX_IMAGE_LIMIT_EXCEEDED);
     }
 
-    Optional.ofNullable(updateGoodsInfoRequest.getImagesToDelete())
+    Optional.ofNullable(updateGoodsInfoRequest.getImages_to_delete())
         .ifPresent(urls -> urls.forEach(goodsUrl -> {
           imageRepository.deleteImageByImageUrl(goodsUrl);
           s3Service.deleteFile(goodsUrl);
         }));
 
-    Optional.ofNullable(updateGoodsInfoRequest.getGoodsImageFiles())
+    Optional.ofNullable(updateGoodsInfoRequest.getGoods_image_files())
         .ifPresent(files ->
             files.stream()
                 .map(multipart -> s3Service.uploadFile(multipart,
@@ -247,7 +247,7 @@ public class GoodsService {
               .goodsName(goods.getGoodsName())
               .price(String.valueOf(goods.getPrice()))
               .goodsThumbnail(imageUrl)
-              .goodsStatus(goods.getGoodsStatus())
+              .goodsStatus(goods.getGoodsStatus().getDescription())
               .uploadedBefore(getTradedBeforeSeconds(goods.getCreatedAt()))
               .build();
         }).collect(Collectors.toList());
