@@ -39,6 +39,7 @@ public class ChatRoom {
   private Goods goods;
 
   @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL)
+  @Builder.Default
   private List<ChatLog> chatLogs = new ArrayList<>();
 
   public void changeDate() {
