@@ -27,12 +27,10 @@ import com.unity.goods.domain.member.dto.SignUpDto.SignUpRequest;
 import com.unity.goods.domain.member.dto.SignUpDto.SignUpResponse;
 import com.unity.goods.domain.member.dto.UpdateProfileDto.UpdateProfileRequest;
 import com.unity.goods.domain.member.dto.UpdateProfileDto.UpdateProfileResponse;
-import com.unity.goods.domain.member.entity.Badge;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.exception.MemberException;
 import com.unity.goods.domain.member.repository.BadgeRepository;
 import com.unity.goods.domain.member.repository.MemberRepository;
-import com.unity.goods.domain.member.type.BadgeType;
 import com.unity.goods.domain.model.TokenDto;
 import com.unity.goods.global.jwt.JwtTokenProvider;
 import com.unity.goods.global.jwt.UserDetailsImpl;
@@ -40,7 +38,6 @@ import com.unity.goods.infra.service.RedisService;
 import com.unity.goods.infra.service.S3Service;
 import java.security.SecureRandom;
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -98,7 +95,12 @@ public class MemberService {
 
     // 비밀번호 & 거래 비밀번호 암호화
     signUpRequest.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
-    signUpRequest.setTrade_password(passwordEncoder.encode(signUpRequest.getTrade_password()));
+    if (!signUpRequest.getTradePassword().isEmpty()) {
+      signUpRequest.setTradePassword(passwordEncoder.encode(signUpRequest.getTrade_password()));
+    } else {
+      signUpRequest.setTradePassword(null);
+    }
+    
     Member member = Member.fromSignUpRequest(signUpRequest, imageUrl);
     memberRepository.save(member);
 
@@ -298,7 +300,9 @@ public class MemberService {
       throw new MemberException(RESIGNED_ACCOUNT);
     }
 
-    return MemberProfileResponse.fromMember(findMember);
+    boolean tradePasswordExists = findMember.getTradePassword() != null;
+
+    return MemberProfileResponse.fromMember(findMember, tradePasswordExists);
   }
 
   // 판매자 프로필 조회
@@ -351,6 +355,7 @@ public class MemberService {
     return UpdateProfileResponse.fromMember(findMember);
   }
 
+
   private String uploadProfileImageToS3(UserDetailsImpl member, UpdateProfileRequest updateProfileRequest) {
     String uploadedUrl = s3Service.uploadFile(updateProfileRequest.getProfile_image_file(),
         member.getUsername() + "/" + "profileImage");
@@ -390,9 +395,11 @@ public class MemberService {
     Member findMember = memberRepository.findByEmail(member.getUsername())
         .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
 
-    if (!passwordEncoder.matches(changeTradePasswordRequest.getCurTradePassword(),
-        findMember.getTradePassword())) {
-      throw new MemberException(PASSWORD_NOT_MATCH);
+    if (changeTradePasswordRequest.getCurTradePassword() != null) {
+      if (!passwordEncoder.matches(changeTradePasswordRequest.getCurTradePassword(),
+          findMember.getTradePassword())) {
+        throw new MemberException(PASSWORD_NOT_MATCH);
+      }
     }
 
     if (passwordEncoder.matches(changeTradePasswordRequest.getNewTradePassword(),

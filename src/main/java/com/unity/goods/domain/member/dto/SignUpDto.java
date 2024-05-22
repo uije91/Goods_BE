@@ -50,7 +50,7 @@ public class SignUpDto {
     private String nickName;
     private String phoneNumber;
 
-    public static SignUpResponse fromMember(Member member){
+    public static SignUpResponse fromMember(Member member) {
       return SignUpResponse.builder()
           .email(member.getEmail())
           .nickName(member.getNickname())

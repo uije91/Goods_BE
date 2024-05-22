@@ -20,21 +20,22 @@ public class MemberProfileDto {
     private String nickName;
     private String phoneNumber;
     private String profileImage;
+    private boolean tradePasswordExists;
     private double star;
     private List<String> badgeList;
 
-    public static MemberProfileResponse fromMember(Member member) {
+    public static MemberProfileResponse fromMember(Member member, boolean tradePasswordExists) {
 
       return MemberProfileResponse.builder()
           .memberId(member.getId())
           .nickName(member.getNickname())
           .phoneNumber(member.getPhoneNumber())
           .profileImage(member.getProfileImage())
+          .tradePasswordExists(tradePasswordExists)
           .star(member.getStar())
           .badgeList(badgeToString(member.getBadgeList()))
           .build();
     }
 
   }
-
 }
