@@ -7,7 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ErrorCode {
   //Chat Error
-  CHAT_ROOM_NOT_FOUND(400,"채팅방이 존재하지 않습니다."),
+  CHAT_ROOM_NOT_FOUND(400, "채팅방이 존재하지 않습니다."),
 
   // OAuth Error
   INVALID_SOCIAL_TYPE(400, "잘못된 소셜 타입입니다"),
@@ -32,6 +32,7 @@ public enum ErrorCode {
   NEED_LEAST_ONE_IMAGE(400, "상품 등록 시 최소 1개의 이미지를 올려야 합니다."),
   CANNOT_DELETE_SOLD_ITEM(400, "판매완료된 상품은 삭제할 수 없습니다."),
   UNMATCHED_SELLER(400, "해당 상품의 판매자가 아닙니다."),
+  INVALID_GOODS_STATUS(400, "유효하지 않은 상품 상태 값입니다."),
 
   // Trade Error
   OUT_RANGED_COST(400, "해당 금액은 송금 범위를 초과하였습니다. 다시 확인 부탁드립니다."),
@@ -43,9 +44,9 @@ public enum ErrorCode {
   PAYMENT_UNMATCHED(400, "결제 내역이 불일치합니다."),
 
   // WishList Error
-  GOODS_ALREADY_WISHLIST(400,"이미 찜한 상품입니다."),
-  WISHLIST_NOT_FOUND(400,"찜한 상품을 찾을 수 없습니다"),
-  IMPOSSIBLE_TO_WISHLIST_MY_GOODS(400,"내가 등록한 제품에 찜은 불가능합니다."),
+  GOODS_ALREADY_WISHLIST(400, "이미 찜한 상품입니다."),
+  WISHLIST_NOT_FOUND(400, "찜한 상품을 찾을 수 없습니다"),
+  IMPOSSIBLE_TO_WISHLIST_MY_GOODS(400, "내가 등록한 제품에 찜은 불가능합니다."),
 
   // System Error
   INTERNAL_SERVER_ERROR(500, "내부 서버 오류가 발생했습니다."),

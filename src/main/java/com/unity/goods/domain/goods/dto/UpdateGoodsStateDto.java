@@ -1,6 +1,5 @@
 package com.unity.goods.domain.goods.dto;
 
-import com.unity.goods.domain.goods.type.GoodsStatus;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,7 +17,7 @@ public class UpdateGoodsStateDto {
   public static class UpdateGoodsStateRequest {
 
     @NotNull(message = "상품 상태를 입력해주세요.")
-    private GoodsStatus goodsStatus;
+    private String goodsStatus;
 
   }
 }

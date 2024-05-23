@@ -1,6 +1,7 @@
 package com.unity.goods.domain.goods.service;
 
 import static com.unity.goods.domain.goods.type.GoodsStatus.SOLDOUT;
+import static com.unity.goods.domain.goods.type.GoodsStatus.fromDescription;
 import static com.unity.goods.global.exception.ErrorCode.ALREADY_SOLD_OUT_GOODS;
 import static com.unity.goods.global.exception.ErrorCode.CANNOT_DELETE_SOLD_ITEM;
 import static com.unity.goods.global.exception.ErrorCode.GOODS_NOT_FOUND;
@@ -200,7 +201,7 @@ public class GoodsService {
       throw new GoodsException(MISMATCHED_SELLER);
     }
 
-    goods.setGoodsStatus(updateGoodsStateRequest.getGoodsStatus());
+    goods.setGoodsStatus(fromDescription(updateGoodsStateRequest.getGoodsStatus()));
   }
 
   @Transactional
