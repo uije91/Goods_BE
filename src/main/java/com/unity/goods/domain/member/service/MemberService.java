@@ -265,7 +265,7 @@ public class MemberService {
   }
 
   // 토큰 재발급
-  public String reissue(TokenDto tokenDto) {
+  public TokenDto reissue(TokenDto tokenDto) {
     // 1. RT 검증
     if (!jwtTokenProvider.validateToken(tokenDto.getRefreshToken())) {
       log.error("[MemberService][reissue] : RefreshToken 검증 실패");
@@ -285,7 +285,7 @@ public class MemberService {
     }
 
     // 4.새로운 토큰 생성 및 반환
-    return jwtTokenProvider.generateAccessToken(email, role);
+    return generateToken(email, role);
   }
 
   // 회원 프로필 조회
