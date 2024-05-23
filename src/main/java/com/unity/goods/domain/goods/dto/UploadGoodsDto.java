@@ -53,6 +53,7 @@ public class UploadGoodsDto {
   @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
   public static class UploadGoodsResponse {
 
+    private Long goodsId;
     private String sellerName;
     private String goodsName;
     private String price;
@@ -62,6 +63,7 @@ public class UploadGoodsDto {
 
     public static UploadGoodsResponse fromGoods(Goods goods) {
       return UploadGoodsResponse.builder()
+          .goodsId(goods.getId())
           .sellerName(goods.getMember().getNickname())
           .goodsName(goods.getGoodsName())
           .price(String.valueOf(goods.getPrice()))
