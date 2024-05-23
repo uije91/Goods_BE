@@ -56,13 +56,13 @@ public class ChatService {
 
     if (existChatRoom.isPresent()) {
 
+      log.info("[ChatService][addChatRoom]: 이미 존재하는 채팅방" + "goods={}, sellerId={}, buyerId={}",
+          goods, chatRoom.getSellerId(), chatRoom.getBuyerId());
       return ChatRoomResponse.builder()
           .roomId(existChatRoom.get().getId())
           .build();
     }
 
-    log.info("[ChatService][addChatRoom]: 이미 존재하는 채팅방" + "goods={}, sellerId={}, buyerId={}",
-        goods, chatRoom.getSellerId(), chatRoom.getBuyerId());
     chatRoomRepository.save(chatRoom);
 
     return ChatRoomResponse.builder()
@@ -100,7 +100,7 @@ public class ChatService {
   }
 
   // 채팅 내용 확인
-  public ChatRoomDto getChatLog(Long roomId, Long memberId) {
+  public ChatRoomDto getChatLogs(Long roomId, Long memberId) {
     Member member = memberRepository.findById(memberId)
         .orElseThrow(() -> new ChatException(USER_NOT_FOUND));
 
@@ -117,15 +117,6 @@ public class ChatService {
         chatLogRepository.findAllByChatRoomIdAndCheckedAndReceiver(roomId, false, name);
     list.forEach(ChatLog::changeCheckedState);
     chatLogRepository.saveAll(list);
-  }
-
-  // 전체 안읽은 채팅 수 조회(사용하지 않기로 함)
-  public int countAllChatNotRead(Long id) {
-    Member member = memberRepository.findById(id)
-        .orElseThrow(() -> new ChatException(USER_NOT_FOUND));
-    String nickname = member.getNickname();
-
-    return chatLogRepository.countAllByReceiverAndChecked(nickname, false);
   }
 
   // 채팅로그 저장
