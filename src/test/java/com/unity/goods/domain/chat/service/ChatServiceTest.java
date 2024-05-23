@@ -148,7 +148,7 @@ class ChatServiceTest {
     when(chatRoomRepository.findById(anyLong())).thenReturn(Optional.of(chatRoom));
 
     // when
-    ChatRoomDto chatRoomDto = chatService.getChatLog(chatRoom.getId(),member2.getId());
+    ChatRoomDto chatRoomDto = chatService.getChatLogs(chatRoom.getId(),member2.getId());
 
     //then
     assertEquals(5, chatRoomDto.getChatLogs().size());

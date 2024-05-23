@@ -16,6 +16,7 @@ import com.unity.goods.domain.chat.repository.ChatRoomRepository;
 import com.unity.goods.domain.goods.entity.Goods;
 import com.unity.goods.domain.goods.repository.GoodsRepository;
 import com.unity.goods.domain.member.entity.Member;
+import com.unity.goods.domain.member.exception.MemberException;
 import com.unity.goods.domain.member.repository.MemberRepository;
 import com.unity.goods.global.jwt.JwtTokenProvider;
 import java.time.LocalDateTime;
@@ -128,29 +129,20 @@ public class ChatService {
     String email = jwtTokenProvider.getClaims(token).get("email").toString();
     String sender = memberRepository.findMemberByEmail(email).getNickname();
 
-    String receiver;
+    // 앞에서 채팅룸 이미 검색됨. 구매자는 당연히 있어야 함. 없으면 에러.
+    Member member = memberRepository.findById(chatRoom.getBuyerId())
+        .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
 
-    String buyer = "";
-    Optional<Member> optionalMember = memberRepository.findById(chatRoom.getBuyerId());
-    if (optionalMember.isPresent()) {
-      buyer = optionalMember.get().getNickname();
-    }
-
+    String buyer = member.getNickname();
     String seller = chatRoom.getGoods().getMember().getNickname();
 
-    if (seller.equals(sender)) {
-      receiver = buyer;
-    } else {
-      receiver = seller;
-    }
-
-    String message = chatMessageDto.getMessage();
+    String receiver = seller.equals(sender) ? buyer : seller;
 
     ChatLog chatLog = ChatLog.builder()
         .sender(sender)
         .receiver(receiver)
         .chatRoom(chatRoom)
-        .message(message)
+        .message(chatMessageDto.getMessage())
         .createdAt(LocalDateTime.now())
         .build();
 
