@@ -6,6 +6,7 @@ import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
 
 import com.unity.goods.domain.chat.dto.ChatMessageDto;
 import com.unity.goods.domain.chat.dto.ChatRoomDto;
+import com.unity.goods.domain.chat.dto.ChatRoomDto.ChatRoomResponse;
 import com.unity.goods.domain.chat.dto.ChatRoomListDto;
 import com.unity.goods.domain.chat.entity.ChatLog;
 import com.unity.goods.domain.chat.entity.ChatRoom;
@@ -15,6 +16,7 @@ import com.unity.goods.domain.chat.repository.ChatRoomRepository;
 import com.unity.goods.domain.goods.entity.Goods;
 import com.unity.goods.domain.goods.repository.GoodsRepository;
 import com.unity.goods.domain.member.entity.Member;
+import com.unity.goods.domain.member.exception.MemberException;
 import com.unity.goods.domain.member.repository.MemberRepository;
 import com.unity.goods.global.jwt.JwtTokenProvider;
 import java.time.LocalDateTime;
@@ -39,7 +41,7 @@ public class ChatService {
   private final JwtTokenProvider jwtTokenProvider;
 
   // 채팅방 생성
-  public Long addChatRoom(Long goodsId, Long memberId) {
+  public ChatRoomResponse addChatRoom(Long goodsId, Long memberId) {
     Goods goods = goodsRepository.findById(goodsId)
         .orElseThrow(() -> new ChatException(GOODS_NOT_FOUND));
 
@@ -55,13 +57,18 @@ public class ChatService {
 
     if (existChatRoom.isPresent()) {
 
-      return existChatRoom.get().getId();
+      log.info("[ChatService][addChatRoom]: 이미 존재하는 채팅방" + "goods={}, sellerId={}, buyerId={}",
+          goods, chatRoom.getSellerId(), chatRoom.getBuyerId());
+      return ChatRoomResponse.builder()
+          .roomId(existChatRoom.get().getId())
+          .build();
     }
 
-    log.info("[ChatService][addChatRoom]: 이미 존재하는 채팅방" + "goods={}, sellerId={}, buyerId={}",
-        goods, chatRoom.getSellerId(), chatRoom.getBuyerId());
     chatRoomRepository.save(chatRoom);
-    return chatRoom.getId();
+
+    return ChatRoomResponse.builder()
+        .roomId(chatRoom.getId())
+        .build();
   }
 
   // 채팅방 목록 조회
@@ -94,7 +101,7 @@ public class ChatService {
   }
 
   // 채팅 내용 확인
-  public ChatRoomDto getChatLog(Long roomId, Long memberId) {
+  public ChatRoomDto getChatLogs(Long roomId, Long memberId) {
     Member member = memberRepository.findById(memberId)
         .orElseThrow(() -> new ChatException(USER_NOT_FOUND));
 
@@ -113,15 +120,6 @@ public class ChatService {
     chatLogRepository.saveAll(list);
   }
 
-  // 전체 안읽은 채팅 수 조회(사용하지 않기로 함)
-  public int countAllChatNotRead(Long id) {
-    Member member = memberRepository.findById(id)
-        .orElseThrow(() -> new ChatException(USER_NOT_FOUND));
-    String nickname = member.getNickname();
-
-    return chatLogRepository.countAllByReceiverAndChecked(nickname, false);
-  }
-
   // 채팅로그 저장
   @Transactional
   public void addChatLog(ChatMessageDto chatMessageDto, String token) {
@@ -131,29 +129,20 @@ public class ChatService {
     String email = jwtTokenProvider.getClaims(token).get("email").toString();
     String sender = memberRepository.findMemberByEmail(email).getNickname();
 
-    String receiver;
+    // 앞에서 채팅룸 이미 검색됨. 구매자는 당연히 있어야 함. 없으면 에러.
+    Member member = memberRepository.findById(chatRoom.getBuyerId())
+        .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
 
-    String buyer = "";
-    Optional<Member> optionalMember = memberRepository.findById(chatRoom.getBuyerId());
-    if (optionalMember.isPresent()) {
-      buyer = optionalMember.get().getNickname();
-    }
-
+    String buyer = member.getNickname();
     String seller = chatRoom.getGoods().getMember().getNickname();
 
-    if (seller.equals(sender)) {
-      receiver = buyer;
-    } else {
-      receiver = seller;
-    }
-
-    String message = chatMessageDto.getMessage();
+    String receiver = seller.equals(sender) ? buyer : seller;
 
     ChatLog chatLog = ChatLog.builder()
         .sender(sender)
         .receiver(receiver)
         .chatRoom(chatRoom)
-        .message(message)
+        .message(chatMessageDto.getMessage())
         .createdAt(LocalDateTime.now())
         .build();
 

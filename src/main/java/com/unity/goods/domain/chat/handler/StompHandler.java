@@ -1,5 +1,8 @@
 package com.unity.goods.domain.chat.handler;
 
+import static com.unity.goods.global.exception.ErrorCode.UNAUTHORIZED;
+
+import com.unity.goods.global.exception.JwtFilterAuthenticationException;
 import com.unity.goods.global.jwt.JwtTokenProvider;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +31,10 @@ public class StompHandler implements ChannelInterceptor {
     if (StompCommand.CONNECT == accessor.getCommand()) {
       String token = Objects.requireNonNull(
           accessor.getFirstNativeHeader("Authorization")).substring(7);
-      jwtTokenProvider.validateToken(token);
+
+      if(!jwtTokenProvider.validateToken(token)) {
+        throw new JwtFilterAuthenticationException(UNAUTHORIZED);
+      }
     }
 
     return message;

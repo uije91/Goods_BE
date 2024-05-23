@@ -3,6 +3,7 @@ package com.unity.goods.domain.chat.controller;
 
 import com.unity.goods.domain.chat.dto.ChatMessageDto;
 import com.unity.goods.domain.chat.dto.ChatRoomDto;
+import com.unity.goods.domain.chat.dto.ChatRoomDto.ChatRoomResponse;
 import com.unity.goods.domain.chat.service.ChatService;
 import com.unity.goods.global.jwt.UserDetailsImpl;
 import java.util.HashMap;
@@ -28,7 +29,7 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/chat")
+@RequestMapping("/api/chat")
 public class ChatController {
 
   private final SimpMessageSendingOperations msgTemplate;
@@ -63,7 +64,7 @@ public class ChatController {
   }
 
   @PostMapping("/room")
-  public ResponseEntity<?> addChatRoom(@RequestParam Long goodsId,
+  public ResponseEntity<ChatRoomResponse> addChatRoom(@RequestParam Long goodsId,
       @AuthenticationPrincipal UserDetailsImpl user) {
     return ResponseEntity.ok(chatService.addChatRoom(goodsId, user.getId()));
   }
@@ -75,15 +76,9 @@ public class ChatController {
   }
 
   @GetMapping("/{roomId}")
-  public ResponseEntity<ChatRoomDto> getChatLog(@PathVariable Long roomId,
+  public ResponseEntity<ChatRoomDto> getChatLogs(@PathVariable Long roomId,
       @AuthenticationPrincipal UserDetailsImpl principal) {
-    return ResponseEntity.ok().body(chatService.getChatLog(roomId, principal.getId()));
+    return ResponseEntity.ok().body(chatService.getChatLogs(roomId, principal.getId()));
   }
 
-  @GetMapping("/read")
-  public ResponseEntity<Integer> getChatLogNotRead(
-      @AuthenticationPrincipal UserDetailsImpl principal) {
-
-    return ResponseEntity.ok(chatService.countAllChatNotRead(principal.getId()));
-  }
 }
