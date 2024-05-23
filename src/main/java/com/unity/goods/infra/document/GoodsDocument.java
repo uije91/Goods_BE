@@ -57,6 +57,7 @@ public class GoodsDocument {
   private GeoPoint location;
 
   @Field(type = FieldType.Long)
+  @Builder.Default
   private Long likes = 0L;
 
   @Field(type = FieldType.Integer)
