@@ -7,6 +7,7 @@ import static org.springframework.security.web.util.matcher.AntPathRequestMatche
 
 import com.unity.goods.domain.oauth.handler.OAuth2FailHandler;
 import com.unity.goods.domain.oauth.handler.OAuth2SuccessHandler;
+import com.unity.goods.domain.oauth.repository.CustomAuthorizationRequestRepository;
 import com.unity.goods.domain.oauth.service.OAuth2UserService;
 import com.unity.goods.global.exception.AuthenticationEntryPointHandler;
 import com.unity.goods.global.jwt.JwtAuthenticationFilter;
@@ -37,6 +38,7 @@ public class SecurityConfig {
 
   private final JwtTokenProvider jwtTokenProvider;
   private final OAuth2UserService oAuth2UserService;
+  private final CustomAuthorizationRequestRepository authorizationRequestRepository;
   private final OAuth2SuccessHandler successHandler;
   private final OAuth2FailHandler failHandler;
 
@@ -54,13 +56,13 @@ public class SecurityConfig {
             .configurationSource(request -> {
               CorsConfiguration config = new CorsConfiguration();
 
-              config.setAllowedOrigins(List.of("http://localhost:5173","https://apic.app"));
+              config.setAllowedOrigins(List.of("http://localhost:5173", "https://apic.app"));
               config.setAllowedMethods(Collections.singletonList("*"));
               config.setAllowCredentials(true);
               config.setAllowedHeaders(Collections.singletonList("*"));
               config.setMaxAge(3600L);
 
-              config.setExposedHeaders(Arrays.asList("Authorization","Set_Cookie"));
+              config.setExposedHeaders(Arrays.asList("Authorization", "Set_Cookie"));
               return config;
             }))
 
@@ -75,9 +77,11 @@ public class SecurityConfig {
         )
         // OAuth2
         .oauth2Login(oauth2 -> oauth2
-            .redirectionEndpoint(endpoint -> endpoint
-                .baseUri("/api/oauth/code/*"))
-            .userInfoEndpoint(endpoint -> endpoint.userService(oAuth2UserService))
+            .authorizationEndpoint(e -> e
+                .baseUri("/oauth2/authorization")
+                .authorizationRequestRepository(authorizationRequestRepository))
+            .redirectionEndpoint(e -> e.baseUri("/api/oauth/code/*"))
+            .userInfoEndpoint(e -> e.userService(oAuth2UserService))
             .successHandler(successHandler)
             .failureHandler(failHandler))
         // 인가되지 않은 사용자 접근 에러 핸들링
