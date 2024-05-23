@@ -1,19 +1,15 @@
 package com.unity.goods.domain.oauth.handler;
 
-import static com.unity.goods.domain.oauth.repository.CustomAuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME;
-
 import com.unity.goods.domain.model.TokenDto;
 import com.unity.goods.domain.oauth.repository.CustomAuthorizationRequestRepository;
 import com.unity.goods.global.jwt.JwtTokenProvider;
 import com.unity.goods.global.jwt.UserDetailsImpl;
 import com.unity.goods.global.util.CookieUtil;
 import com.unity.goods.infra.service.RedisService;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Date;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -45,11 +41,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
   protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response,
       Authentication authentication) {
 
-    Optional<String> redirectUri = CookieUtil.getCookies(request, REDIRECT_URI_PARAM_COOKIE_NAME)
-        .map(Cookie::getValue);
-    //이미 OAuth2LoginAuthenticationFilter에서 authentication을 꺼내왔고 위에서 redirectUrl을 받아왔으므로 쿠키의 값은 제거
     clearAuthenticationAttributes(request, response);
-    return redirectUri.orElse(getDefaultTargetUrl());
+    return "http://localhost:5173/oauth/kakao";
   }
 
   private TokenDto saveUser(Authentication authentication) {
@@ -57,9 +50,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     UserDetailsImpl user = (UserDetailsImpl) authentication.getPrincipal();
     String email = user.getName();
     String role = user.getAuthorities().iterator().next().getAuthority();
-
-    log.info("email : {} ", email);
-    log.info("role : {}", role);
 
     // AT, RT 생성 및 Redis 에 RT 저장
     TokenDto tokenDto = jwtTokenProvider.generateToken(email, role);
