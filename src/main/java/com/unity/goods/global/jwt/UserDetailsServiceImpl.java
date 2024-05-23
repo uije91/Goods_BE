@@ -1,6 +1,5 @@
 package com.unity.goods.global.jwt;
 
-import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,12 +15,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
   @Override
   public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-    Member findMember = memberRepository.findByEmail(email)
+    return memberRepository.findByEmail(email)
+        .map(UserDetailsImpl::new)
         .orElseThrow(() -> new UsernameNotFoundException("이메일 정보가 없습니다."));
-
-    if (findMember != null) {
-      return new UserDetailsImpl(findMember);
-    }
-    return null;
   }
 }

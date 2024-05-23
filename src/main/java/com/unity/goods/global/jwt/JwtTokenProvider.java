@@ -43,24 +43,6 @@ public class JwtTokenProvider {
     key = Keys.hmacShaKeyFor(keyBytes);
   }
 
-  // AT 생성
-  public String generateAccessToken(String email, String role) {
-    Date now = new Date();
-    Date accessTokenExpiration = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_TIME);
-
-    String accessToken = Jwts.builder()
-        .setExpiration(accessTokenExpiration)
-        .setSubject("access-token")
-        .claim("email", email)
-        .claim("role", role)
-        .signWith(key, SignatureAlgorithm.HS512)
-        .compact();
-
-    log.info("[JwtTokenProvider] : accessToken 생성 완료");
-
-    return accessToken;
-  }
-
   // AT, RT 생성
   public TokenDto generateToken(String email, String role) {
     Date now = new Date();

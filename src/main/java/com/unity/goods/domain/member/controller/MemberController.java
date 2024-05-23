@@ -20,6 +20,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -33,12 +34,14 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/member")
 public class MemberController {
 
   private final MemberService memberService;
+  private final int COOKIE_EXPIRE = 30 * 24 * 60 * 60; // 30일
 
   @PostMapping("/signup")
   public ResponseEntity<?> signUp(
@@ -51,8 +54,7 @@ public class MemberController {
   public ResponseEntity<?> login(@RequestBody @Valid LoginDto.LoginRequest request) {
     TokenDto login = memberService.login(request);
 
-    Cookie cookie = CookieUtil.addCookie("refresh", login.getRefreshToken(),
-        30 * 24 * 60 * 60);
+    Cookie cookie = CookieUtil.addCookie("refresh", login.getRefreshToken(), COOKIE_EXPIRE);
     return ResponseEntity.ok()
         .header(HttpHeaders.SET_COOKIE, cookie.getName() + "=" + cookie.getValue())
         .body(LoginResponse.builder().accessToken(login.getAccessToken()).build());
@@ -125,12 +127,16 @@ public class MemberController {
 
   @PostMapping("/reissue")
   public ResponseEntity<?> reissue(HttpServletRequest request) {
-    TokenDto tokenDto = TokenDto.builder()
+    TokenDto token = TokenDto.builder()
         .accessToken(request.getHeader(HttpHeaders.AUTHORIZATION))
         .refreshToken(CookieUtil.getCookie(request, "refresh"))
         .build();
+    TokenDto reissue = memberService.reissue(token);
 
-    String accessToken = memberService.reissue(tokenDto);
-    return ResponseEntity.ok().body(LoginResponse.builder().accessToken(accessToken).build());
+    CookieUtil.deleteCookie("refresh", null);
+    Cookie refresh = CookieUtil.addCookie("refresh", reissue.getRefreshToken(), COOKIE_EXPIRE);
+    return ResponseEntity.ok()
+        .header(HttpHeaders.SET_COOKIE, refresh.getName() + "=" + refresh.getValue())
+        .body(LoginResponse.builder().accessToken(reissue.getAccessToken()).build());
   }
 }

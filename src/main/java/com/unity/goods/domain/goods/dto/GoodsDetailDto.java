@@ -20,6 +20,7 @@ public class GoodsDetailDto {
   public static class GoodsDetailResponse {
 
     private Long sellerId;
+    private Long goodsId;
     private String sellerProfileImage;
     private String sellerName;
     private List<String> badgeList;
@@ -39,6 +40,7 @@ public class GoodsDetailDto {
 
       return GoodsDetailResponse.builder()
           .sellerId(member.getId())
+          .goodsId(goods.getId())
           .sellerProfileImage(member.getProfileImage())
           .sellerName(goods.getMember().getNickname())
           .goodsName(goods.getGoodsName())
