@@ -1,5 +1,7 @@
 package com.unity.goods.domain.oauth.handler;
 
+import static com.unity.goods.domain.oauth.repository.CustomAuthorizationRequestRepository.REFRESH_TOKEN;
+
 import com.unity.goods.domain.model.TokenDto;
 import com.unity.goods.domain.oauth.repository.CustomAuthorizationRequestRepository;
 import com.unity.goods.global.jwt.JwtTokenProvider;
@@ -29,20 +31,13 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
   @Override
   public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
       Authentication authentication) throws IOException {
-    String targetUrl = determineTargetUrl(request, response, authentication);
+
+    String targetUrl = "http://localhost:8080";
     TokenDto tokenDto = saveUser(authentication);
 
-    CookieUtil.deleteCookie(request, response, "refresh");
-    CookieUtil.addCookie(response, "refresh", tokenDto.getRefreshToken(), 2592000);
-
-    getRedirectStrategy().sendRedirect(request, response, getRedirectUrl(targetUrl, tokenDto));
-  }
-
-  protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response,
-      Authentication authentication) {
-
     clearAuthenticationAttributes(request, response);
-    return "http://localhost:5173/oauth/kakao";
+    CookieUtil.addCookie(response, REFRESH_TOKEN, tokenDto.getRefreshToken(), 2592000);
+    getRedirectStrategy().sendRedirect(request, response, getRedirectUrl(targetUrl, tokenDto));
   }
 
   private TokenDto saveUser(Authentication authentication) {
@@ -66,7 +61,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     return tokenDto;
   }
-
 
   private String getRedirectUrl(String targetUrl, TokenDto token) {
     return UriComponentsBuilder.fromUriString(targetUrl)

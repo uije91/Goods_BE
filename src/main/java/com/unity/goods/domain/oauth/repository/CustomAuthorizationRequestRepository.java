@@ -14,6 +14,7 @@ public class CustomAuthorizationRequestRepository implements
 
   public final static String OAUTH2_AUTHORIZATION_REQUEST_COOKIE = "oauth2_auth_request";
   public final static String REDIRECT_URI_PARAM_COOKIE_NAME = "redirect_uri";
+  public final static String REFRESH_TOKEN = "refresh";
   private final static int COOKIE_EXPIRE_SECONDS = 180;
 
   @Override
@@ -31,6 +32,7 @@ public class CustomAuthorizationRequestRepository implements
     if (authorizationRequest == null) {
       CookieUtil.deleteCookie(request, response, OAUTH2_AUTHORIZATION_REQUEST_COOKIE);
       CookieUtil.deleteCookie(request, response, REDIRECT_URI_PARAM_COOKIE_NAME);
+      CookieUtil.deleteCookie(request, response, REFRESH_TOKEN);
       return;
     }
 
@@ -55,6 +57,7 @@ public class CustomAuthorizationRequestRepository implements
   public void removeAuthorizationRequestCookies(HttpServletRequest request, HttpServletResponse response){
     CookieUtil.deleteCookie(request,response,OAUTH2_AUTHORIZATION_REQUEST_COOKIE);
     CookieUtil.deleteCookie(request,response,REDIRECT_URI_PARAM_COOKIE_NAME);
+    CookieUtil.deleteCookie(request,response,REFRESH_TOKEN);
 
   }
 }
