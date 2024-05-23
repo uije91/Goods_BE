@@ -1,5 +1,7 @@
 package com.unity.goods.domain.chat.dto;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.unity.goods.domain.chat.entity.ChatRoom;
 import com.unity.goods.domain.goods.entity.Goods;
 import java.util.List;
@@ -40,6 +42,13 @@ public class ChatRoomDto {
             .collect(Collectors.toList()))
         .build();
 
+  }
+
+  @Getter
+  @Builder
+  @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+  public static class ChatRoomResponse {
+    private Long roomId;
   }
 
 }

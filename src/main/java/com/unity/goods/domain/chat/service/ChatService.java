@@ -6,6 +6,7 @@ import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
 
 import com.unity.goods.domain.chat.dto.ChatMessageDto;
 import com.unity.goods.domain.chat.dto.ChatRoomDto;
+import com.unity.goods.domain.chat.dto.ChatRoomDto.ChatRoomResponse;
 import com.unity.goods.domain.chat.dto.ChatRoomListDto;
 import com.unity.goods.domain.chat.entity.ChatLog;
 import com.unity.goods.domain.chat.entity.ChatRoom;
@@ -39,7 +40,7 @@ public class ChatService {
   private final JwtTokenProvider jwtTokenProvider;
 
   // 채팅방 생성
-  public Long addChatRoom(Long goodsId, Long memberId) {
+  public ChatRoomResponse addChatRoom(Long goodsId, Long memberId) {
     Goods goods = goodsRepository.findById(goodsId)
         .orElseThrow(() -> new ChatException(GOODS_NOT_FOUND));
 
@@ -55,13 +56,18 @@ public class ChatService {
 
     if (existChatRoom.isPresent()) {
 
-      return existChatRoom.get().getId();
+      return ChatRoomResponse.builder()
+          .roomId(existChatRoom.get().getId())
+          .build();
     }
 
     log.info("[ChatService][addChatRoom]: 이미 존재하는 채팅방" + "goods={}, sellerId={}, buyerId={}",
         goods, chatRoom.getSellerId(), chatRoom.getBuyerId());
     chatRoomRepository.save(chatRoom);
-    return chatRoom.getId();
+
+    return ChatRoomResponse.builder()
+        .roomId(chatRoom.getId())
+        .build();
   }
 
   // 채팅방 목록 조회
