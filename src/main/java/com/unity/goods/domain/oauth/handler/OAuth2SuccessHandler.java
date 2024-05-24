@@ -34,8 +34,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     TokenDto tokenDto = saveUser(authentication);
 
     clearAuthenticationAttributes(request, response);
-    CookieUtil.deleteCookie(request, response, "refresh");
-    CookieUtil.addCookie(response, "refresh", tokenDto.getRefreshToken(), 2592000);
     getRedirectStrategy().sendRedirect(request, response, getRedirectUrl(targetUrl, tokenDto));
   }
 
@@ -64,6 +62,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
   private String getRedirectUrl(String targetUrl, TokenDto token) {
     return UriComponentsBuilder.fromUriString(targetUrl)
         .queryParam("access", token.getAccessToken())
+        .queryParam("refresh", token.getRefreshToken())
         .build().toUriString();
   }
 

@@ -12,21 +12,8 @@ import org.springframework.util.SerializationUtils;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CookieUtil {
 
-  public static String getCookie(HttpServletRequest request, String name) {
-    Cookie[] cookies = request.getCookies();
-
-    if (cookies != null) {
-      for (Cookie cookie : cookies) {
-        if (name.equals(cookie.getName())) {
-          return cookie.getValue();
-        }
-      }
-    }
-    return null;
-  }
-
   // 쿠키 가져오기
-  public static Optional<Cookie> getCookies(HttpServletRequest request, String name) {
+  public static Optional<Cookie> getCookie(HttpServletRequest request, String name) {
     Cookie[] cookies = request.getCookies();
     if (cookies != null) {
       for (Cookie cookie : cookies) {

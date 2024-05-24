@@ -15,4 +15,23 @@ import lombok.NoArgsConstructor;
 public class TokenDto {
   private String accessToken;
   private String refreshToken;
+
+
+  @Getter
+  @Builder
+  @AllArgsConstructor
+  @NoArgsConstructor
+  @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+  public static class requestAccessToken {
+    private String accessToken;
+  }
+
+  @Getter
+  @Builder
+  @AllArgsConstructor
+  @NoArgsConstructor
+  @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+  public static class requestRefreshToken {
+    private String refreshToken;
+  }
 }
