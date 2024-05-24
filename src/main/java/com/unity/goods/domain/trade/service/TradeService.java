@@ -16,10 +16,10 @@ import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
 import com.unity.goods.domain.goods.entity.Goods;
 import com.unity.goods.domain.goods.exception.GoodsException;
 import com.unity.goods.domain.goods.repository.GoodsRepository;
-import com.unity.goods.domain.goods.type.PaymentStatus;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.exception.MemberException;
 import com.unity.goods.domain.member.repository.MemberRepository;
+import com.unity.goods.domain.member.type.PaymentStatus;
 import com.unity.goods.domain.trade.dto.PointTradeDto.PointTradeRequest;
 import com.unity.goods.domain.trade.dto.PointTradeDto.PointTradeResponse;
 import com.unity.goods.domain.trade.dto.PointTradeHistoryDto;
@@ -155,7 +155,7 @@ public class TradeService {
     memberRepository.save(goodsSeller);
 
     return PointTradeResponse.builder()
-        .paymentStatus(String.valueOf(PaymentStatus.SUCCESS))
+        .paymentStatus(PaymentStatus.SUCCESS.getDescription())
         .tradePoint(pointTradeRequest.getPrice())
         .remainPoint(String.valueOf(authenticatedUser.getBalance()))
         .build();

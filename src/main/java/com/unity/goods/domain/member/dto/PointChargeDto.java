@@ -29,7 +29,7 @@ public class PointChargeDto {
   @Builder
   @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
   public static class PointChargeResponse {
-    private PaymentStatus paymentStatus;
+    private String paymentStatus;
   }
 
 }

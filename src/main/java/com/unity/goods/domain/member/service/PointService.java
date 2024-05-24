@@ -55,7 +55,7 @@ public class PointService {
     authenticatedUser.setBalance(Long.valueOf(pointChargeRequest.getPrice()));
 
     return PointChargeResponse.builder()
-        .paymentStatus(PaymentStatus.SUCCESS)
+        .paymentStatus(PaymentStatus.SUCCESS.getDescription())
         .build();
   }
 
