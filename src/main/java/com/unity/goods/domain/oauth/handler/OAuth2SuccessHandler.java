@@ -32,7 +32,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
   public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
       Authentication authentication) throws IOException {
 
-    String targetUrl = "http://localhost:8080";
+    String targetUrl = "http://localhost:5173/oauth/kakao";
     TokenDto tokenDto = saveUser(authentication);
 
     clearAuthenticationAttributes(request, response);

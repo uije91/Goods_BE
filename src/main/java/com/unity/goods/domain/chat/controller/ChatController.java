@@ -63,8 +63,8 @@ public class ChatController {
     chatService.addChatLog(message, token);
   }
 
-  @PostMapping("/room")
-  public ResponseEntity<ChatRoomResponse> addChatRoom(@RequestParam Long goodsId,
+  @PostMapping("/room/{goodsId}")
+  public ResponseEntity<ChatRoomResponse> addChatRoom(@PathVariable Long goodsId,
       @AuthenticationPrincipal UserDetailsImpl user) {
     return ResponseEntity.ok(chatService.addChatRoom(goodsId, user.getId()));
   }
