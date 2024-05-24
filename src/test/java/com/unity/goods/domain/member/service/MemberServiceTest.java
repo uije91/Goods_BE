@@ -38,7 +38,6 @@ import com.unity.goods.global.exception.ErrorCode;
 import com.unity.goods.global.jwt.JwtTokenProvider;
 import com.unity.goods.global.jwt.UserDetailsImpl;
 import com.unity.goods.infra.service.RedisService;
-import io.jsonwebtoken.lang.Assert;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -363,8 +362,8 @@ class MemberServiceTest {
     List<Member> members = Arrays.asList(member1, member2);
 
     when(memberRepository.findAll()).thenReturn(members);
-    when(goodsRepository.countByCreatedAtAfter(any(LocalDateTime.class))).thenReturn(40);
-    when(badgeRepository.existsByBadge(any(BadgeType.class))).thenReturn(false);
+    when(goodsRepository.countByMemberIdAndCreatedAtAfter(anyLong(), any(LocalDateTime.class))).thenReturn(40);
+    when(badgeRepository.existsByMemberIdAndBadge(anyLong(), any(BadgeType.class))).thenReturn(false);
 
     // when
     memberService.updateBadge();
@@ -396,8 +395,8 @@ class MemberServiceTest {
     List<Member> members = Arrays.asList(member1, member2);
 
     when(memberRepository.findAll()).thenReturn(members);
-    when(goodsRepository.countByCreatedAtAfter(any(LocalDateTime.class))).thenReturn(40);
-    when(badgeRepository.existsByBadge(any(BadgeType.class))).thenReturn(true);
+    when(goodsRepository.countByMemberIdAndCreatedAtAfter(anyLong(), any(LocalDateTime.class))).thenReturn(40);
+    when(badgeRepository.existsByMemberIdAndBadge(anyLong(), any(BadgeType.class))).thenReturn(true);
     when(badgeRepository.findByMemberIdAndBadge(anyLong(), any(BadgeType.class))).thenReturn(newBadge);
 
     // when
