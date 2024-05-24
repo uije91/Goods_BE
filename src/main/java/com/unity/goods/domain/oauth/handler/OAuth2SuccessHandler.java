@@ -1,12 +1,9 @@
 package com.unity.goods.domain.oauth.handler;
 
-import static com.unity.goods.domain.oauth.repository.CustomAuthorizationRequestRepository.REFRESH_TOKEN;
-
 import com.unity.goods.domain.model.TokenDto;
 import com.unity.goods.domain.oauth.repository.CustomAuthorizationRequestRepository;
 import com.unity.goods.global.jwt.JwtTokenProvider;
 import com.unity.goods.global.jwt.UserDetailsImpl;
-import com.unity.goods.global.util.CookieUtil;
 import com.unity.goods.infra.service.RedisService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
