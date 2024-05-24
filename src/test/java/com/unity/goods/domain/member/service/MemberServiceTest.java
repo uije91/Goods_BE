@@ -107,16 +107,16 @@ class MemberServiceTest {
     SignUpRequest mockSignUpRequest = SignUpRequest.builder()
         .email(fakeMemberEmail)
         .password(encodedPw)
-        .chkPassword(encodedPw)
-        .nickName("nickName")
-        .tradePassword(encodedTradePw)
+        .chk_password(encodedPw)
+        .nick_name("nickName")
+        .trade_password(encodedTradePw)
         .build();
 
     // given
     given(memberRepository.existsByEmail(mockSignUpRequest.getEmail())).willReturn(false);
-    given(memberRepository.existsByNickname(mockSignUpRequest.getNickName())).willReturn(false);
+    given(memberRepository.existsByNickname(mockSignUpRequest.getNick_name())).willReturn(false);
     given(passwordEncoder.encode(mockSignUpRequest.getPassword())).willReturn(encodedPw);
-    given(passwordEncoder.encode(mockSignUpRequest.getTradePassword())).willReturn(encodedTradePw);
+    given(passwordEncoder.encode(mockSignUpRequest.getTrade_password())).willReturn(encodedTradePw);
 
     given(memberRepository.findByEmail(mockSignUpRequest.getEmail()))
         .willReturn(Optional.of(member));
@@ -128,7 +128,7 @@ class MemberServiceTest {
     Member signUpMember = memberRepository.findByEmail(fakeMemberEmail)
         .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
 
-    assertEquals(mockSignUpRequest.getNickName(), signUpMember.getNickname());
+    assertEquals(mockSignUpRequest.getNick_name(), signUpMember.getNickname());
     assertEquals(ACTIVE, signUpMember.getStatus());
     assertEquals(encodedPw, signUpMember.getPassword());
     assertEquals(encodedTradePw, signUpMember.getTradePassword());
