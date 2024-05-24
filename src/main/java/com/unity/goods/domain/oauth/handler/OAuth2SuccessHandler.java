@@ -4,6 +4,7 @@ import com.unity.goods.domain.model.TokenDto;
 import com.unity.goods.domain.oauth.repository.CustomAuthorizationRequestRepository;
 import com.unity.goods.global.jwt.JwtTokenProvider;
 import com.unity.goods.global.jwt.UserDetailsImpl;
+import com.unity.goods.global.util.CookieUtil;
 import com.unity.goods.infra.service.RedisService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -33,7 +34,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     TokenDto tokenDto = saveUser(authentication);
 
     clearAuthenticationAttributes(request, response);
-//    CookieUtil.addCookie(response, REFRESH_TOKEN, tokenDto.getRefreshToken(), 2592000);
+    CookieUtil.deleteCookie(request, response, "refresh");
+    CookieUtil.addCookie(response, "refresh", tokenDto.getRefreshToken(), 2592000);
     getRedirectStrategy().sendRedirect(request, response, getRedirectUrl(targetUrl, tokenDto));
   }
 
@@ -62,7 +64,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
   private String getRedirectUrl(String targetUrl, TokenDto token) {
     return UriComponentsBuilder.fromUriString(targetUrl)
         .queryParam("access", token.getAccessToken())
-        .queryParam("refresh", token.getRefreshToken())
         .build().toUriString();
   }
 

@@ -12,23 +12,6 @@ import org.springframework.util.SerializationUtils;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CookieUtil {
 
-  public static Cookie addCookie(String key, String value, int maxAge) {
-    Cookie cookie = new Cookie(key, value);
-    cookie.setHttpOnly(true);
-    //cookie.setSecure(true);
-    cookie.setPath("/");
-    cookie.setMaxAge(maxAge);
-
-    return cookie;
-  }
-
-  public static Cookie deleteCookie(String key, String value) {
-    Cookie cookie = new Cookie(key, value);
-    cookie.setMaxAge(0);
-    cookie.setPath("/");
-    return cookie;
-  }
-
   public static String getCookie(HttpServletRequest request, String name) {
     Cookie[] cookies = request.getCookies();
 
@@ -70,7 +53,7 @@ public class CookieUtil {
     if (cookies != null) {
       for (Cookie cookie : cookies) {
         if (cookie.getName().equals(name)) {
-          cookie.setValue(null);
+          cookie.setValue("");
           cookie.setPath("/");
           cookie.setMaxAge(0);
           response.addCookie(cookie);

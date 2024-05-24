@@ -16,8 +16,8 @@ import com.unity.goods.domain.member.service.MemberService;
 import com.unity.goods.domain.model.TokenDto;
 import com.unity.goods.global.jwt.UserDetailsImpl;
 import com.unity.goods.global.util.CookieUtil;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,31 +51,32 @@ public class MemberController {
   }
 
   @PostMapping("/login")
-  public ResponseEntity<?> login(@RequestBody @Valid LoginDto.LoginRequest request) {
-    TokenDto login = memberService.login(request);
+  public ResponseEntity<?> login(@RequestBody LoginDto.LoginRequest login,
+      HttpServletRequest request, HttpServletResponse response) {
+    TokenDto tokenDto = memberService.login(login);
 
-    Cookie cookie = CookieUtil.addCookie("refresh", login.getRefreshToken(), COOKIE_EXPIRE);
+    CookieUtil.deleteCookie(request, response, "refresh");
+    CookieUtil.addCookie(response, "refresh", tokenDto.getRefreshToken(), COOKIE_EXPIRE);
     return ResponseEntity.ok()
-        .header(HttpHeaders.SET_COOKIE, cookie.getName() + "=" + cookie.getValue())
-        .body(LoginResponse.builder().accessToken(login.getAccessToken()).build());
+        .body(LoginResponse.builder().accessToken(tokenDto.getAccessToken()).build());
   }
 
   @PostMapping("/logout")
-  public ResponseEntity<?> logout(@RequestHeader("Authorization") String requestAccessToken) {
-    memberService.logout(requestAccessToken);
-    Cookie cookie = CookieUtil.deleteCookie("refresh", null);
-    return ResponseEntity.ok()
-        .header(HttpHeaders.SET_COOKIE, cookie.toString()).build();
+  public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
+    memberService.logout(request.getHeader(HttpHeaders.AUTHORIZATION));
+    CookieUtil.deleteCookie(request, response, "refresh");
+    return ResponseEntity.ok().build();
   }
 
   @PutMapping("/resign")
   public ResponseEntity<?> resign(
       @RequestHeader("Authorization") String accessToken,
       @AuthenticationPrincipal UserDetailsImpl member,
-      @RequestBody ResignDto.ResignRequest resignRequest
+      @RequestBody ResignDto.ResignRequest resignRequest,
+      HttpServletRequest request, HttpServletResponse response
   ) {
     memberService.resign(accessToken, member, resignRequest);
-    CookieUtil.deleteCookie("refresh", null);
+    CookieUtil.deleteCookie(request, response, "refresh");
     return ResponseEntity.ok().build();
   }
 
@@ -126,17 +127,16 @@ public class MemberController {
   }
 
   @PostMapping("/reissue")
-  public ResponseEntity<?> reissue(HttpServletRequest request) {
+  public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
     TokenDto token = TokenDto.builder()
         .accessToken(request.getHeader(HttpHeaders.AUTHORIZATION))
         .refreshToken(CookieUtil.getCookie(request, "refresh"))
         .build();
     TokenDto reissue = memberService.reissue(token);
 
-    CookieUtil.deleteCookie("refresh", null);
-    Cookie refresh = CookieUtil.addCookie("refresh", reissue.getRefreshToken(), COOKIE_EXPIRE);
+    CookieUtil.deleteCookie(request, response, "refresh");
+    CookieUtil.addCookie(response, "refresh", reissue.getRefreshToken(), COOKIE_EXPIRE);
     return ResponseEntity.ok()
-        .header(HttpHeaders.SET_COOKIE, refresh.getName() + "=" + refresh.getValue())
         .body(LoginResponse.builder().accessToken(reissue.getAccessToken()).build());
   }
 }

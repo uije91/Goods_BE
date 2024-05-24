@@ -99,6 +99,7 @@ public class SecurityConfig {
   private RequestMatcher[] anyRequest() {
     List<RequestMatcher> requestMatchers = List.of(
         antMatcher("/"),
+        antMatcher("/oauth/*"),
         antMatcher(POST, "/api/member/signup"), // 회원가입
         antMatcher(POST, "/api/member/login"),  // 로그인
         antMatcher(POST, "/api/member/reissue"), // 토큰 재발급
