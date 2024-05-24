@@ -90,14 +90,14 @@ class GoodsServiceTest {
     goodsImages.add(multipartFile1);
 
     UpdateGoodsInfoRequest updateGoodsInfoRequest = UpdateGoodsInfoRequest.builder()
-        .goodsName("새로운 테스트상품")
+        .goods_name("새로운 테스트상품")
         .price("10000")
         .description("테스트 상품의 새로운 설명 입니다.")
         .lat(11.564)
         .lng(27.001)
-        .goodsImageFiles(goodsImages)
+        .goods_image_files(goodsImages)
         .address("서울시 강남구")
-        .userDefinedLocation("새로운 테스트 건물 앞")
+        .user_defined_location("새로운 테스트 건물 앞")
         .build();
 
     given(goodsRepository.findById(1L))
@@ -166,14 +166,14 @@ class GoodsServiceTest {
     goodsImages.add(multipartFile1);
 
     UpdateGoodsInfoRequest updateGoodsInfoRequest = UpdateGoodsInfoRequest.builder()
-        .goodsName("새로운 테스트상품")
+        .goods_name("새로운 테스트상품")
         .price("10000")
         .description("테스트 상품의 새로운 설명 입니다.")
         .lat(11.564)
         .lng(27.001)
-        .goodsImageFiles(goodsImages)
+        .goods_image_files(goodsImages)
         .address("서울시 강남구")
-        .userDefinedLocation("새로운 테스트 건물 앞")
+        .user_defined_location("새로운 테스트 건물 앞")
         .build();
 
     //when
