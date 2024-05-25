@@ -97,7 +97,7 @@ public class ChatService {
 
     changeChatLogAllRead(roomId, memberId);
 
-    return ChatRoomDto.to(chatRoom);
+    return ChatRoomDto.to(chatRoom, memberId);
   }
 
   private void changeChatLogAllRead(Long roomId, Long memberId) {

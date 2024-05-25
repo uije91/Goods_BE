@@ -18,13 +18,13 @@ public class ChatRoomDto {
 
   private final Long roomId;
   private final Long goodsId;
-  private final String goodsSeller;
+  private final Long memberId;
   private final String goodsName;
   private final String goodsImage;
   private final Long goodsPrice;
   private final List<ChatLogDto> chatLogs;
 
-  public static ChatRoomDto to(ChatRoom chatRoom) {
+  public static ChatRoomDto to(ChatRoom chatRoom, Long memberId) {
     String image = Optional.ofNullable(chatRoom)
         .map(ChatRoom::getGoods)
         .map(Goods::getImageList)
@@ -34,8 +34,8 @@ public class ChatRoomDto {
 
     return ChatRoomDto.builder()
         .roomId(Objects.requireNonNull(chatRoom).getId())
+        .memberId(memberId)
         .goodsId(chatRoom.getGoods().getId())
-        .goodsSeller(chatRoom.getGoods().getMember().getNickname())
         .goodsName(chatRoom.getGoods().getGoodsName())
         .goodsImage(image)
         .goodsPrice(chatRoom.getGoods().getPrice())
