@@ -45,7 +45,7 @@ services:
     restart: always
     build:
       context: .
-      dockerfile: Dockerfile
+      file: ./Dockerfile
     depends_on:
       - mysql
       - redis
