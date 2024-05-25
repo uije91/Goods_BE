@@ -11,4 +11,6 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
   List<ChatRoom> findAllByBuyerIdOrSellerId(Long buyerId, Long sellerId);
 
   Optional<ChatRoom> findByBuyerIdAndSellerIdAndGoods(Long buyerId, Long sellerId, Goods goods);
+
+  boolean existsByBuyerIdAndGoodsId(Long buyerId, Long goodsId);
 }

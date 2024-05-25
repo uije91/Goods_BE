@@ -26,8 +26,8 @@ public class ChatLog {
   @Column(name = "chat_log_id")
   private Long id;
   private String message;
-  private String sender;
-  private String receiver;
+  private Long senderId;
+  private Long receiverId;
   private LocalDateTime createdAt;
 
   private boolean checked;
@@ -38,11 +38,6 @@ public class ChatLog {
 
   public void changeCheckedState() {
     this.checked = true;
-  }
-
-  public void addChatRoom(ChatRoom chatRoom) {
-    this.chatRoom = chatRoom;
-    this.chatRoom.getChatLogs().add(this);
   }
 
 }

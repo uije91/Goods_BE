@@ -8,6 +8,7 @@ import lombok.Getter;
 public enum ErrorCode {
   //Chat Error
   CHAT_ROOM_NOT_FOUND(400, "채팅방이 존재하지 않습니다."),
+  ALREADY_GENERATED_CHAT_ROOM(400, "이미 생성된 채팅방입니다."),
 
   // OAuth Error
   INVALID_SOCIAL_TYPE(400, "잘못된 소셜 타입입니다"),

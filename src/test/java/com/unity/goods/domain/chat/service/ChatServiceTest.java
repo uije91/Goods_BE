@@ -89,8 +89,8 @@ class ChatServiceTest {
     List<ChatLog> chatLogList = new ArrayList<>();
     for (int i = 0; i < 5; i++) {
       ChatLog chatLog = ChatLog.builder()
-          .sender(member2.getNickname())
-          .receiver(member.getNickname())
+          .senderId(member2.getId())
+          .receiverId(member.getId())
           .message("msg" + i)
           .build();
       chatLogList.add(chatLog);
@@ -126,8 +126,8 @@ class ChatServiceTest {
     List<ChatLog> chatLogList = new ArrayList<>();
     for (int i = 0; i < 5; i++) {
       ChatLog chatLog = ChatLog.builder()
-          .sender(member2.getNickname())
-          .receiver(member.getNickname())
+          .senderId(member2.getId())
+          .receiverId(member.getId())
           .message("msg" + i)
           .build();
 

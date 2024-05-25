@@ -13,7 +13,9 @@ import lombok.Getter;
 
 @Getter
 @Builder
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class ChatRoomDto {
+
   private final Long roomId;
   private final Long goodsId;
   private final String goodsSeller;
@@ -22,7 +24,7 @@ public class ChatRoomDto {
   private final Long goodsPrice;
   private final List<ChatLogDto> chatLogs;
 
-  public static ChatRoomDto to(ChatRoom chatRoom){
+  public static ChatRoomDto to(ChatRoom chatRoom) {
     String image = Optional.ofNullable(chatRoom)
         .map(ChatRoom::getGoods)
         .map(Goods::getImageList)
@@ -48,6 +50,7 @@ public class ChatRoomDto {
   @Builder
   @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
   public static class ChatRoomResponse {
+
     private Long roomId;
   }
 
