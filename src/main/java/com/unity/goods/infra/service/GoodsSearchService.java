@@ -101,12 +101,18 @@ public class GoodsSearchService {
         .orElseThrow(() -> new GoodsException(GOODS_NOT_FOUND));
 
     document.setLikes(document.getLikes() + change);
-    Document esDocument = elasticsearchOperations.getElasticsearchConverter()
-        .mapObject(document);
 
-    elasticsearchOperations.update(UpdateQuery.builder(document.getId().toString())
+    // Elasticsearch 문서 변환
+    Document esDocument = Document.create();
+    esDocument.put("likes", document.getLikes());
+
+    // 업데이트 쿼리 생성
+    UpdateQuery updateQuery = UpdateQuery.builder(document.getId().toString())
         .withDocument(esDocument)
         .withDocAsUpsert(true)
-        .build(), IndexCoordinates.of("keyword"));
+        .build();
+
+    // Elasticsearch 업데이트
+    elasticsearchOperations.update(updateQuery, IndexCoordinates.of("keywords"));
   }
 }
