@@ -1,8 +1,11 @@
 services:
   mysql:
     image: mysql:8.0.33
+    container_name: mysql-container
     ports:
       - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
 
   redis:
     image: redis
@@ -19,6 +22,24 @@ services:
     ports:
       - 9200:9200
       - 9300:9300
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.17.20
+    container_name: logstash-container
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline
+      - ./logstash/config:/usr/share/logstash/config
+      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
+      - ./logstash/config/mysql-connector-java.jar:/usr/share/logstash/config/mysql-connector-java.jar
+      - ./logstash/config/jvm.options:/usr/share/logstash/config/jvm.options
+    ports:
+      - 5044:5044
+      - 9600:9600
+    depends_on:
+      - mysql
+      - es
 
   goodsapp:
     restart: always
@@ -29,6 +50,7 @@ services:
       - mysql
       - redis
       - es
+      - logstash
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/goodsDb
       SPRING_DATASOURCE_USERNAME: root
@@ -40,3 +62,7 @@ services:
 
     ports:
       - "8080:8080"
+
+volumes:
+  mysql-data:
+  es-data:
