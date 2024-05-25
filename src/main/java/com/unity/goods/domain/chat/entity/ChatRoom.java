@@ -42,7 +42,7 @@ public class ChatRoom {
   @Builder.Default
   private List<ChatLog> chatLogs = new ArrayList<>();
 
-  public void changeDate() {
-    this.updatedAt = LocalDateTime.now();
+  public void changeDate(LocalDateTime localDateTime) {
+    this.updatedAt = localDateTime;
   }
 }

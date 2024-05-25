@@ -6,9 +6,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ChatLogRepository extends JpaRepository<ChatLog, Long> {
 
-  List<ChatLog> findAllByChatRoomIdAndCheckedAndReceiver(
-      Long chatRoomId, boolean checked, String receiver);
+  List<ChatLog> findAllByChatRoomIdAndCheckedAndReceiverId(
+      Long chatRoomId, boolean checked, Long receiverId);
 
-  int countAllByReceiverAndChecked(String receiver, boolean checked);
+  int countAllByReceiverIdAndChecked(Long receiverId, boolean checked);
 
 }
