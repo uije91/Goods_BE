@@ -13,7 +13,5 @@ import lombok.Setter;
 @NoArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class ChatMessageDto {
-
-  private Long goodsId;
   private String message;
 }
