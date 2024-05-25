@@ -1,5 +1,7 @@
 package com.unity.goods.domain.member.service;
 
+import static com.unity.goods.domain.member.type.BadgeType.MANNER;
+import static com.unity.goods.domain.member.type.BadgeType.SELL;
 import static com.unity.goods.domain.member.type.SocialType.SERVER;
 import static com.unity.goods.domain.member.type.Status.INACTIVE;
 import static com.unity.goods.domain.member.type.Status.RESIGN;
@@ -16,6 +18,7 @@ import static com.unity.goods.global.exception.ErrorCode.USE_SOCIAL_LOGIN;
 
 import com.unity.goods.domain.email.exception.EmailException;
 import com.unity.goods.domain.email.type.EmailSubjects;
+import com.unity.goods.domain.goods.repository.GoodsRepository;
 import com.unity.goods.domain.member.dto.ChangePasswordDto.ChangePasswordRequest;
 import com.unity.goods.domain.member.dto.ChangeTradePasswordDto.ChangeTradePasswordRequest;
 import com.unity.goods.domain.member.dto.FindPasswordDto.FindPasswordRequest;
@@ -27,6 +30,7 @@ import com.unity.goods.domain.member.dto.SignUpDto.SignUpRequest;
 import com.unity.goods.domain.member.dto.SignUpDto.SignUpResponse;
 import com.unity.goods.domain.member.dto.UpdateProfileDto.UpdateProfileRequest;
 import com.unity.goods.domain.member.dto.UpdateProfileDto.UpdateProfileResponse;
+import com.unity.goods.domain.member.entity.Badge;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.exception.MemberException;
 import com.unity.goods.domain.member.repository.BadgeRepository;
@@ -37,7 +41,10 @@ import com.unity.goods.global.jwt.UserDetailsImpl;
 import com.unity.goods.infra.service.RedisService;
 import com.unity.goods.infra.service.S3Service;
 import java.security.SecureRandom;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +52,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -63,12 +71,16 @@ public class MemberService {
   private final PasswordEncoder passwordEncoder;
   private final MemberRepository memberRepository;
   private final BadgeRepository badgeRepository;
+  private final GoodsRepository goodsRepository;
   private final RedisService redisService;
   private final S3Service s3Service;
   private final JwtTokenProvider jwtTokenProvider;
   private final AuthenticationManagerBuilder authenticationManagerBuilder;
   private final MailSender mailSender;
 
+  private final static int SELL_GOODS_NUM_FOR_SELL_BADGE = 40;
+  private final static int SELL_GOODS_NUM_FOR_MANNER_BADGE = 20;
+  private final static double MEMBER_STAR_FOR_MANNER_BADGE = 4.0;
 
   public SignUpResponse signUp(SignUpRequest signUpRequest) {
     // 비밀번호와 비밀번화 확인 일치 검사 (안전성을 위해 프론트에 이어 한번 더 검사)
@@ -100,7 +112,7 @@ public class MemberService {
     } else {
       signUpRequest.setTrade_password(null);
     }
-    
+
     Member member = Member.fromSignUpRequest(signUpRequest, imageUrl);
     memberRepository.save(member);
 
@@ -356,7 +368,8 @@ public class MemberService {
   }
 
 
-  private String uploadProfileImageToS3(UserDetailsImpl member, UpdateProfileRequest updateProfileRequest) {
+  private String uploadProfileImageToS3(UserDetailsImpl member,
+      UpdateProfileRequest updateProfileRequest) {
     String uploadedUrl = s3Service.uploadFile(updateProfileRequest.getProfile_image_file(),
         member.getUsername() + "/" + "profileImage");
     log.info("[updateMemberProfile] : {} 프로필 이미지 업로드 완료", member.getUsername());
@@ -409,5 +422,70 @@ public class MemberService {
 
     findMember.setTradePassword(
         passwordEncoder.encode(changeTradePasswordRequest.getNewTradePassword()));
+  }
+
+  @Transactional
+  @Scheduled(cron = "0 0 0 1 1,7 ?") // 매년 1월 1일과 7월 1일에 실행
+  public void updateBadge() {
+
+    LocalDateTime createBadgeDate = LocalDate.now().minusMonths(6).atStartOfDay();
+
+    List<Member> allMember = memberRepository.findAll();
+
+    for (Member member : allMember) {
+      Integer goodsNum = goodsRepository.countByMemberIdAndCreatedAtAfter(member.getId(), createBadgeDate);
+
+      // 매너왕 배지 조건 판별
+      updateMannerBadge(member, goodsNum, createBadgeDate);
+      // 판매왕 배지 조건 판별
+      updateSellBadge(member, goodsNum, createBadgeDate);
+    }
+  }
+
+  private void updateMannerBadge(Member member, Integer goodsNum, LocalDateTime createBadgeDate) {
+    if (!badgeRepository.existsByMemberIdAndBadge(member.getId(), MANNER)) {
+      if (goodsNum >= SELL_GOODS_NUM_FOR_MANNER_BADGE && member.getStar() >= MEMBER_STAR_FOR_MANNER_BADGE) {
+        Badge newBadge = Badge.builder()
+            .member(member)
+            .badge(MANNER)
+            .build();
+
+        log.info("{} -> MANNER 배지 획득", member.getNickname());
+        badgeRepository.save(newBadge);
+      }
+    } else {
+      Badge badge = badgeRepository.findByMemberIdAndBadge(member.getId(), MANNER);
+
+      if (goodsNum >= SELL_GOODS_NUM_FOR_MANNER_BADGE
+          && member.getStar() >= MEMBER_STAR_FOR_MANNER_BADGE) {
+        badge.setCreatedAt(createBadgeDate);
+        log.info("{} -> MANNER 배지 획득", member.getNickname());
+      } else {
+        badgeRepository.delete(badge);
+      }
+    }
+  }
+
+  private void updateSellBadge(Member member, Integer goodsNum, LocalDateTime createBadgeDate) {
+    if (!badgeRepository.existsByMemberIdAndBadge(member.getId(), SELL)) {
+      if (goodsNum >= SELL_GOODS_NUM_FOR_SELL_BADGE) {
+        Badge newBadge = Badge.builder()
+            .member(member)
+            .badge(SELL)
+            .build();
+
+        log.info("{} -> SELL 배지 획득", member.getNickname());
+        badgeRepository.save(newBadge);
+      }
+    } else {
+      Badge badge = badgeRepository.findByMemberIdAndBadge(member.getId(), SELL);
+
+      if (goodsNum >= SELL_GOODS_NUM_FOR_SELL_BADGE) {
+        badge.setCreatedAt(createBadgeDate);
+        log.info("{} -> SELL 배지 획득", member.getNickname());
+      } else {
+        badgeRepository.delete(badge);
+      }
+    }
   }
 }
