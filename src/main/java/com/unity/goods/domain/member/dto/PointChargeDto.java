@@ -20,9 +20,6 @@ public class PointChargeDto {
 
     @NotBlank(message = "주문 번호는 필수입니다.")
     private String paymentId;
-
-    @NotBlank(message = "결제 고유 번호는 필수입니다.")
-    private String impUid;
   }
 
   @Getter
