@@ -111,12 +111,12 @@ public class WishService {
     return WishlistDto.builder()
         .goodsId(goods.getId())
         .goodsName(goods.getGoodsName())
-        .imageUrl(image)
+        .goodsThumbnail(image)
         .address(goods.getAddress())
         .price(String.valueOf(goods.getPrice()))
         .sellerName(goods.getMember().getNickname())
         .goodsStatus(goods.getGoodsStatus().getDescription())
-        .uploadBefore(uploadBefore)
+        .uploadedBefore(uploadBefore)
         .build();
   }
 
