@@ -111,7 +111,7 @@ public class SecurityConfig {
         antMatcher(GET, "/api/goods"), // 첫 화면
         antMatcher(GET, "/api/goods/**"), // 상품 상세 페이지
         antMatcher(GET, "/api/goods/sell-list/**"),
-        antMatcher("/chat/**")
+        antMatcher("/app/chat/**")
     );
     return requestMatchers.toArray(RequestMatcher[]::new);
   }
