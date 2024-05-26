@@ -2,8 +2,8 @@ package com.unity.goods.domain.goods.entity;
 
 import static com.unity.goods.domain.goods.type.GoodsStatus.SALE;
 
+import com.unity.goods.domain.chat.entity.ChatRoom;
 import com.unity.goods.domain.goods.dto.UploadGoodsDto.UploadGoodsRequest;
-import com.unity.goods.domain.goods.dto.WishlistDto;
 import com.unity.goods.domain.goods.type.GoodsStatus;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.model.BaseEntity;
@@ -80,7 +80,11 @@ public class Goods extends BaseEntity {
 
   @OneToMany(mappedBy = "goods")
   @Builder.Default
-  private List<Trade> tradeList  = new ArrayList<>();
+  private List<Trade> tradeList = new ArrayList<>();
+
+  @OneToMany(mappedBy = "goods")
+  @Builder.Default
+  private List<ChatRoom> chatRoomList = new ArrayList<>();
 
   public static Goods fromUploadGoodsRequest(UploadGoodsRequest request) {
 
