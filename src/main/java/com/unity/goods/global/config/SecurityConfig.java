@@ -128,8 +128,7 @@ public class SecurityConfig {
         antMatcher(POST, "/api/goods/new"),
         antMatcher("/api/goods/**"),
         antMatcher("/api/trade/**"),
-        antMatcher("/api/point/**"),
-        antMatcher("/app/chat/**")
+        antMatcher("/api/point/**")
     );
     return requestMatchers.toArray(RequestMatcher[]::new);
   }
