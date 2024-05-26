@@ -8,6 +8,7 @@ import com.unity.goods.domain.goods.type.GoodsStatus;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.model.BaseEntity;
 import com.unity.goods.domain.trade.entity.Trade;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -70,11 +71,11 @@ public class Goods extends BaseEntity {
   @JoinColumn(name = "member_id")
   private Member member;
 
-  @OneToMany(mappedBy = "goods")
+  @OneToMany(mappedBy = "goods", cascade = CascadeType.ALL)
   @Builder.Default
   private List<Image> imageList = new ArrayList<>();
 
-  @OneToMany(mappedBy = "goods")
+  @OneToMany(mappedBy = "goods", cascade = CascadeType.ALL)
   @Builder.Default
   private List<Wishlist> wishList = new ArrayList<>();
 
@@ -82,7 +83,7 @@ public class Goods extends BaseEntity {
   @Builder.Default
   private List<Trade> tradeList = new ArrayList<>();
 
-  @OneToMany(mappedBy = "goods")
+  @OneToMany(mappedBy = "goods", cascade = CascadeType.ALL)
   @Builder.Default
   private List<ChatRoom> chatRoomList = new ArrayList<>();
 
