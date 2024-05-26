@@ -3,8 +3,7 @@ package com.unity.goods.infra.document;
 import com.unity.goods.domain.goods.entity.Goods;
 import com.unity.goods.domain.goods.type.GoodsStatus;
 import jakarta.persistence.Id;
-import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -65,7 +64,7 @@ public class GoodsDocument {
 
   public static GoodsDocument fromGoods(Goods goods, String thumbnailUrl) {
 
-    int secondsAgo = (int) Duration.between(goods.getCreatedAt(), LocalDateTime.now()).toSeconds();
+    int epochSeconds = (int) Instant.now().getEpochSecond();
 
     GeoPoint geoPoint = new GeoPoint(goods.getLat(), goods.getLng());
 
@@ -79,7 +78,7 @@ public class GoodsDocument {
         .price(goods.getPrice())
         .thumbnailUrl(thumbnailUrl)
         .location(geoPoint)
-        .uploadedBefore(minutesAgo)
+        .uploadedBefore(epochSeconds)
         .build();
   }
 
