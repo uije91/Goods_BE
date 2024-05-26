@@ -24,6 +24,7 @@ public class PointController {
 
   private final PointService pointService;
 
+  // TODO iamport 단건 조회 구현 필요
   @PostMapping("/charge")
   public ResponseEntity<PointChargeResponse> chargePoint(
       @AuthenticationPrincipal UserDetailsImpl member,
