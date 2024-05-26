@@ -12,4 +12,4 @@ COPY ${JAR_FILE} app.jar
 EXPOSE 8080
 
 # 애플리케이션 시작 명령어 수정
-ENTRYPOINT ["/wait-for-it.sh", "redis:6379", "--", "/wait-for-it.sh", "es-container:9200", "--", "-Dspring.profiles.active=prod", "-jar", "app.jar"]
+ENTRYPOINT ["/wait-for-it.sh", "redis:6379", "--", "/wait-for-it.sh", "es-container:9200", "--", "java", "-Dspring.profiles.active=prod", "-jar", "app.jar"]
