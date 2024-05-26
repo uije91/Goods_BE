@@ -3,6 +3,7 @@ package com.unity.goods.infra.dto;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.unity.goods.infra.document.GoodsDocument;
+import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,6 +35,14 @@ public class SearchDto {
     private Integer uploadedBefore;
 
     public static SearchedGoods fromGoodsDocument(GoodsDocument goodsDocument) {
+
+      int before;
+      if(goodsDocument.getUploadedBefore() == 0) {
+        before = 60 * 60;
+      } else {
+        before = (int)Instant.now().getEpochSecond() - goodsDocument.getUploadedBefore();
+      }
+
       return SearchedGoods.builder()
           .goodsId(goodsDocument.getId())
           .sellerNickName(goodsDocument.getSellerNickName())
@@ -41,7 +50,7 @@ public class SearchDto {
           .price(goodsDocument.getPrice())
           .tradeSpot(goodsDocument.getAddress())
           .thumbnailUrl(goodsDocument.getThumbnailUrl())
-          .uploadedBefore(goodsDocument.getUploadedBefore())
+          .uploadedBefore(before)
           .lat(goodsDocument.getLocation().lat())
           .lng(goodsDocument.getLocation().lon())
           .build();
