@@ -26,8 +26,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
   @Override
   public void registerStompEndpoints(StompEndpointRegistry registry) {
-    registry.addEndpoint("/app/chat").setAllowedOriginPatterns("*").withSockJS();
-    registry.addEndpoint("/app/chat").setAllowedOriginPatterns("*");
+    registry.addEndpoint("/api/chat").setAllowedOriginPatterns("*").withSockJS();
+    registry.addEndpoint("/api/chat").setAllowedOriginPatterns("*");
   }
 
   @Override

@@ -111,7 +111,7 @@ public class SecurityConfig {
         antMatcher(GET, "/api/goods"), // 첫 화면
         antMatcher(GET, "/api/goods/**"), // 상품 상세 페이지
         antMatcher(GET, "/api/goods/sell-list/**"),
-        antMatcher("/app/chat/**")
+        antMatcher("/api/chat/**")
     );
     return requestMatchers.toArray(RequestMatcher[]::new);
   }
@@ -128,8 +128,7 @@ public class SecurityConfig {
         antMatcher(POST, "/api/goods/new"),
         antMatcher("/api/goods/**"),
         antMatcher("/api/trade/**"),
-        antMatcher("/api/point/**"),
-        antMatcher("/api/chat/**")
+        antMatcher("/api/point/**")
     );
     return requestMatchers.toArray(RequestMatcher[]::new);
   }
