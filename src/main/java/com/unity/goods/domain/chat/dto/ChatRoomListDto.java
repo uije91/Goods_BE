@@ -14,6 +14,7 @@ public class ChatRoomListDto {
   private Long roomId;
   private String partner;
   private String profileImage;
+  private String goodsImage;
   private int notRead;
   private String lastMessage;
   private LocalDateTime updatedAt;
