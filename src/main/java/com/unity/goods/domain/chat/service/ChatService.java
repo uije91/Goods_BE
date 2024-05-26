@@ -1,9 +1,12 @@
 package com.unity.goods.domain.chat.service;
 
+import static com.unity.goods.domain.chat.chatType.ChatRole.BUYER;
+import static com.unity.goods.domain.chat.chatType.ChatRole.SELLER;
 import static com.unity.goods.global.exception.ErrorCode.CHAT_ROOM_NOT_FOUND;
 import static com.unity.goods.global.exception.ErrorCode.GOODS_NOT_FOUND;
 import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
 
+import com.unity.goods.domain.chat.chatType.ChatRole;
 import com.unity.goods.domain.chat.dto.ChatMessageDto;
 import com.unity.goods.domain.chat.dto.ChatRoomDto;
 import com.unity.goods.domain.chat.dto.ChatRoomDto.ChatRoomResponse;
@@ -124,7 +127,13 @@ public class ChatService {
 
     changeChatLogAllRead(roomId, memberId);
 
-    return ChatRoomDto.to(chatRoom, memberId);
+    Long partnerId = chatRoomRepository.findOppositeMemberIdByMemberId(memberId);
+    Member partner = memberRepository.findById(partnerId)
+        .orElseThrow(() -> new ChatException(USER_NOT_FOUND));
+
+    ChatRole chatRole = (memberId == chatRoom.getBuyerId()) ? BUYER : SELLER;
+
+    return ChatRoomDto.to(chatRoom, memberId, partner.getNickname(), chatRole);
   }
 
   private void changeChatLogAllRead(Long roomId, Long memberId) {
