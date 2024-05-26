@@ -71,11 +71,11 @@ public class Goods extends BaseEntity {
   @JoinColumn(name = "member_id")
   private Member member;
 
-  @OneToMany(mappedBy = "goods", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "goods", cascade = CascadeType.REMOVE)
   @Builder.Default
   private List<Image> imageList = new ArrayList<>();
 
-  @OneToMany(mappedBy = "goods", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "goods", cascade = CascadeType.REMOVE)
   @Builder.Default
   private List<Wishlist> wishList = new ArrayList<>();
 
@@ -83,7 +83,7 @@ public class Goods extends BaseEntity {
   @Builder.Default
   private List<Trade> tradeList = new ArrayList<>();
 
-  @OneToMany(mappedBy = "goods", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "goods", cascade = CascadeType.REMOVE)
   @Builder.Default
   private List<ChatRoom> chatRoomList = new ArrayList<>();
 
