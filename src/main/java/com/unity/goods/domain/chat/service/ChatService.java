@@ -79,7 +79,12 @@ public class ChatService {
   }
 
   private ChatRoomListDto getChatRoomListDto(ChatRoom chatRoom, int count, Long memberId) {
-    Long partnerId = chatRoomRepository.findOppositeMemberIdByMemberId(memberId);
+    List<Long> oppositeMemberId = chatRoomRepository.findOppositeMemberIdByMemberId(memberId);
+    if (oppositeMemberId.isEmpty()) {
+      throw new ChatException(USER_NOT_FOUND);
+    }
+    Long partnerId = oppositeMemberId.get(0);
+
     Member member = memberRepository.findById(partnerId)
         .orElseThrow(() -> new ChatException(USER_NOT_FOUND));
 
@@ -102,7 +107,7 @@ public class ChatService {
         .profileImage(member.getProfileImage())
         .notRead(count)
         .lastMessage(lastMessage)
-        .updatedAt(LocalDateTime.now())
+        .updatedAt(lastMessageTime)
         .uploadedBefore(uploadedBefore)
         .build();
   }
@@ -127,7 +132,12 @@ public class ChatService {
 
     changeChatLogAllRead(roomId, memberId);
 
-    Long partnerId = chatRoomRepository.findOppositeMemberIdByMemberId(memberId);
+    List<Long> oppositeMemberId = chatRoomRepository.findOppositeMemberIdByMemberId(memberId);
+    if (oppositeMemberId.isEmpty()) {
+      throw new ChatException(USER_NOT_FOUND);
+    }
+    Long partnerId = oppositeMemberId.get(0);
+
     Member partner = memberRepository.findById(partnerId)
         .orElseThrow(() -> new ChatException(USER_NOT_FOUND));
 

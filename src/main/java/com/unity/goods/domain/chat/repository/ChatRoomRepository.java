@@ -16,5 +16,5 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 
   @Query("SELECT CASE WHEN c.sellerId = :memberId THEN c.buyerId WHEN c.buyerId = :memberId THEN c.sellerId ELSE null END " +
       "FROM ChatRoom c WHERE (c.sellerId = :memberId OR c.buyerId = :memberId) AND c.id IS NOT NULL AND c.sellerId IS NOT NULL AND c.buyerId IS NOT NULL")
-  Long findOppositeMemberIdByMemberId(Long memberId);
+  List<Long> findOppositeMemberIdByMemberId(Long memberId);
 }
