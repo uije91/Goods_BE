@@ -65,7 +65,7 @@ public class GoodsDocument {
 
   public static GoodsDocument fromGoods(Goods goods, String thumbnailUrl) {
 
-    int minutesAgo = (int) Duration.between(goods.getCreatedAt(), LocalDateTime.now()).toMinutes();
+    int secondsAgo = (int) Duration.between(goods.getCreatedAt(), LocalDateTime.now()).toSeconds();
 
     GeoPoint geoPoint = new GeoPoint(goods.getLat(), goods.getLng());
 
