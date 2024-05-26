@@ -1,6 +1,7 @@
 package com.unity.goods.domain.chat.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
@@ -18,7 +19,9 @@ import com.unity.goods.domain.goods.repository.GoodsRepository;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.repository.MemberRepository;
 import com.unity.goods.global.jwt.UserDetailsImpl;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -92,6 +95,7 @@ class ChatServiceTest {
           .senderId(member2.getId())
           .receiverId(member.getId())
           .message("msg" + i)
+          .createdAt(LocalDateTime.now().minusMinutes(1))
           .build();
       chatLogList.add(chatLog);
     }
@@ -104,19 +108,25 @@ class ChatServiceTest {
         .chatLogs(chatLogList)
         .build();
 
-    when(memberRepository.findById(anyLong())).thenReturn(Optional.of(member2));
-    when(chatRoomRepository.findAllByBuyerIdOrSellerId(anyLong(), anyLong()))
-        .thenReturn(List.of(chatRoom));
+    when(chatRoomRepository.findAllByBuyerIdOrSellerId(member.getId(), member.getId()))
+        .thenReturn(Collections.singletonList(chatRoom));
+    when(chatRoomRepository.findOppositeMemberIdByMemberId(member.getId()))
+        .thenReturn(member2.getId());
+    when(memberRepository.findById(member2.getId()))
+        .thenReturn(Optional.of(member2));
 
     // when
-    List<ChatRoomListDto> result = chatService.getChatRoomList(member2.getId());
+    List<ChatRoomListDto> result = chatService.getChatRoomList(member.getId());
+
 
     //then
+    ChatRoomListDto dto = result.get(0);
     assertEquals(1, result.size());
-    assertEquals("구매자", result.get(0).getSender());
-
-    verify(chatRoomRepository, times(1))
-        .findAllByBuyerIdOrSellerId(12L, 12L);
+    assertEquals(1L,dto.getRoomId());
+    assertEquals("구매자",dto.getPartner());
+    assertEquals("msg4",dto.getLastMessage());
+    assertNotNull(dto.getUpdatedAt());
+    assertEquals(5, dto.getNotRead());
   }
 
   @Test
