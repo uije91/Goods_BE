@@ -56,7 +56,7 @@ public class ChatService {
 
     if (existChatRoom.isPresent()) {
       log.info("[ChatService] Chat room already exist");
-      return ChatRoomResponse.builder().roomId(chatRoom.getId()).build();
+      return ChatRoomResponse.builder().roomId(existChatRoom.get().getId()).build();
     }
 
     chatRoomRepository.save(chatRoom);
@@ -85,8 +85,15 @@ public class ChatService {
         .getCreatedAt();
 
     long uploadedBefore = Duration.between(lastMessageTime, LocalDateTime.now()).getSeconds();
+    String goodsImage = Optional.of(chatRoom)
+        .map(ChatRoom::getGoods)
+        .map(Goods::getImageList)
+        .filter(list -> !list.isEmpty())
+        .map(list -> list.get(0).getImageUrl())
+        .orElse(null);
 
     return ChatRoomListDto.builder()
+        .goodsImage(goodsImage)
         .roomId(chatRoom.getId())
         .partner(member.getNickname())
         .profileImage(member.getProfileImage())
