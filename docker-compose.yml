@@ -27,6 +27,8 @@ services:
       - "9300:9300"
     networks:
       - app-network
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
       interval: 30s
@@ -45,3 +47,11 @@ services:
       - "8080:8080"
     networks:
       - app-network
+
+volumes:
+  es-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/lib/elasticsearch
