@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+// TODO 채팅 수신 알림 기능 구현
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
