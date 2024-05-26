@@ -1,68 +1,47 @@
-services:
-  mysql:
-    image: mysql:8.0.33
-    container_name: mysql-container
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql-data:/var/lib/mysql
+networks:
+  app-network:
 
+services:
   redis:
     image: redis
+    container_name: redis
     ports:
       - "6379:6379"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   es:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
-    container_name: elastic-search-container
+    container_name: es-container
     environment:
       - node.name=single-node
       - cluster.name=goods
       - discovery.type=single-node
     ports:
-      - 9200:9200
-      - 9300:9300
-    volumes:
-      - es-data:/usr/share/elasticsearch/data
-
-  logstash:
-    image: docker.elastic.co/logstash/logstash:7.17.20
-    container_name: logstash-container
-    volumes:
-      - ./logstash/pipeline:/usr/share/logstash/pipeline
-      - ./logstash/config:/usr/share/logstash/config
-      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
-      - ./logstash/config/mysql-connector-java.jar:/usr/share/logstash/config/mysql-connector-java.jar
-      - ./logstash/config/jvm.options:/usr/share/logstash/config/jvm.options
-    ports:
-      - 5044:5044
-      - 9600:9600
-    depends_on:
-      - mysql
-      - es
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   goodsapp:
-    restart: always
-    build:
-      context: .
-      file: ./Dockerfile
+    image: heechannoh/goods-project-image:latest  # Docker Hub에 올린 애플리케이션 이미지
+    container_name: goodsApp
     depends_on:
-      - mysql
-      - redis
-      - es
-      - logstash
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/goodsDb
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: unity-goods
-      SPRING_SERVLET_MULTIPART_MAX-FILE-SIZE: 10MB
-      SPRING_SERVLET_MULTIPART_MAX-REQUEST-SIZE: 50MB
-      SPRING_DATA_REDIS_HOST: redis
-      SPRING_DATA_REDIS_PASSWORD: unity-goods
-
+      redis:
+        condition: service_healthy
+      es:
+        condition: service_healthy
     ports:
       - "8080:8080"
-
-volumes:
-  mysql-data:
-  es-data:
+    networks:
+      - app-network
