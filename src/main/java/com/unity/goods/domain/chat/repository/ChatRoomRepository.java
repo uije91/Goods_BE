@@ -2,7 +2,6 @@ package com.unity.goods.domain.chat.repository;
 
 import com.unity.goods.domain.chat.entity.ChatRoom;
 import com.unity.goods.domain.goods.entity.Goods;
-import io.lettuce.core.dynamic.annotation.Param;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
