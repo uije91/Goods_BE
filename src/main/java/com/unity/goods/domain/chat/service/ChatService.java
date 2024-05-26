@@ -1,6 +1,5 @@
 package com.unity.goods.domain.chat.service;
 
-import static com.unity.goods.global.exception.ErrorCode.ALREADY_GENERATED_CHAT_ROOM;
 import static com.unity.goods.global.exception.ErrorCode.CHAT_ROOM_NOT_FOUND;
 import static com.unity.goods.global.exception.ErrorCode.GOODS_NOT_FOUND;
 import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
@@ -18,9 +17,12 @@ import com.unity.goods.domain.goods.entity.Goods;
 import com.unity.goods.domain.goods.repository.GoodsRepository;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.repository.MemberRepository;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,11 +44,6 @@ public class ChatService {
     Goods goods = goodsRepository.findById(goodsId)
         .orElseThrow(() -> new ChatException(GOODS_NOT_FOUND));
 
-    // 구매자와 상품 아이디로 채팅방 존재하는지 확인
-    if (chatRoomRepository.existsByBuyerIdAndGoodsId(buyerId, goodsId)) {
-      throw new ChatException(ALREADY_GENERATED_CHAT_ROOM);
-    }
-
     ChatRoom chatRoom = ChatRoom.builder()
         .sellerId(goods.getMember().getId())
         .buyerId(buyerId)
@@ -54,27 +51,50 @@ public class ChatService {
         .updatedAt(LocalDateTime.now())
         .build();
 
-    chatRoomRepository.save(chatRoom);
+    Optional<ChatRoom> existChatRoom = chatRoomRepository.findByBuyerIdAndSellerIdAndGoods(
+        chatRoom.getBuyerId(), chatRoom.getSellerId(), goods);
 
-    return ChatRoomResponse.builder()
-        .roomId(chatRoom.getId())
-        .build();
+    if (existChatRoom.isPresent()) {
+      log.info("[ChatService] Chat room already exist");
+      return ChatRoomResponse.builder().roomId(chatRoom.getId()).build();
+    }
+
+    chatRoomRepository.save(chatRoom);
+    return ChatRoomResponse.builder().roomId(chatRoom.getId()).build();
   }
 
   // 채팅방 목록 조회
   public List<ChatRoomListDto> getChatRoomList(Long memberId) {
-    Member member = memberRepository.findById(memberId)
-        .orElseThrow(() -> new ChatException(USER_NOT_FOUND));
-
     return chatRoomRepository.findAllByBuyerIdOrSellerId(memberId, memberId).stream()
         .filter(room -> !room.getChatLogs().isEmpty())
         .map(m -> {
           int count = countChatLogNotRead(m.getChatLogs(), memberId);
-          String lastMessage = m.getChatLogs().get(m.getChatLogs().size() - 1).getMessage();
-          return ChatRoomListDto.to(m, count, lastMessage, member.getNickname());
+          return getChatRoomListDto(m, count, memberId);
         })
         .sorted(Comparator.comparing(ChatRoomListDto::getUpdatedAt, Comparator.reverseOrder()))
         .collect(Collectors.toList());
+  }
+
+  private ChatRoomListDto getChatRoomListDto(ChatRoom chatRoom, int count, Long memberId) {
+    Long partnerId = chatRoomRepository.findOppositeMemberIdByMemberId(memberId);
+    Member member = memberRepository.findById(partnerId)
+        .orElseThrow(() -> new ChatException(USER_NOT_FOUND));
+
+    String lastMessage = chatRoom.getChatLogs().get(chatRoom.getChatLogs().size() - 1).getMessage();
+    LocalDateTime lastMessageTime = chatRoom.getChatLogs().get(chatRoom.getChatLogs().size() - 1)
+        .getCreatedAt();
+
+    long uploadedBefore = Duration.between(lastMessageTime, LocalDateTime.now()).getSeconds();
+
+    return ChatRoomListDto.builder()
+        .roomId(chatRoom.getId())
+        .partner(member.getNickname())
+        .profileImage(member.getProfileImage())
+        .notRead(count)
+        .lastMessage(lastMessage)
+        .updatedAt(LocalDateTime.now())
+        .uploadedBefore(uploadedBefore)
+        .build();
   }
 
   // 채팅방에서 읽지 않은 채팅의 수
@@ -115,7 +135,8 @@ public class ChatService {
 
     Long senderId = memberRepository.findMemberByEmail(senderEmail).getId();
     Long receiverId =
-        (senderId == chatRoom.getBuyerId()) ? chatRoom.getSellerId() : chatRoom.getBuyerId();
+        (Objects.equals(senderId, chatRoom.getBuyerId())) ? chatRoom.getSellerId()
+            : chatRoom.getBuyerId();
 
     LocalDateTime localDateTime = LocalDateTime.now();
 

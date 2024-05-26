@@ -140,8 +140,8 @@ class WishServiceTest {
     assertEquals("테스트 주소", dto.getAddress());
     assertEquals("20000", dto.getPrice());
     assertEquals("test", dto.getSellerName());
-    assertEquals("test_url",dto.getImageUrl());
-    assertEquals(GoodsStatus.SALE, dto.getGoodsStatus());
+    assertEquals("test_url",dto.getGoodsThumbnail());
+    assertEquals(GoodsStatus.SALE.getDescription(), dto.getGoodsStatus());
   }
 
 
