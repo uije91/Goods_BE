@@ -188,18 +188,28 @@ public class GoodsService {
     updateGoodsInfoRequest.updateGoodsEntity(goods);
 
     // ES data 기존 삭제, 새로 추가
-//    goodsSearchService.deleteGoodsDocument("keywords", String.valueOf(goods.getId()));
-//
-//    String newThumbnail = "";
-//    for (Image img : goods.getImageList()) {
-//      if (updateGoodsInfoRequest.getImages_to_delete() != null
-//          && !updateGoodsInfoRequest.getImages_to_delete().contains(img.getImageUrl())) {
-//        newThumbnail = img.getImageUrl();
-//        break;
-//      }
-//    }
-//
-//    goodsSearchService.saveGoods(goods, newThumbnail);
+    goodsSearchService.deleteGoodsDocument("keywords", String.valueOf(goods.getId()));
+
+    String newThumbnail = "";
+    if (!goods.getImageList().isEmpty()) {
+      int count = 0;
+      for (Image img : goods.getImageList()) {
+        if (!updateGoodsInfoRequest.getImages_to_delete().isEmpty()
+            && !(updateGoodsInfoRequest.getImages_to_delete().contains(img.getImageUrl()))) {
+          newThumbnail = img.getImageUrl();
+          break;
+        }
+        count++;
+      }
+
+      if (count == goods.getImageList().size() && !updateGoodsInfoRequest.getGoods_image_files()
+          .isEmpty()) {
+        newThumbnail = s3Service.uploadFile(updateGoodsInfoRequest.getGoods_image_files().get(0),
+            member.getUsername() + "/" + goods.getGoodsName());
+      }
+    }
+
+    goodsSearchService.saveGoods(goods, newThumbnail);
     return UpdateGoodsInfoResponse.fromGoods(goods);
   }
 
