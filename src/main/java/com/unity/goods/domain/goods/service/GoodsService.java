@@ -188,18 +188,18 @@ public class GoodsService {
     updateGoodsInfoRequest.updateGoodsEntity(goods);
 
     // ES data 기존 삭제, 새로 추가
-    goodsSearchService.deleteGoodsDocument("keywords", String.valueOf(goods.getId()));
-
-    String newThumbnail = "";
-    for (Image img : goods.getImageList()) {
-      if (updateGoodsInfoRequest.getImages_to_delete() != null
-          && !updateGoodsInfoRequest.getImages_to_delete().contains(img.getImageUrl())) {
-        newThumbnail = img.getImageUrl();
-        break;
-      }
-    }
-
-    goodsSearchService.saveGoods(goods, newThumbnail);
+//    goodsSearchService.deleteGoodsDocument("keywords", String.valueOf(goods.getId()));
+//
+//    String newThumbnail = "";
+//    for (Image img : goods.getImageList()) {
+//      if (updateGoodsInfoRequest.getImages_to_delete() != null
+//          && !updateGoodsInfoRequest.getImages_to_delete().contains(img.getImageUrl())) {
+//        newThumbnail = img.getImageUrl();
+//        break;
+//      }
+//    }
+//
+//    goodsSearchService.saveGoods(goods, newThumbnail);
     return UpdateGoodsInfoResponse.fromGoods(goods);
   }
 
