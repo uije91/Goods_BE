@@ -26,6 +26,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -68,18 +69,21 @@ public class ChatService {
 
   // 채팅방 목록 조회
   public List<ChatRoomListDto> getChatRoomList(Long memberId) {
+    List<Long> oppositeMemberIds = chatRoomRepository.findOppositeMemberIdByMemberId(memberId);
+    AtomicInteger index = new AtomicInteger(0);
+
     return chatRoomRepository.findAllByBuyerIdOrSellerId(memberId, memberId).stream()
         .filter(room -> !room.getChatLogs().isEmpty())
         .map(m -> {
           int count = countChatLogNotRead(m.getChatLogs(), memberId);
-          return getChatRoomListDto(m, count, memberId);
+          Long partnerId = oppositeMemberIds.get(index.getAndIncrement() % oppositeMemberIds.size());
+          return getChatRoomListDto(m, count, partnerId);
         })
         .sorted(Comparator.comparing(ChatRoomListDto::getUpdatedAt, Comparator.reverseOrder()))
         .collect(Collectors.toList());
   }
 
-  private ChatRoomListDto getChatRoomListDto(ChatRoom chatRoom, int count, Long memberId) {
-    Long partnerId = chatRoomRepository.findOppositeMemberIdByMemberId(memberId);
+  private ChatRoomListDto getChatRoomListDto(ChatRoom chatRoom, int count, Long partnerId) {
     Member member = memberRepository.findById(partnerId)
         .orElseThrow(() -> new ChatException(USER_NOT_FOUND));
 
@@ -88,8 +92,7 @@ public class ChatService {
         .getCreatedAt();
 
     long uploadedBefore = Duration.between(lastMessageTime, LocalDateTime.now()).getSeconds();
-    String goodsImage = Optional.of(chatRoom)
-        .map(ChatRoom::getGoods)
+    String goodsImage = Optional.ofNullable(chatRoom.getGoods())
         .map(Goods::getImageList)
         .filter(list -> !list.isEmpty())
         .map(list -> list.get(0).getImageUrl())
@@ -102,7 +105,7 @@ public class ChatService {
         .profileImage(member.getProfileImage())
         .notRead(count)
         .lastMessage(lastMessage)
-        .updatedAt(LocalDateTime.now())
+        .updatedAt(lastMessageTime)
         .uploadedBefore(uploadedBefore)
         .build();
   }
@@ -127,11 +130,12 @@ public class ChatService {
 
     changeChatLogAllRead(roomId, memberId);
 
-    Long partnerId = chatRoomRepository.findOppositeMemberIdByMemberId(memberId);
+    Long partnerId = chatRoomRepository.findOppositeMemberId(roomId,memberId);
+
     Member partner = memberRepository.findById(partnerId)
         .orElseThrow(() -> new ChatException(USER_NOT_FOUND));
 
-    ChatRole chatRole = (memberId == chatRoom.getBuyerId()) ? BUYER : SELLER;
+    ChatRole chatRole = (memberId.equals(chatRoom.getBuyerId())) ? BUYER : SELLER;
 
     return ChatRoomDto.to(chatRoom, memberId, partner.getNickname(), chatRole);
   }

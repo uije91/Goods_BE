@@ -21,6 +21,6 @@ public class ChatLogDto {
     this.message = chatLog.getMessage();
     this.senderId = chatLog.getSenderId();
     this.receiverId = chatLog.getReceiverId();
-    this.createdAt = LocalDateTime.now();
+    this.createdAt = chatLog.getCreatedAt();
   }
 }
