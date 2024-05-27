@@ -115,4 +115,9 @@ public class GoodsSearchService {
     // Elasticsearch 업데이트
     elasticsearchOperations.update(updateQuery, IndexCoordinates.of("keywords"));
   }
+
+  public void deleteGoodsDocument(String index, String goodsId) {
+    IndexCoordinates indexCoordinates = IndexCoordinates.of(index);
+    elasticsearchOperations.delete(goodsId, indexCoordinates);
+  }
 }

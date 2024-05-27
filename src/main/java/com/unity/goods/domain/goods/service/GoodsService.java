@@ -227,6 +227,7 @@ public class GoodsService {
     log.info("[GoodsService][deleteGoods] : \"GoodsId: {}, GoodsName: {}\" 상품 삭제"
         , goods.getId(), goods.getGoodsName());
     goodsRepository.deleteById(goodsId);
+    goodsSearchService.deleteGoodsDocument("keywords", String.valueOf(goods.getId()));
   }
 
   public Page<SellerSalesListResponse> getSellerSalesList(Long sellerId, int page, int size) {
