@@ -89,7 +89,7 @@ public class WishService {
 
     List<WishlistDto> goodsInWishlist = wishlists.getContent().stream()
         .map(item -> {
-          Optional<Goods> optionalGoods = goodsRepository.findById(item.getId());
+          Optional<Goods> optionalGoods = goodsRepository.findById(item.getGoods().getId());
           return optionalGoods.map(this::getWishlistDto).orElse(null);
         })
         .filter(Objects::nonNull).toList();
