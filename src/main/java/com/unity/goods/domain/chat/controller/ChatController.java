@@ -2,6 +2,7 @@ package com.unity.goods.domain.chat.controller;
 
 
 import com.unity.goods.domain.chat.dto.ChatMessageDto;
+import com.unity.goods.domain.chat.dto.ChatMessageDto.ChatMessageResponse;
 import com.unity.goods.domain.chat.dto.ChatRoomDto;
 import com.unity.goods.domain.chat.dto.ChatRoomDto.ChatRoomResponse;
 import com.unity.goods.domain.chat.service.ChatService;
@@ -35,14 +36,19 @@ public class ChatController {
   // 채팅 message 메서드 수정
   @MessageMapping("/message/{roomId}")
   @SendTo("/sub/message/{roomId}")
-  public ChatMessageDto messageHandler(@DestinationVariable Long roomId, ChatMessageDto message,
+  public ChatMessageResponse messageHandler(@DestinationVariable Long roomId,
+      ChatMessageDto message,
       @Header("Authorization") String authorization) {
     String token = authorization.substring(7);
     String senderEmail = jwtTokenProvider.getClaims(token).get("email").toString();
 
-    chatService.addChatLog(roomId, message, senderEmail);
+    Long senderId = chatService.addChatLog(roomId, message, senderEmail);
     log.info("[ChatController] Message sent to room {}", roomId);
-    return message;
+
+    return ChatMessageResponse.builder()
+        .senderId(senderId)
+        .message(message.getMessage())
+        .build();
   }
 
   @PostMapping("/room/{goodsId}")

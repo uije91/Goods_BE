@@ -149,7 +149,7 @@ public class ChatService {
 
   // 채팅로그 저장
   @Transactional
-  public void addChatLog(Long roomId, ChatMessageDto chatMessageDto, String senderEmail) {
+  public Long addChatLog(Long roomId, ChatMessageDto chatMessageDto, String senderEmail) {
     ChatRoom chatRoom = chatRoomRepository.findById(roomId)
         .orElseThrow(() -> new ChatException(CHAT_ROOM_NOT_FOUND));
 
@@ -171,5 +171,7 @@ public class ChatService {
         .build();
 
     chatLogRepository.save(chatLog);
+
+    return senderId;
   }
 }
