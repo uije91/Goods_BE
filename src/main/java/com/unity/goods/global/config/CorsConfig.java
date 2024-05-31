@@ -11,6 +11,6 @@ public class CorsConfig implements WebMvcConfigurer {
   public void addCorsMappings(CorsRegistry registry) {
     registry.addMapping("/**")
         .exposedHeaders("Set-Cookie")
-        .allowedOrigins("http://localhost:5173"); //TODO: 프론트 서버 주소
+        .allowedOrigins("https://goods-trade.vercel.app");
   }
 }
