@@ -73,7 +73,7 @@ public class ChatService {
     AtomicInteger index = new AtomicInteger(0);
 
     return chatRoomRepository.findAllByBuyerIdOrSellerId(memberId, memberId).stream()
-        .filter(room -> !room.getChatLogs().isEmpty())
+        .filter(room -> !room.getChatLogs().isEmpty() && !hasUserLeft(room, memberId))
         .map(m -> {
           int count = countChatLogNotRead(m.getChatLogs(), memberId);
           Long partnerId = oppositeMemberIds.get(index.getAndIncrement() % oppositeMemberIds.size());
@@ -110,6 +110,15 @@ public class ChatService {
         .build();
   }
 
+  private boolean hasUserLeft(ChatRoom chatRoom, Long memberId){
+    if (chatRoom.getBuyerId().equals(memberId)) {
+      return chatRoom.isBuyerLeft();
+    } else if (chatRoom.getSellerId().equals(memberId)) {
+      return chatRoom.isSellerLeft();
+    }
+    return false;
+  }
+
   // 채팅방에서 읽지 않은 채팅의 수
   private int countChatLogNotRead(List<ChatLog> chatLogs, Long memberId) {
 
@@ -130,7 +139,7 @@ public class ChatService {
 
     changeChatLogAllRead(roomId, memberId);
 
-    Long partnerId = chatRoomRepository.findOppositeMemberId(roomId,memberId);
+    Long partnerId = chatRoomRepository.findOppositeMemberId(roomId, memberId);
 
     Member partner = memberRepository.findById(partnerId)
         .orElseThrow(() -> new ChatException(USER_NOT_FOUND));
@@ -173,5 +182,33 @@ public class ChatService {
     chatLogRepository.save(chatLog);
 
     return senderId;
+  }
+
+  // 채팅방 나가기
+  @Transactional
+  public void leaveChatRoom(Long roomId, Long memberId) {
+    ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+        .orElseThrow(() -> new ChatException(CHAT_ROOM_NOT_FOUND));
+
+    if (chatRoom.getBuyerId().equals(memberId)) {
+      chatRoom.setBuyerLeft(true);
+    } else if (chatRoom.getSellerId().equals(memberId)) {
+      chatRoom.setSellerLeft(true);
+    } else {
+      throw new ChatException(USER_NOT_FOUND);
+    }
+    chatRoomRepository.save(chatRoom);
+  }
+
+  // 대화시 나간 사용자가 다시 대화에 참여, 게시글 목록 재출력
+  public void inviteChatRoom(Long roomId){
+    ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+        .orElseThrow(() -> new ChatException(CHAT_ROOM_NOT_FOUND));
+
+    if(chatRoom.isSellerLeft() || chatRoom.isBuyerLeft()){
+      chatRoom.setSellerLeft(false);
+      chatRoom.setBuyerLeft(false);
+      chatRoomRepository.save(chatRoom);
+    }
   }
 }
