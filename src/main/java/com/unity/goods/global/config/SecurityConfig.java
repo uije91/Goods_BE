@@ -56,7 +56,7 @@ public class SecurityConfig {
             .configurationSource(request -> {
               CorsConfiguration config = new CorsConfiguration();
 
-              config.setAllowedOrigins(List.of("https://goods-trade.vercel.app", "https://apic.app"));
+              config.setAllowedOrigins(List.of("https://goods-trade.vercel.app", "https://apic.app", "http://localhost:5173"));
               config.setAllowedMethods(Collections.singletonList("*"));
               config.setAllowCredentials(true);
               config.setAllowedHeaders(Collections.singletonList("*"));
