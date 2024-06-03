@@ -27,6 +27,13 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
+    # ## Git secret -> copy keystore.12
+    # - name: copy keystore.p12
+    #   run: |
+    #     cd ./src/main/resources
+    #     touch ./keystore.p12
+    #     echo "${{ secrets.KEYSTORE }}" | base 64 --decode > ./keystore.p12
+
     ## Git secret 사용하여 application-prod.yml 생성
     - name: make application-prod.yml
       run: |
