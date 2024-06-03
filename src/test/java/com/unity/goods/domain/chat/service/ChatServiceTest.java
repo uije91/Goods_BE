@@ -1,7 +1,9 @@
 package com.unity.goods.domain.chat.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
@@ -41,8 +43,6 @@ class ChatServiceTest {
 
   @Mock
   private ChatRoomRepository chatRoomRepository;
-  @Mock
-  private ChatLogRepository chatLogRepository;
   @Mock
   private GoodsRepository goodsRepository;
   @Mock
@@ -111,7 +111,7 @@ class ChatServiceTest {
     when(chatRoomRepository.findAllByBuyerIdOrSellerId(member.getId(), member.getId()))
         .thenReturn(Collections.singletonList(chatRoom));
     when(chatRoomRepository.findOppositeMemberIdByMemberId(member.getId()))
-        .thenReturn(member2.getId());
+        .thenReturn(Collections.singletonList(member2.getId()));
     when(memberRepository.findById(member2.getId()))
         .thenReturn(Optional.of(member2));
 
@@ -166,5 +166,73 @@ class ChatServiceTest {
     assertEquals(1L, chatRoomDto.getGoodsId());
 
     verify(chatRoomRepository, times(1)).findById(anyLong());
+  }
+
+  @Test
+  @DisplayName("채팅방 나가기")
+  public void testLeaveChatRoom_SellerLeft() {
+    // given
+    ChatRoom chatRoom = ChatRoom.builder().id(1L)
+        .sellerId(member.getId())
+        .buyerId(member2.getId()).build();
+
+    chatRoom.setSellerLeft(true);
+    chatRoom.setBuyerLeft(false);
+    when(chatRoomRepository.findById(1L)).thenReturn(Optional.of(chatRoom));
+
+    // when
+    chatService.leaveChatRoom(1L,member.getId());
+
+    // then
+    assertTrue(chatRoom.isSellerLeft());
+    assertFalse(chatRoom.isBuyerLeft());
+    verify(chatRoomRepository).save(chatRoom);
+
+    // given
+    chatRoom.setSellerLeft(false);
+    chatRoom.setBuyerLeft(true);
+    when(chatRoomRepository.findById(1L)).thenReturn(Optional.of(chatRoom));
+
+    // when
+    chatService.leaveChatRoom(1L,member2.getId());
+
+    // then
+    assertFalse(chatRoom.isSellerLeft());
+    assertTrue(chatRoom.isBuyerLeft());
+    verify(chatRoomRepository,times(2)).save(chatRoom);
+  }
+
+  @Test
+  @DisplayName("채팅방 메세지 전송 - 채팅방 다시초대")
+  void testInviteRoom() throws Exception{
+    // given
+    ChatRoom chatRoom = ChatRoom.builder().id(1L)
+        .sellerId(member.getId())
+        .buyerId(member2.getId()).build();
+
+    chatRoom.setSellerLeft(false);
+    chatRoom.setBuyerLeft(true);
+    when(chatRoomRepository.findById(1L)).thenReturn(Optional.of(chatRoom));
+
+    // when
+    chatService.inviteChatRoom(1L);
+
+    //then
+    assertFalse(chatRoom.isSellerLeft());
+    assertFalse(chatRoom.isBuyerLeft());
+    verify(chatRoomRepository).save(chatRoom);
+
+    // given
+    chatRoom.setSellerLeft(true);
+    chatRoom.setBuyerLeft(false);
+    when(chatRoomRepository.findById(1L)).thenReturn(Optional.of(chatRoom));
+
+    // when
+    chatService.inviteChatRoom(1L);
+
+    //then
+    assertFalse(chatRoom.isSellerLeft());
+    assertFalse(chatRoom.isBuyerLeft());
+    verify(chatRoomRepository, times(2)).save(chatRoom);
   }
 }
