@@ -41,7 +41,7 @@ public class ChatController {
       @Header("Authorization") String authorization) {
     String token = authorization.substring(7);
     String senderEmail = jwtTokenProvider.getClaims(token).get("email").toString();
-
+    chatService.inviteChatRoom(roomId);
     Long senderId = chatService.addChatLog(roomId, message, senderEmail);
     log.info("[ChatController] Message sent to room {}", roomId);
 
@@ -67,6 +67,13 @@ public class ChatController {
   public ResponseEntity<ChatRoomDto> getChatLogs(@PathVariable Long roomId,
       @AuthenticationPrincipal UserDetailsImpl principal) {
     return ResponseEntity.ok().body(chatService.getChatLogs(roomId, principal.getId()));
+  }
+
+  @PostMapping("room/leave/{roomId}")
+  public ResponseEntity<?> leaveChatRoom(@PathVariable Long roomId,
+      @AuthenticationPrincipal UserDetailsImpl principal){
+    chatService.leaveChatRoom(roomId,principal.getId());
+    return ResponseEntity.ok().build();
   }
 
 }

@@ -18,6 +18,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Entity
@@ -33,6 +34,11 @@ public class ChatRoom {
   private Long sellerId;
   private Long buyerId;
   private LocalDateTime updatedAt;
+
+  @Setter
+  private boolean sellerLeft;
+  @Setter
+  private boolean buyerLeft;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "goods_id")
