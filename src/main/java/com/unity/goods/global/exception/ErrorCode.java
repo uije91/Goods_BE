@@ -7,7 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ErrorCode {
   //Chat Error
-  CHAT_ROOM_NOT_FOUND(400, "채팅방이 존재하지 않습니다."),
+  CHAT_ROOM_NOT_FOUND(404, "채팅방이 존재하지 않습니다."),
   ALREADY_GENERATED_CHAT_ROOM(400, "이미 생성된 채팅방입니다."),
 
   // OAuth Error
@@ -26,7 +26,7 @@ public enum ErrorCode {
   INVALID_REFRESH_TOKEN(400, "잘못된 리프레시 토큰입니다."),
 
   // Goods Error
-  GOODS_NOT_FOUND(400, "조회되지 않는 상품입니다."),
+  GOODS_NOT_FOUND(404, "조회되지 않는 상품입니다."),
   MISMATCHED_SELLER(404, "판매자 정보가 일치하지 않습니다."),
   ALREADY_SOLD_OUT_GOODS(400, "이미 판매가 완료된 상품입니다."),
   MAX_IMAGE_LIMIT_EXCEEDED(404, "등록할 수 있는 이미지의 최대 개수를 초과하였습니다."),
@@ -37,16 +37,16 @@ public enum ErrorCode {
 
   // Trade Error
   OUT_RANGED_COST(400, "해당 금액은 송금 범위를 초과하였습니다. 다시 확인 부탁드립니다."),
-  SELLER_NOT_FOUND(400, "해당 판매자는 존재하지 않습니다. "),
+  SELLER_NOT_FOUND(404, "해당 판매자는 존재하지 않습니다. "),
   UNMATCHED_PRICE(400, "거래 금액이 상품 가격과 일치하지 않습니다."),
   ALREADY_SOLD(400, "이미 거래 완료된 상품입니다."),
   INSUFFICIENT_AMOUNT(400, "거래를 진행할 잔액이 부족합니다."),
-  PAYMENT_NOT_FOUND(400, "조회되지 않는 결제 내역입니다."),
+  PAYMENT_NOT_FOUND(404, "조회되지 않는 결제 내역입니다."),
   PAYMENT_UNMATCHED(400, "결제 내역이 불일치합니다."),
 
   // WishList Error
   GOODS_ALREADY_WISHLIST(400, "이미 찜한 상품입니다."),
-  WISHLIST_NOT_FOUND(400, "찜한 상품을 찾을 수 없습니다."),
+  WISHLIST_NOT_FOUND(404, "찜한 상품을 찾을 수 없습니다."),
   IMPOSSIBLE_TO_WISHLIST_MY_GOODS(400, "내가 등록한 제품에 찜은 불가능합니다."),
 
   // System Error
@@ -55,7 +55,7 @@ public enum ErrorCode {
 
   // Email Error
   EMAIL_SEND_ERROR(500, "이메일 전송 과정 중 에러가 발생하였습니다."),
-  EMAIL_VERIFICATION_NOT_EXISTS(400, "해당 이메일에 대한 인증 정보가 존재하지 않습니다."),
+  EMAIL_VERIFICATION_NOT_EXISTS(404, "해당 이메일에 대한 인증 정보가 존재하지 않습니다."),
   INCORRECT_VERIFICATION_NUM(400, "인증 번호가 올바르지 않습니다."),
 
   // JwtFilterAuthenticationError
