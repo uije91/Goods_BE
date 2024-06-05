@@ -1,12 +1,15 @@
 package com.unity.goods.domain.member.service;
 
+import static com.unity.goods.domain.member.type.BadgeType.SELL;
 import static com.unity.goods.domain.member.type.Status.ACTIVE;
 import static com.unity.goods.domain.member.type.Status.RESIGN;
 import static com.unity.goods.global.exception.ErrorCode.RESIGNED_ACCOUNT;
 import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -14,14 +17,19 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.unity.goods.domain.goods.repository.GoodsRepository;
 import com.unity.goods.domain.member.dto.ChangePasswordDto.ChangePasswordRequest;
+import com.unity.goods.domain.member.dto.ChangeTradePasswordDto.ChangeTradePasswordRequest;
 import com.unity.goods.domain.member.dto.FindPasswordDto.FindPasswordRequest;
 import com.unity.goods.domain.member.dto.MemberProfileDto.MemberProfileResponse;
 import com.unity.goods.domain.member.dto.ResignDto.ResignRequest;
 import com.unity.goods.domain.member.dto.SignUpDto.SignUpRequest;
+import com.unity.goods.domain.member.entity.Badge;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.exception.MemberException;
+import com.unity.goods.domain.member.repository.BadgeRepository;
 import com.unity.goods.domain.member.repository.MemberRepository;
+import com.unity.goods.domain.member.type.BadgeType;
 import com.unity.goods.domain.member.type.Role;
 import com.unity.goods.domain.member.type.SocialType;
 import com.unity.goods.domain.member.type.Status;
@@ -30,6 +38,9 @@ import com.unity.goods.global.exception.ErrorCode;
 import com.unity.goods.global.jwt.JwtTokenProvider;
 import com.unity.goods.global.jwt.UserDetailsImpl;
 import com.unity.goods.infra.service.RedisService;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -53,6 +64,10 @@ class MemberServiceTest {
   @Mock
   private MemberRepository memberRepository;
   @Mock
+  private GoodsRepository goodsRepository;
+  @Mock
+  private BadgeRepository badgeRepository;
+  @Mock
   private PasswordEncoder passwordEncoder;
   @Mock
   private RedisService redisService;
@@ -61,9 +76,11 @@ class MemberServiceTest {
   @Mock
   private MailSender mailSender;
 
+  private Member member;
+
   @BeforeEach
   public void setMember() {
-    Member member = Member.builder()
+    member = Member.builder()
         .nickname("test")
         .email("test@naver.com")
         .password("test1234")
@@ -95,16 +112,16 @@ class MemberServiceTest {
     SignUpRequest mockSignUpRequest = SignUpRequest.builder()
         .email(fakeMemberEmail)
         .password(encodedPw)
-        .chkPassword(encodedPw)
-        .nickName("nickName")
-        .tradePassword(encodedTradePw)
+        .chk_password(encodedPw)
+        .nick_name("nickName")
+        .trade_password(encodedTradePw)
         .build();
 
     // given
     given(memberRepository.existsByEmail(mockSignUpRequest.getEmail())).willReturn(false);
-    given(memberRepository.existsByNickname(mockSignUpRequest.getNickName())).willReturn(false);
+    given(memberRepository.existsByNickname(mockSignUpRequest.getNick_name())).willReturn(false);
     given(passwordEncoder.encode(mockSignUpRequest.getPassword())).willReturn(encodedPw);
-    given(passwordEncoder.encode(mockSignUpRequest.getTradePassword())).willReturn(encodedTradePw);
+    given(passwordEncoder.encode(mockSignUpRequest.getTrade_password())).willReturn(encodedTradePw);
 
     given(memberRepository.findByEmail(mockSignUpRequest.getEmail()))
         .willReturn(Optional.of(member));
@@ -116,7 +133,7 @@ class MemberServiceTest {
     Member signUpMember = memberRepository.findByEmail(fakeMemberEmail)
         .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
 
-    assertEquals(mockSignUpRequest.getNickName(), signUpMember.getNickname());
+    assertEquals(mockSignUpRequest.getNick_name(), signUpMember.getNickname());
     assertEquals(ACTIVE, signUpMember.getStatus());
     assertEquals(encodedPw, signUpMember.getPassword());
     assertEquals(encodedTradePw, signUpMember.getTradePassword());
@@ -205,11 +222,16 @@ class MemberServiceTest {
   @DisplayName("회원 프로필 조회 성공 테스트")
   void getMemberProfileSuccess() {
     //given
+    Badge badge = Badge.builder()
+        .badge(BadgeType.SELL)
+        .build();
+
     Member member = Member.builder()
         .email("test@naver.com")
         .password("test1234")
         .nickname("test")
         .status(ACTIVE)
+        .badgeList(List.of(new Badge[]{badge}))
         .phoneNumber("010-1111-1111")
         .profileImage("http://amazonS3/test.jpg")
         .build();
@@ -278,6 +300,8 @@ class MemberServiceTest {
     given(memberRepository.findByEmail(anyString()))
         .willReturn(Optional.of(member));
     given(passwordEncoder.encode(changePasswordRequest.getNewPassword())).willReturn("new1234");
+    given(!passwordEncoder.matches(changePasswordRequest.getCurPassword(),
+        member.getPassword())).willReturn(true);
 
     //when
     memberService.changePassword(changePasswordRequest, userDetails);
@@ -286,5 +310,100 @@ class MemberServiceTest {
     assertEquals(member.getPassword(), "new1234");
   }
 
+  @Test
+  @DisplayName("거래 비밀번호 변경 테스트")
+  void changeTradePasswordTest() {
+    //given
+    Member member = Member.builder()
+        .email("test@naver.com")
+        .password("test1234")
+        .tradePassword("111111")
+        .nickname("test")
+        .status(RESIGN)
+        .phoneNumber("010-1111-1111")
+        .profileImage("http://amazonS3/test.jpg")
+        .build();
+
+    ChangeTradePasswordRequest changeTradePasswordRequest = ChangeTradePasswordRequest.builder()
+        .curTradePassword("111111")
+        .newTradePassword("222222")
+        .build();
+
+    UserDetailsImpl userDetails = new UserDetailsImpl(member);
+
+    given(memberRepository.findByEmail(anyString()))
+        .willReturn(Optional.of(member));
+    given(passwordEncoder.encode(changeTradePasswordRequest.getNewTradePassword())).willReturn(
+        "222222");
+    given(!passwordEncoder.matches(changeTradePasswordRequest.getCurTradePassword(),
+        member.getTradePassword())).willReturn(true);
+
+    //when
+    memberService.changeTradePassword(changeTradePasswordRequest, userDetails);
+
+    //then
+    assertEquals(member.getTradePassword(), "222222");
+  }
+
+  @Test
+  @DisplayName("배지를 가지고 있는 회원 배지 테스트")
+  public void testUpdateBadge() {
+    // given
+    Member member1 = new Member();
+    member1.setId(1L);
+    member1.setNickname("member1");
+    member1.setStar(4.5);
+
+    Member member2 = new Member();
+    member2.setId(2L);
+    member2.setNickname("member2");
+    member2.setStar(3.5);
+
+    List<Member> members = Arrays.asList(member1, member2);
+
+    when(memberRepository.findAll()).thenReturn(members);
+    when(goodsRepository.countByMemberIdAndCreatedAtAfter(anyLong(), any(LocalDateTime.class))).thenReturn(40);
+    when(badgeRepository.existsByMemberIdAndBadge(anyLong(), any(BadgeType.class))).thenReturn(false);
+
+    // when
+    memberService.updateBadge();
+
+    // then
+    verify(badgeRepository, times(3)).save(any(Badge.class));
+
+  }
+
+  @Test
+  @DisplayName("배지를 가지고 있지 않은 회원 배지 테스트")
+  public void testUpdateBadge2() {
+    // given
+    Member member1 = new Member();
+    member1.setId(1L);
+    member1.setNickname("member1");
+    member1.setStar(4.5);
+
+    Member member2 = new Member();
+    member2.setId(2L);
+    member2.setNickname("member2");
+    member2.setStar(3.5);
+
+    Badge newBadge = Badge.builder()
+        .member(member)
+        .badge(SELL)
+        .build();
+
+    List<Member> members = Arrays.asList(member1, member2);
+
+    when(memberRepository.findAll()).thenReturn(members);
+    when(goodsRepository.countByMemberIdAndCreatedAtAfter(anyLong(), any(LocalDateTime.class))).thenReturn(40);
+    when(badgeRepository.existsByMemberIdAndBadge(anyLong(), any(BadgeType.class))).thenReturn(true);
+    when(badgeRepository.findByMemberIdAndBadge(anyLong(), any(BadgeType.class))).thenReturn(newBadge);
+
+    // when
+    memberService.updateBadge();
+
+    // then
+    verify(badgeRepository, times(1)).delete(any(Badge.class));
+  }
 
 }

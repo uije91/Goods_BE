@@ -1,5 +1,7 @@
 package com.unity.goods.domain.member.dto;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.unity.goods.domain.member.entity.Member;
 import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
@@ -14,7 +16,7 @@ public class SignUpDto {
   @Builder
   public static class SignUpRequest {
 
-    private MultipartFile profileImage;
+    private MultipartFile profile_image;
 
     @Pattern(regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+.[A-Za-z]{2,6}$",
         message = "이메일 형식에 맞지 않습니다.")
@@ -26,20 +28,21 @@ public class SignUpDto {
 
     @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[~!@#$%^&*()+|=])[A-Za-z\\d~!@#$%^&*()+|=]{8,20}$",
         message = "비밀번호는 8~20자 영문,숫자,특수문자를 사용하세요.")
-    private String chkPassword;
+    private String chk_password;
 
     @Pattern(regexp = "^[ㄱ-ㅎ가-힣a-z0-9-_]{2,10}$", message = "닉네임은 특수문자를 제외한 2~10자리여야 합니다.")
-    private String nickName;
+    private String nick_name;
 
-    private String phoneNumber;
+    private String phone_number;
 
-    @Pattern(regexp = "^[0-9]{6}$", message = "거래 비밀번호는 6자리 숫자로 작성해주세요.")
-    private String tradePassword;
+    @Pattern(regexp = "^$|^[0-9]{6}$", message = "거래 비밀번호는 6자리 숫자로 작성해주세요.")
+    private String trade_password;
 
   }
 
   @Getter
   @Builder
+  @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
   public static class SignUpResponse {
 
     private String profileImageUrl;
@@ -47,7 +50,7 @@ public class SignUpDto {
     private String nickName;
     private String phoneNumber;
 
-    public static SignUpResponse fromMember(Member member){
+    public static SignUpResponse fromMember(Member member) {
       return SignUpResponse.builder()
           .email(member.getEmail())
           .nickName(member.getNickname())

@@ -1,14 +1,19 @@
 package com.unity.goods.global.config;
 
+import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpMethod.PUT;
 import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
 import com.unity.goods.domain.oauth.handler.OAuth2FailHandler;
 import com.unity.goods.domain.oauth.handler.OAuth2SuccessHandler;
+import com.unity.goods.domain.oauth.repository.CustomAuthorizationRequestRepository;
 import com.unity.goods.domain.oauth.service.OAuth2UserService;
+import com.unity.goods.global.exception.AuthenticationEntryPointHandler;
 import com.unity.goods.global.jwt.JwtAuthenticationFilter;
 import com.unity.goods.global.jwt.JwtTokenProvider;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -23,6 +28,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
 
 @Configuration
 @EnableWebSecurity
@@ -32,8 +38,11 @@ public class SecurityConfig {
 
   private final JwtTokenProvider jwtTokenProvider;
   private final OAuth2UserService oAuth2UserService;
+  private final CustomAuthorizationRequestRepository authorizationRequestRepository;
   private final OAuth2SuccessHandler successHandler;
   private final OAuth2FailHandler failHandler;
+
+  private final AuthenticationEntryPointHandler authenticationEntryPointHandler;
 
   @Bean
   public PasswordEncoder passwordEncoder() {
@@ -43,24 +52,42 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http
+        .cors(cors -> cors
+            .configurationSource(request -> {
+              CorsConfiguration config = new CorsConfiguration();
+
+              config.setAllowedOrigins(List.of("https://goods-trade.vercel.app", "https://apic.app", "http://localhost:5173"));
+              config.setAllowedMethods(Collections.singletonList("*"));
+              config.setAllowCredentials(true);
+              config.setAllowedHeaders(Collections.singletonList("*"));
+              config.setMaxAge(3600L);
+
+              config.setExposedHeaders(Arrays.asList("Authorization", "Set_Cookie"));
+              return config;
+            }))
+
         .csrf(AbstractHttpConfigurer::disable)
         .httpBasic(AbstractHttpConfigurer::disable)
         .formLogin(AbstractHttpConfigurer::disable)
         .sessionManagement(configurer -> configurer
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-            .requestMatchers(requestAuthenticated()).authenticated()
             .requestMatchers(anyRequest()).permitAll()
+            .requestMatchers(requestAuthenticated()).authenticated()
         )
         // OAuth2
         .oauth2Login(oauth2 -> oauth2
-            .authorizationEndpoint(endpoint -> endpoint
-                .baseUri("/oauth2/authorization"))
-            .redirectionEndpoint(endpoint -> endpoint
-                .baseUri("/api/oauth/code/*"))
-            .userInfoEndpoint(endpoint -> endpoint.userService(oAuth2UserService))
+            .authorizationEndpoint(e -> e
+                .baseUri("/oauth2/authorization")
+                .authorizationRequestRepository(authorizationRequestRepository))
+            .redirectionEndpoint(e -> e.baseUri("/api/oauth/code/*"))
+            .userInfoEndpoint(e -> e.userService(oAuth2UserService))
             .successHandler(successHandler)
             .failureHandler(failHandler))
+        // 인가되지 않은 사용자 접근 에러 핸들링
+        .exceptionHandling(exceptionHandling ->
+            exceptionHandling
+                .authenticationEntryPoint(authenticationEntryPointHandler))
         // JWT Filter
         .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
             UsernamePasswordAuthenticationFilter.class)
@@ -72,11 +99,19 @@ public class SecurityConfig {
   private RequestMatcher[] anyRequest() {
     List<RequestMatcher> requestMatchers = List.of(
         antMatcher("/"),
+        antMatcher("/oauth/*"),
         antMatcher(POST, "/api/member/signup"), // 회원가입
         antMatcher(POST, "/api/member/login"),  // 로그인
-        antMatcher(POST, "/api/member/logout"), // 로그아웃
         antMatcher(POST, "/api/member/reissue"), // 토큰 재발급
-        antMatcher(POST, "/api/email/**") // 이메일 인증
+        antMatcher(GET, "/api/member/badge"), // 배지 조회
+        antMatcher(GET, "/api/member/{sellerId}/profile"), // 판매자 정보 조회
+        antMatcher(POST, "/api/email/**"), // 이메일 인증
+        antMatcher(POST, "/api/member/find"), // 비밀번호 찾기
+        antMatcher(POST, "/api/goods/search"), // 검색
+        antMatcher(GET, "/api/goods"), // 첫 화면
+        antMatcher(GET, "/api/goods/**"), // 상품 상세 페이지
+        antMatcher(GET, "/api/goods/sell-list/**"),
+        antMatcher("/api/chat/**")
     );
     return requestMatchers.toArray(RequestMatcher[]::new);
   }
@@ -85,10 +120,17 @@ public class SecurityConfig {
   private RequestMatcher[] requestAuthenticated() {
     List<RequestMatcher> requestMatchers = List.of(
         antMatcher(POST, "/api/member/logout"), // 로그아웃
-        antMatcher(PUT, "/api/member/resign") // 회원탈퇴
+        antMatcher(PUT, "/api/member/resign"), // 회원탈퇴
+        antMatcher(PUT, "/api/member/password"), // 비밀번호 변경
+        antMatcher(PUT, "/api/member/trade-password"), // 거래 비밀번호 변경
+        antMatcher(GET, "/api/member/profile"), // 회원정보 조회
+        antMatcher(PUT, "/api/member/profile"), // 회원정보 수정
+        antMatcher(POST, "/api/goods/new"),
+        antMatcher("/api/goods/**"),
+        antMatcher("/api/trade/**"),
+        antMatcher("/api/point/**")
     );
     return requestMatchers.toArray(RequestMatcher[]::new);
   }
-
 
 }

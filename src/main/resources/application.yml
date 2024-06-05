@@ -5,12 +5,25 @@ spring:
       host: localhost
       port: 6379
 
+    elasticsearch:
+      repositories:
+        enabled: true
+      url: localhost:9200
+
   # MySQL 설정
+#  datasource:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://localhost:3306/goods?characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+#    username: root
+#    password: 1234
+
+  # 도커용 db
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/goods?characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+    #    url: jdbc:mysql://127.0.0.1:3306/goodsDb
+    url: jdbc:mysql://mysql-container:3306/goodsDb
     username: root
-    password: 1234
+    password: unity-goods
 
   # JPA 설정
   jpa:
@@ -75,6 +88,11 @@ spring:
           write timeout: 5000
       auth-code-expiration-millis: 600000  # 10 * 60 * 1000 == 10분. redis 유효시간 + 안전장치
 
+  servlet:
+    multipart:
+      maxFileSize: 10MB
+      max-request-size: 50MB
+
 # AWS S3 설정
 cloud:
   aws:
@@ -88,5 +106,14 @@ cloud:
     credentials:
       access-key: accessKey
       secret-key: secretKey
+logging:
+  level:
+    org:
+      springframework:
+        data:
+          elasticsearch:
+            client:
+              WIRE=DEBUG:
+
 
 

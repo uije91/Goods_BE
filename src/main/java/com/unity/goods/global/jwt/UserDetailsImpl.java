@@ -24,6 +24,10 @@ public class UserDetailsImpl implements UserDetails, OAuth2User {
     return authorities;
   }
 
+  public Long getId() {
+    return member.getId();
+  }
+
   @Override
   public String getUsername() {
     return member.getEmail();

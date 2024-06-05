@@ -6,9 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 
-import com.unity.goods.domain.email.dto.EmailVerificationCheckDto.EmailVerificationCheckRequest;
-import com.unity.goods.domain.email.exception.EmailException;
-import com.unity.goods.domain.email.type.EmailSubjects;
+import com.unity.goods.domain.member.dto.EmailVerificationCheckDto.EmailVerificationCheckRequest;
+import com.unity.goods.domain.member.exception.EmailException;
+import com.unity.goods.domain.member.type.EmailSubjects;
+import com.unity.goods.domain.member.service.EmailService;
 import com.unity.goods.infra.service.RedisService;
 import java.util.Objects;
 import org.junit.jupiter.api.DisplayName;
