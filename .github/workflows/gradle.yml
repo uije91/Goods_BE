@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - "main"
-      - "feat/goods"
+      - "develop"
   pull_request:
     branches:
       - "main"
