@@ -11,11 +11,11 @@ public enum ErrorCode {
   ALREADY_GENERATED_CHAT_ROOM(400, "이미 생성된 채팅방입니다."),
 
   // OAuth Error
-  INVALID_SOCIAL_TYPE(400, "잘못된 소셜 타입입니다"),
+  INVALID_SOCIAL_TYPE(400, "잘못된 소셜 타입입니다."),
   USE_SERVER_LOGIN(400, "기존 회원입니다. 자체 로그인을 이용해주세요."),
 
   // Member Error
-  USER_NOT_FOUND(404, "회원 정보를 찾을 수 없습니다"),
+  USER_NOT_FOUND(404, "회원 정보를 찾을 수 없습니다."),
   USE_SOCIAL_LOGIN(400, "소셜 로그인을 이용해주세요"),
   PASSWORD_NOT_MATCH(400, "비밀번호가 올바르지 않습니다."),
   EMAIL_NOT_VERITY(400, "이메일 인증이 완료되지 않았습니다."),
@@ -46,7 +46,7 @@ public enum ErrorCode {
 
   // WishList Error
   GOODS_ALREADY_WISHLIST(400, "이미 찜한 상품입니다."),
-  WISHLIST_NOT_FOUND(400, "찜한 상품을 찾을 수 없습니다"),
+  WISHLIST_NOT_FOUND(400, "찜한 상품을 찾을 수 없습니다."),
   IMPOSSIBLE_TO_WISHLIST_MY_GOODS(400, "내가 등록한 제품에 찜은 불가능합니다."),
 
   // System Error
