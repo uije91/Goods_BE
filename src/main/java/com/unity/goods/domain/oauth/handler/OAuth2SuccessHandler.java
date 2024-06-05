@@ -29,7 +29,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
   public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
       Authentication authentication) throws IOException {
 
-    String targetUrl = "https://goods-trade.vercel.app/oauth/kakao";
+    //String targetUrl = "https://goods-trade.vercel.app/oauth/kakao";
+    String targetUrl = "http://localhost:5173/oauth/kakao";
     TokenDto tokenDto = saveUser(authentication);
 
     clearAuthenticationAttributes(request, response);
