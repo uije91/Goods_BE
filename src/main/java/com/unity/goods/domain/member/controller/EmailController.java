@@ -1,9 +1,9 @@
-package com.unity.goods.domain.email.controller;
+package com.unity.goods.domain.member.controller;
 
-import com.unity.goods.domain.email.dto.EmailVerificationCheckDto.EmailVerificationCheckRequest;
-import com.unity.goods.domain.email.dto.EmailVerificationCheckDto.EmailVerificationCheckResponse;
-import com.unity.goods.domain.email.dto.EmailVerificationDto.EmailVerificationRequest;
-import com.unity.goods.domain.email.service.EmailService;
+import com.unity.goods.domain.member.dto.EmailVerificationCheckDto.EmailVerificationCheckRequest;
+import com.unity.goods.domain.member.dto.EmailVerificationCheckDto.EmailVerificationCheckResponse;
+import com.unity.goods.domain.member.dto.EmailVerificationDto.EmailVerificationRequest;
+import com.unity.goods.domain.member.service.EmailService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

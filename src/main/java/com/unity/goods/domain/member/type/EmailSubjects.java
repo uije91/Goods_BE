@@ -1,4 +1,4 @@
-package com.unity.goods.domain.email.type;
+package com.unity.goods.domain.member.type;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -16,8 +16,8 @@ import static com.unity.goods.global.exception.ErrorCode.RESIGNED_ACCOUNT;
 import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
 import static com.unity.goods.global.exception.ErrorCode.USE_SOCIAL_LOGIN;
 
-import com.unity.goods.domain.email.exception.EmailException;
-import com.unity.goods.domain.email.type.EmailSubjects;
+import com.unity.goods.domain.member.exception.EmailException;
+import com.unity.goods.domain.member.type.EmailSubjects;
 import com.unity.goods.domain.goods.repository.GoodsRepository;
 import com.unity.goods.domain.member.dto.ChangePasswordDto.ChangePasswordRequest;
 import com.unity.goods.domain.member.dto.ChangeTradePasswordDto.ChangeTradePasswordRequest;

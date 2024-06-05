@@ -1,14 +1,14 @@
-package com.unity.goods.domain.email.service;
+package com.unity.goods.domain.member.service;
 
 import static com.unity.goods.global.exception.ErrorCode.EMAIL_SEND_ERROR;
 import static com.unity.goods.global.exception.ErrorCode.EMAIL_VERIFICATION_NOT_EXISTS;
 import static com.unity.goods.global.exception.ErrorCode.INCORRECT_VERIFICATION_NUM;
 
-import com.unity.goods.domain.email.dto.EmailVerificationCheckDto.EmailVerificationCheckRequest;
-import com.unity.goods.domain.email.dto.EmailVerificationCheckDto.EmailVerificationCheckResponse;
-import com.unity.goods.domain.email.dto.EmailVerificationDto.EmailVerificationRequest;
-import com.unity.goods.domain.email.exception.EmailException;
-import com.unity.goods.domain.email.type.EmailSubjects;
+import com.unity.goods.domain.member.dto.EmailVerificationCheckDto.EmailVerificationCheckRequest;
+import com.unity.goods.domain.member.dto.EmailVerificationCheckDto.EmailVerificationCheckResponse;
+import com.unity.goods.domain.member.dto.EmailVerificationDto.EmailVerificationRequest;
+import com.unity.goods.domain.member.exception.EmailException;
+import com.unity.goods.domain.member.type.EmailSubjects;
 import com.unity.goods.infra.service.RedisService;
 import java.security.SecureRandom;
 import lombok.RequiredArgsConstructor;

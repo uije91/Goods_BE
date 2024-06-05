@@ -1,4 +1,4 @@
-package com.unity.goods.domain.email.dto;
+package com.unity.goods.domain.member.dto;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;

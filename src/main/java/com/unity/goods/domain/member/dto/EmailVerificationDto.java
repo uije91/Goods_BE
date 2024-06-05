@@ -1,4 +1,4 @@
-package com.unity.goods.domain.email.dto;
+package com.unity.goods.domain.member.dto;
 
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
