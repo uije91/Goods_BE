@@ -35,8 +35,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
     implementation 'org.webjars:sockjs-client:1.5.1'
     implementation 'org.webjars:stomp-websocket:2.3.4'
-
-
+    implementation 'com.google.firebase:firebase-admin:9.2.0'
     implementation 'com.github.iamport:iamport-rest-client-java:0.2.21'
 
     compileOnly 'org.projectlombok:lombok'
