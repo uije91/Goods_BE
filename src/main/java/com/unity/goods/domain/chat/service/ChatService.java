@@ -69,22 +69,19 @@ public class ChatService {
 
   // 채팅방 목록 조회
   public List<ChatRoomListDto> getChatRoomList(Long memberId) {
-    List<Long> oppositeMemberIds = chatRoomRepository.findOppositeMemberIdByMemberId(memberId);
-    AtomicInteger index = new AtomicInteger(0);
-
     return chatRoomRepository.findAllByBuyerIdOrSellerId(memberId, memberId).stream()
         .filter(room -> !room.getChatLogs().isEmpty() && !hasUserLeft(room, memberId))
         .map(m -> {
           int count = countChatLogNotRead(m.getChatLogs(), memberId);
-          Long partnerId = oppositeMemberIds.get(index.getAndIncrement() % oppositeMemberIds.size());
-          return getChatRoomListDto(m, count, partnerId);
+          return getChatRoomListDto(m, count, memberId);
         })
         .sorted(Comparator.comparing(ChatRoomListDto::getUpdatedAt, Comparator.reverseOrder()))
         .collect(Collectors.toList());
   }
 
-  private ChatRoomListDto getChatRoomListDto(ChatRoom chatRoom, int count, Long partnerId) {
-    Member member = memberRepository.findById(partnerId)
+  private ChatRoomListDto getChatRoomListDto(ChatRoom chatRoom, int count, Long memberId) {
+    Long partnerId = chatRoomRepository.findOppositeMemberId(chatRoom.getId(), memberId);
+    Member partner = memberRepository.findById(partnerId)
         .orElseThrow(() -> new ChatException(USER_NOT_FOUND));
 
     String lastMessage = chatRoom.getChatLogs().get(chatRoom.getChatLogs().size() - 1).getMessage();
@@ -101,8 +98,8 @@ public class ChatService {
     return ChatRoomListDto.builder()
         .goodsImage(goodsImage)
         .roomId(chatRoom.getId())
-        .partner(member.getNickname())
-        .profileImage(member.getProfileImage())
+        .partner(partner.getNickname())
+        .profileImage(partner.getProfileImage())
         .notRead(count)
         .lastMessage(lastMessage)
         .updatedAt(lastMessageTime)
@@ -110,7 +107,7 @@ public class ChatService {
         .build();
   }
 
-  private boolean hasUserLeft(ChatRoom chatRoom, Long memberId){
+  private boolean hasUserLeft(ChatRoom chatRoom, Long memberId) {
     if (chatRoom.getBuyerId().equals(memberId)) {
       return chatRoom.isBuyerLeft();
     } else if (chatRoom.getSellerId().equals(memberId)) {
@@ -201,11 +198,11 @@ public class ChatService {
   }
 
   // 대화시 나간 사용자가 다시 대화에 참여, 게시글 목록 재출력
-  public void inviteChatRoom(Long roomId){
+  public void inviteChatRoom(Long roomId) {
     ChatRoom chatRoom = chatRoomRepository.findById(roomId)
         .orElseThrow(() -> new ChatException(CHAT_ROOM_NOT_FOUND));
 
-    if(chatRoom.isSellerLeft() || chatRoom.isBuyerLeft()){
+    if (chatRoom.isSellerLeft() || chatRoom.isBuyerLeft()) {
       chatRoom.setSellerLeft(false);
       chatRoom.setBuyerLeft(false);
       chatRoomRepository.save(chatRoom);
