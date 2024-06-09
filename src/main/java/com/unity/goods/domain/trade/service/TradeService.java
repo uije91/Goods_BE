@@ -8,7 +8,9 @@ import static com.unity.goods.global.exception.ErrorCode.GOODS_NOT_FOUND;
 import static com.unity.goods.global.exception.ErrorCode.INSUFFICIENT_AMOUNT;
 import static com.unity.goods.global.exception.ErrorCode.OUT_RANGED_COST;
 import static com.unity.goods.global.exception.ErrorCode.PASSWORD_NOT_MATCH;
+import static com.unity.goods.global.exception.ErrorCode.RATE_ALREADY_REGISTERED;
 import static com.unity.goods.global.exception.ErrorCode.SELLER_NOT_FOUND;
+import static com.unity.goods.global.exception.ErrorCode.UNIDENTIFIED_TRADE;
 import static com.unity.goods.global.exception.ErrorCode.UNMATCHED_PRICE;
 import static com.unity.goods.global.exception.ErrorCode.UNMATCHED_SELLER;
 import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
@@ -154,6 +156,9 @@ public class TradeService {
     tradeRepository.save(seller);
     memberRepository.save(goodsSeller);
 
+    goods.setGoodsStatus(SOLDOUT);
+    goodsRepository.save(goods);
+
     return PointTradeResponse.builder()
         .paymentStatus(PaymentStatus.SUCCESS.getDescription())
         .tradePoint(pointTradeRequest.getPrice())
@@ -179,9 +184,14 @@ public class TradeService {
     Goods goods = goodsRepository.findById(goodsId)
         .orElseThrow(() -> new GoodsException(GOODS_NOT_FOUND));
 
-    // 상품 이미 거래 완료된 SOLD OUT 상태인지 확인
-    if (goods.getGoodsStatus().equals(SOLDOUT)) {
-      throw new TradeException(ALREADY_SOLD);
+    // 거래 완료된 상품에 별점 매길 수 있음. (거래 완료 == 판매자가 입금 확인 완료)
+    if(goods.getGoodsStatus() != SOLDOUT){
+      throw new TradeException(UNIDENTIFIED_TRADE);
+    }
+
+    // 상품 별점 등록 여부
+    if (goods.getStar() != 0.0) {
+      throw new GoodsException(RATE_ALREADY_REGISTERED);
     }
 
     goods.setStar(starRateRequest.getStar());
@@ -190,11 +200,8 @@ public class TradeService {
     // SOLD OUT된 상품들 + 현재 별점 매긴 상품들의 최종 평점 계산
     List<Goods> allByMemberAndGoodsStatus = goodsRepository.findAllByMemberAndGoodsStatus(seller,
         SOLDOUT);
-    double totalRate = allByMemberAndGoodsStatus.stream().mapToDouble(Goods::getStar).sum()
-        + starRateRequest.getStar();
-    seller.setStar(totalRate / (allByMemberAndGoodsStatus.size() + 1));
+    double totalRate = allByMemberAndGoodsStatus.stream().mapToDouble(Goods::getStar).sum();
+    seller.setStar(totalRate / allByMemberAndGoodsStatus.size());
 
-    // 상품 상태 변경
-    goods.setGoodsStatus(SOLDOUT);
   }
 }
