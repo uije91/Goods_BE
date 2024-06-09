@@ -3,6 +3,7 @@ package com.unity.goods.domain.chat.service;
 import static com.unity.goods.domain.chat.chatType.ChatRole.BUYER;
 import static com.unity.goods.domain.chat.chatType.ChatRole.SELLER;
 import static com.unity.goods.global.exception.ErrorCode.CHAT_ROOM_NOT_FOUND;
+import static com.unity.goods.global.exception.ErrorCode.FCM_TOKEN_NOT_FOUND;
 import static com.unity.goods.global.exception.ErrorCode.GOODS_NOT_FOUND;
 import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
 
@@ -19,7 +20,11 @@ import com.unity.goods.domain.chat.repository.ChatRoomRepository;
 import com.unity.goods.domain.goods.entity.Goods;
 import com.unity.goods.domain.goods.repository.GoodsRepository;
 import com.unity.goods.domain.member.entity.Member;
+import com.unity.goods.domain.member.exception.MemberException;
 import com.unity.goods.domain.member.repository.MemberRepository;
+import com.unity.goods.domain.notification.dto.FcmRequestDto;
+import com.unity.goods.domain.notification.service.FcmService;
+import com.unity.goods.domain.notification.type.NotificationContent;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -42,6 +47,7 @@ public class ChatService {
   private final ChatRoomRepository chatRoomRepository;
   private final ChatLogRepository chatLogRepository;
   private final MemberRepository memberRepository;
+  private final FcmService fcmService;
 
   // 채팅방 생성
   public ChatRoomResponse addChatRoom(Long goodsId, Long buyerId) {
@@ -155,7 +161,8 @@ public class ChatService {
 
   // 채팅로그 저장
   @Transactional
-  public Long addChatLog(Long roomId, ChatMessageDto chatMessageDto, String senderEmail) {
+  public Long addChatLog(Long roomId, ChatMessageDto chatMessageDto, String senderEmail)
+      throws Exception {
     ChatRoom chatRoom = chatRoomRepository.findById(roomId)
         .orElseThrow(() -> new ChatException(CHAT_ROOM_NOT_FOUND));
 
@@ -177,8 +184,25 @@ public class ChatService {
         .build();
 
     chatLogRepository.save(chatLog);
+    sendChatNotification(receiverId);
 
     return senderId;
+  }
+
+  private void sendChatNotification(Long receiverId) throws Exception {
+    Member receiver = memberRepository.findById(receiverId)
+        .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
+
+    if (receiver.getFcmToken() != null && !receiver.getFcmToken().isEmpty()) {
+      FcmRequestDto fcmRequestDto = FcmRequestDto.builder()
+          .token(receiver.getFcmToken())
+          .notificationContent(NotificationContent.CHAT_RECEIVED)
+          .build();
+
+      fcmService.requestNotificationToFcm(fcmRequestDto);
+    } else {
+      throw new MemberException(FCM_TOKEN_NOT_FOUND);
+    }
   }
 
   // 채팅방 나가기

@@ -24,6 +24,7 @@ public enum ErrorCode {
   ALREADY_REGISTERED_USER(400, "이미 가입한 회원입니다."),
   NICKNAME_ALREADY_EXISTS(400, "동일한 닉네임이 존재합니다."),
   INVALID_REFRESH_TOKEN(400, "잘못된 리프레시 토큰입니다."),
+  FCM_TOKEN_NOT_FOUND(404, "알림 전송을 위해 등록된 토큰이 없습니다."),
 
   // Goods Error
   GOODS_NOT_FOUND(404, "조회되지 않는 상품입니다."),
