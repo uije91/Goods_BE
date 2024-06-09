@@ -34,6 +34,7 @@ public enum ErrorCode {
   CANNOT_DELETE_SOLD_ITEM(400, "판매완료된 상품은 삭제할 수 없습니다."),
   UNMATCHED_SELLER(400, "해당 상품의 판매자가 아닙니다."),
   INVALID_GOODS_STATUS(400, "유효하지 않은 상품 상태 값입니다."),
+  RATE_ALREADY_REGISTERED(400, "별점을 이미 등록하셨습니다."),
 
   // Trade Error
   OUT_RANGED_COST(400, "해당 금액은 송금 범위를 초과하였습니다. 다시 확인 부탁드립니다."),
@@ -43,6 +44,7 @@ public enum ErrorCode {
   INSUFFICIENT_AMOUNT(400, "거래를 진행할 잔액이 부족합니다."),
   PAYMENT_NOT_FOUND(404, "조회되지 않는 결제 내역입니다."),
   PAYMENT_UNMATCHED(400, "결제 내역이 불일치합니다."),
+  UNIDENTIFIED_TRADE(400, "해당 상품에 대한 입금 확인 내역이 없습니다."),
 
   // WishList Error
   GOODS_ALREADY_WISHLIST(400, "이미 찜한 상품입니다."),

@@ -8,13 +8,18 @@ import com.unity.goods.domain.goods.dto.UpdateGoodsStateDto.UpdateGoodsStateRequ
 import com.unity.goods.domain.goods.dto.UploadGoodsDto;
 import com.unity.goods.domain.goods.service.GoodsService;
 import com.unity.goods.global.jwt.UserDetailsImpl;
+import com.unity.goods.infra.document.GoodsDocument;
 import com.unity.goods.infra.dto.SearchDto.SearchRequest;
 import com.unity.goods.infra.dto.SearchDto.SearchedGoods;
 import com.unity.goods.infra.service.GoodsSearchService;
 import jakarta.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -38,10 +43,23 @@ public class GoodsController {
   private final GoodsSearchService goodsSearchService;
 
   @GetMapping()
-  public ResponseEntity<?> getNearbyGoods(@RequestParam double lat, @RequestParam double lng,
+  public ResponseEntity<?> getNearbyGoodsPages(@RequestParam double lat, @RequestParam double lng,
+      @RequestParam String responseType,
       @PageableDefault(value = 20) Pageable pageable) {
-    Page<SearchedGoods> goodsNearBy = goodsSearchService.findByGeoLocationOrderByLikes(lat, lng, pageable);
-    return ResponseEntity.ok(goodsNearBy);
+    SearchHits<GoodsDocument> searchHits = goodsSearchService.findByGeoLocationOrderByLikes(
+        lat, lng, pageable);
+
+    List<SearchedGoods> searchedGoods = new ArrayList<>();
+    searchHits.getSearchHits().forEach(
+        searchHit -> searchedGoods.add(SearchedGoods.fromGoodsDocument(searchHit.getContent())));
+
+    if(responseType.equals("list")) {
+      return ResponseEntity.ok(searchedGoods);
+    } else {
+      PageImpl<SearchedGoods> goodsNearBy = new PageImpl<>(searchedGoods, pageable,
+          searchHits.getTotalHits());
+      return ResponseEntity.ok(goodsNearBy);
+    }
   }
 
   @PostMapping("/new")
