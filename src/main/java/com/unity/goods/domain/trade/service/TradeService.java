@@ -32,6 +32,7 @@ import com.unity.goods.domain.trade.entity.Trade;
 import com.unity.goods.domain.trade.exception.TradeException;
 import com.unity.goods.domain.trade.repository.TradeRepository;
 import com.unity.goods.global.jwt.UserDetailsImpl;
+import com.unity.goods.infra.service.GoodsSearchService;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -55,6 +56,7 @@ public class TradeService {
   private final MemberRepository memberRepository;
   private final GoodsRepository goodsRepository;
   private final PasswordEncoder passwordEncoder;
+  private final GoodsSearchService goodsSearchService;
 
   public Page<PurchasedListResponse> getPurchasedList(UserDetailsImpl member, int page, int size) {
 
@@ -158,6 +160,7 @@ public class TradeService {
 
     goods.setGoodsStatus(SOLDOUT);
     goodsRepository.save(goods);
+    goodsSearchService.deleteGoodsDocument("keywords", String.valueOf(goods.getId()));
 
     return PointTradeResponse.builder()
         .paymentStatus(PaymentStatus.SUCCESS.getDescription())
