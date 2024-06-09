@@ -1,6 +1,6 @@
 package com.unity.goods.domain.notification.dto;
 
-import com.unity.goods.domain.notification.type.NotificationContent;
+import com.unity.goods.domain.notification.type.NotificationType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,6 +15,6 @@ import lombok.Setter;
 public class FcmRequestDto {
 
   private String token;
-  private NotificationContent notificationContent;
+  private NotificationType notificationType;
 
 }
