@@ -22,16 +22,13 @@ import com.unity.goods.domain.goods.repository.GoodsRepository;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.exception.MemberException;
 import com.unity.goods.domain.member.repository.MemberRepository;
-import com.unity.goods.domain.notification.dto.FcmRequestDto;
 import com.unity.goods.domain.notification.service.FcmService;
-import com.unity.goods.domain.notification.type.NotificationContent;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -184,25 +181,14 @@ public class ChatService {
         .build();
 
     chatLogRepository.save(chatLog);
-    sendChatNotification(receiverId);
-
-    return senderId;
-  }
-
-  private void sendChatNotification(Long receiverId) throws Exception {
     Member receiver = memberRepository.findById(receiverId)
         .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
-
-    if (receiver.getFcmToken() != null && !receiver.getFcmToken().isEmpty()) {
-      FcmRequestDto fcmRequestDto = FcmRequestDto.builder()
-          .token(receiver.getFcmToken())
-          .notificationContent(NotificationContent.CHAT_RECEIVED)
-          .build();
-
-      fcmService.requestNotificationToFcm(fcmRequestDto);
-    } else {
+    if(receiver.getFcmToken() == null){
       throw new MemberException(FCM_TOKEN_NOT_FOUND);
     }
+    fcmService.sendChatNotification(receiver.getFcmToken(), chatMessageDto.getMessage());
+
+    return senderId;
   }
 
   // 채팅방 나가기

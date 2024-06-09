@@ -1,10 +1,10 @@
 package com.unity.goods.domain.trade.service;
 
 import static com.unity.goods.domain.goods.type.GoodsStatus.SOLDOUT;
-import static com.unity.goods.domain.notification.type.NotificationContent.TRADE_COMPLETED;
 import static com.unity.goods.domain.trade.type.TradePurpose.BUY;
 import static com.unity.goods.domain.trade.type.TradePurpose.SELL;
 import static com.unity.goods.global.exception.ErrorCode.ALREADY_SOLD;
+import static com.unity.goods.global.exception.ErrorCode.FCM_TOKEN_NOT_FOUND;
 import static com.unity.goods.global.exception.ErrorCode.GOODS_NOT_FOUND;
 import static com.unity.goods.global.exception.ErrorCode.INSUFFICIENT_AMOUNT;
 import static com.unity.goods.global.exception.ErrorCode.OUT_RANGED_COST;
@@ -23,7 +23,6 @@ import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.exception.MemberException;
 import com.unity.goods.domain.member.repository.MemberRepository;
 import com.unity.goods.domain.member.type.PaymentStatus;
-import com.unity.goods.domain.notification.dto.FcmRequestDto;
 import com.unity.goods.domain.notification.service.FcmService;
 import com.unity.goods.domain.trade.dto.PointTradeDto.PointTradeRequest;
 import com.unity.goods.domain.trade.dto.PointTradeDto.PointTradeResponse;
@@ -126,8 +125,14 @@ public class TradeService {
 
     goods.setGoodsStatus(SOLDOUT);
 
-    sendTradeCompleteNotification(authenticatedUser);
-    sendTradeCompleteNotification(goodsSeller);
+    if(authenticatedUser.getFcmToken() == null || goodsSeller.getFcmToken() == null){
+      throw new MemberException(FCM_TOKEN_NOT_FOUND);
+    }
+    fcmService.sendTradeCompleteNotification(authenticatedUser.getFcmToken());
+    fcmService.sendTradeCompleteNotification(goodsSeller.getFcmToken());
+
+    fcmService.sendPointReceivedNotification(authenticatedUser.getFcmToken());
+    fcmService.sendPointReceivedNotification(goodsSeller.getFcmToken());
 
     goodsRepository.save(goods);
     goodsSearchService.deleteGoodsDocument("keywords", String.valueOf(goods.getId()));
@@ -147,14 +152,6 @@ public class TradeService {
         .goods(goods)
         .balanceAfterTrade(member.getBalance())
         .build();
-  }
-
-  private void sendTradeCompleteNotification(Member member) throws Exception {
-    FcmRequestDto buyerFcmRequestDto = FcmRequestDto.builder()
-        .token(member.getFcmToken())
-        .notificationContent(TRADE_COMPLETED)
-        .build();
-    fcmService.requestNotificationToFcm(buyerFcmRequestDto);
   }
 
   private void validateTradeGoods(Member goodsSeller, Goods goods,

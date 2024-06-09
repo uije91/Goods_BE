@@ -1,18 +1,17 @@
 package com.unity.goods.domain.notification.service;
 
-import static com.unity.goods.global.exception.ErrorCode.INTERNAL_SERVER_ERROR;
 import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
 
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.FirebaseMessagingException;
+import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.exception.MemberException;
 import com.unity.goods.domain.member.repository.MemberRepository;
-import com.unity.goods.domain.notification.dto.FcmRequestDto;
 import com.unity.goods.domain.notification.dto.FcmTokenDto;
 import com.unity.goods.domain.notification.type.NotificationContent;
 import com.unity.goods.global.jwt.UserDetailsImpl;
-import com.google.firebase.messaging.Message;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -33,28 +32,30 @@ public class FcmService {
     log.info("[FcmService] : {} fcm 토큰 저장 완료", savedMember.getEmail());
   }
 
-  private Message makeMessage(String token, NotificationContent content) {
-    Notification notification = Notification.builder()
-        .setTitle(content.getTitle())
-        .setBody(content.getBody())
+  public void sendNotification(String token, String title, String body) throws FirebaseMessagingException {
+    Message message = Message.builder()
+        .setToken(token)
+        .setNotification(Notification.builder()
+            .setTitle(title)
+            .setBody(body)
+            .build())
         .build();
 
-    return Message.builder()
-        .setToken(token)
-        .setNotification(notification)
-        .build();
+    FirebaseMessaging.getInstance().send(message);
   }
 
-  public void requestNotificationToFcm(FcmRequestDto fcmRequestDto) throws Exception {
-    Message message = makeMessage(fcmRequestDto.getToken(), fcmRequestDto.getNotificationContent());
+  public void sendChatNotification(String token, String chatMessage) throws FirebaseMessagingException {
+    NotificationContent content = NotificationContent.CHAT_RECEIVED;
+    sendNotification(token, content.getTitle(), chatMessage);
+  }
 
-    try {
-      // FCM 서버로 메시지 전송
-      String response = FirebaseMessaging.getInstance().send(message);
-      log.info("[FcmService]: 전송 완료 : {} ", response);
-    } catch (Exception e) {
-      throw new Exception(String.valueOf(INTERNAL_SERVER_ERROR));
-    }
+  public void sendTradeCompleteNotification(String token) throws FirebaseMessagingException {
+    NotificationContent content = NotificationContent.TRADE_COMPLETED;
+    sendNotification(token, content.getTitle(), content.getBody());
+  }
 
+  public void sendPointReceivedNotification(String token) throws FirebaseMessagingException {
+    NotificationContent content = NotificationContent.POINT_RECEIVED;
+    sendNotification(token, content.getTitle(), content.getBody());
   }
 }
