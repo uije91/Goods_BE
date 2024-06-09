@@ -128,11 +128,11 @@ public class TradeService {
     if(authenticatedUser.getFcmToken() == null || goodsSeller.getFcmToken() == null){
       throw new MemberException(FCM_TOKEN_NOT_FOUND);
     }
-    fcmService.sendTradeCompleteNotification(authenticatedUser.getFcmToken());
-    fcmService.sendTradeCompleteNotification(goodsSeller.getFcmToken());
+    fcmService.sendTradeCompleteNotification(authenticatedUser);
+    fcmService.sendTradeCompleteNotification(goodsSeller);
 
-    fcmService.sendPointReceivedNotification(authenticatedUser.getFcmToken());
-    fcmService.sendPointReceivedNotification(goodsSeller.getFcmToken());
+    fcmService.sendPointReceivedNotification(authenticatedUser);
+    fcmService.sendPointReceivedNotification(goodsSeller);
 
     goodsRepository.save(goods);
     goodsSearchService.deleteGoodsDocument("keywords", String.valueOf(goods.getId()));

@@ -181,12 +181,8 @@ public class ChatService {
         .build();
 
     chatLogRepository.save(chatLog);
-    Member receiver = memberRepository.findById(receiverId)
-        .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
-    if(receiver.getFcmToken() == null){
-      throw new MemberException(FCM_TOKEN_NOT_FOUND);
-    }
-    fcmService.sendChatNotification(receiver.getFcmToken(), chatMessageDto.getMessage());
+
+    fcmService.sendChatNotification(receiverId, chatMessageDto.getMessage());
 
     return senderId;
   }

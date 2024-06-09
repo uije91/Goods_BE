@@ -1,5 +1,9 @@
 package com.unity.goods.domain.notification.service;
 
+import static com.unity.goods.domain.notification.type.NotificationType.CHAT_RECEIVED;
+import static com.unity.goods.domain.notification.type.NotificationType.POINT_RECEIVED;
+import static com.unity.goods.domain.notification.type.NotificationType.TRADE_COMPLETED;
+import static com.unity.goods.global.exception.ErrorCode.FCM_TOKEN_NOT_FOUND;
 import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
 
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -10,7 +14,8 @@ import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.exception.MemberException;
 import com.unity.goods.domain.member.repository.MemberRepository;
 import com.unity.goods.domain.notification.dto.FcmTokenDto;
-import com.unity.goods.domain.notification.type.NotificationContent;
+import com.unity.goods.domain.notification.entity.NotificationLog;
+import com.unity.goods.domain.notification.repository.NotificationRepository;
 import com.unity.goods.global.jwt.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +26,7 @@ import org.springframework.stereotype.Service;
 public class FcmService {
 
   private final MemberRepository memberRepository;
+  private final NotificationRepository notificationRepository;
 
   public void registerFcmToken(UserDetailsImpl member, FcmTokenDto fcmTokenDto) {
     Member savedMember = memberRepository.findByEmail(member.getUsername())
@@ -44,18 +50,47 @@ public class FcmService {
     FirebaseMessaging.getInstance().send(message);
   }
 
-  public void sendChatNotification(String token, String chatMessage) throws FirebaseMessagingException {
-    NotificationContent content = NotificationContent.CHAT_RECEIVED;
-    sendNotification(token, content.getTitle(), chatMessage);
+  public void sendChatNotification(Long receiverId, String chatMessage) throws FirebaseMessagingException {
+    Member member = memberRepository.findById(receiverId)
+        .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
+    if(member.getFcmToken() == null){
+      throw new MemberException(FCM_TOKEN_NOT_FOUND);
+    }
+
+    sendNotification(member.getFcmToken(), CHAT_RECEIVED.getTitle(), chatMessage);
+
+    NotificationLog notification = NotificationLog.builder()
+        .receiverId(receiverId)
+        .notificationType(CHAT_RECEIVED)
+        .build();
+    notificationRepository.save(notification);
   }
 
-  public void sendTradeCompleteNotification(String token) throws FirebaseMessagingException {
-    NotificationContent content = NotificationContent.TRADE_COMPLETED;
-    sendNotification(token, content.getTitle(), content.getBody());
+  public void sendTradeCompleteNotification(Member receiver) throws FirebaseMessagingException {
+    if(receiver.getFcmToken() == null){
+      throw new MemberException(FCM_TOKEN_NOT_FOUND);
+    }
+
+    sendNotification(receiver.getFcmToken(), TRADE_COMPLETED.getTitle(), TRADE_COMPLETED.getBody());
+
+    NotificationLog notification = NotificationLog.builder()
+        .receiverId(receiver.getId())
+        .notificationType(TRADE_COMPLETED)
+        .build();
+    notificationRepository.save(notification);
   }
 
-  public void sendPointReceivedNotification(String token) throws FirebaseMessagingException {
-    NotificationContent content = NotificationContent.POINT_RECEIVED;
-    sendNotification(token, content.getTitle(), content.getBody());
+  public void sendPointReceivedNotification(Member receiver) throws FirebaseMessagingException {
+    if(receiver.getFcmToken() == null){
+      throw new MemberException(FCM_TOKEN_NOT_FOUND);
+    }
+
+    sendNotification(receiver.getFcmToken(), POINT_RECEIVED.getTitle(), POINT_RECEIVED.getBody());
+
+    NotificationLog notification = NotificationLog.builder()
+        .receiverId(receiver.getId())
+        .notificationType(POINT_RECEIVED)
+        .build();
+    notificationRepository.save(notification);
   }
 }
