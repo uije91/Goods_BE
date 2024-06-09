@@ -1,6 +1,7 @@
 package com.unity.goods.domain.trade.service;
 
 import static com.unity.goods.domain.goods.type.GoodsStatus.SOLDOUT;
+import static com.unity.goods.domain.notification.type.NotificationContent.TRADE_COMPLETED;
 import static com.unity.goods.domain.trade.type.TradePurpose.BUY;
 import static com.unity.goods.domain.trade.type.TradePurpose.SELL;
 import static com.unity.goods.global.exception.ErrorCode.ALREADY_SOLD;
@@ -22,6 +23,8 @@ import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.exception.MemberException;
 import com.unity.goods.domain.member.repository.MemberRepository;
 import com.unity.goods.domain.member.type.PaymentStatus;
+import com.unity.goods.domain.notification.dto.FcmRequestDto;
+import com.unity.goods.domain.notification.service.FcmService;
 import com.unity.goods.domain.trade.dto.PointTradeDto.PointTradeRequest;
 import com.unity.goods.domain.trade.dto.PointTradeDto.PointTradeResponse;
 import com.unity.goods.domain.trade.dto.PointTradeHistoryDto;
@@ -31,6 +34,7 @@ import com.unity.goods.domain.trade.dto.StarRateDto.StarRateRequest;
 import com.unity.goods.domain.trade.entity.Trade;
 import com.unity.goods.domain.trade.exception.TradeException;
 import com.unity.goods.domain.trade.repository.TradeRepository;
+import com.unity.goods.domain.trade.type.TradePurpose;
 import com.unity.goods.global.jwt.UserDetailsImpl;
 import com.unity.goods.infra.service.GoodsSearchService;
 import java.time.Duration;
@@ -57,6 +61,7 @@ public class TradeService {
   private final GoodsRepository goodsRepository;
   private final PasswordEncoder passwordEncoder;
   private final GoodsSearchService goodsSearchService;
+  private final FcmService fcmService;
 
   public Page<PurchasedListResponse> getPurchasedList(UserDetailsImpl member, int page, int size) {
 
@@ -90,12 +95,87 @@ public class TradeService {
   }
 
   @Transactional
-  public PointTradeResponse tradePoint(UserDetailsImpl member,
-      PointTradeRequest pointTradeRequest) {
+  public PointTradeResponse transferPoint(UserDetailsImpl member,
+      PointTradeRequest pointTradeRequest) throws Exception {
 
     Member authenticatedUser = memberRepository.findByEmail(member.getUsername())
         .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
 
+    validateTrade(authenticatedUser, pointTradeRequest);
+
+    // 판매자 존재 확인
+    Member goodsSeller = memberRepository.findById(pointTradeRequest.getSellerId())
+        .orElseThrow(() -> new TradeException(SELLER_NOT_FOUND));
+
+    Goods goods = goodsRepository.findById(pointTradeRequest.getGoodsId())
+        .orElseThrow(() -> new GoodsException(GOODS_NOT_FOUND));
+
+    validateTradeGoods(goodsSeller, goods, pointTradeRequest);
+
+    // 거래
+    authenticatedUser.setBalance(
+        authenticatedUser.getBalance() - Long.parseLong(pointTradeRequest.getPrice()));
+    Trade buyer = createTrade(goodsSeller, goods, pointTradeRequest.getPrice(), BUY);
+    tradeRepository.save(buyer);
+    memberRepository.save(authenticatedUser);
+
+    goodsSeller.setBalance(goodsSeller.getBalance() + Long.parseLong(pointTradeRequest.getPrice()));
+    Trade seller = createTrade(goodsSeller, goods, pointTradeRequest.getPrice(), SELL);
+    tradeRepository.save(seller);
+    memberRepository.save(goodsSeller);
+
+    goods.setGoodsStatus(SOLDOUT);
+
+    sendTradeCompleteNotification(authenticatedUser);
+    sendTradeCompleteNotification(goodsSeller);
+
+    goodsRepository.save(goods);
+    goodsSearchService.deleteGoodsDocument("keywords", String.valueOf(goods.getId()));
+
+    return PointTradeResponse.builder()
+        .paymentStatus(PaymentStatus.SUCCESS.getDescription())
+        .tradePoint(pointTradeRequest.getPrice())
+        .remainPoint(String.valueOf(authenticatedUser.getBalance()))
+        .build();
+  }
+
+  private Trade createTrade(Member member, Goods goods, String tradePoint, TradePurpose tradePurpose) {
+    return Trade.builder()
+        .tradePoint(Long.parseLong(tradePoint))
+        .tradePurpose(tradePurpose)
+        .member(member)
+        .goods(goods)
+        .balanceAfterTrade(member.getBalance())
+        .build();
+  }
+
+  private void sendTradeCompleteNotification(Member member) throws Exception {
+    FcmRequestDto buyerFcmRequestDto = FcmRequestDto.builder()
+        .token(member.getFcmToken())
+        .notificationContent(TRADE_COMPLETED)
+        .build();
+    fcmService.requestNotificationToFcm(buyerFcmRequestDto);
+  }
+
+  private void validateTradeGoods(Member goodsSeller, Goods goods,
+      PointTradeRequest pointTradeRequest) {
+    // 상품 판매자 일치 확인
+    if (!Objects.equals(goodsSeller.getId(), goods.getMember().getId())) {
+      throw new GoodsException(UNMATCHED_SELLER);
+    }
+
+    // 거래 금액 일치 확인
+    if (goods.getPrice() != Long.parseLong(pointTradeRequest.getPrice())) {
+      throw new TradeException(UNMATCHED_PRICE);
+    }
+
+    // 상품 이미 거래 완료된 SOLD OUT 상태인지 확인
+    if (goods.getGoodsStatus().equals(SOLDOUT)) {
+      throw new TradeException(ALREADY_SOLD);
+    }
+  }
+
+  private void validateTrade(Member authenticatedUser, PointTradeRequest pointTradeRequest) {
     // 결제 금액이 너무 큰 경우(천만원 이상) 처리
     if (Long.parseLong(pointTradeRequest.getPrice()) > 10_000_000L) {
       throw new TradeException(OUT_RANGED_COST);
@@ -111,62 +191,6 @@ public class TradeService {
     if (authenticatedUser.getBalance() < Long.parseLong(pointTradeRequest.getPrice())) {
       throw new TradeException(INSUFFICIENT_AMOUNT);
     }
-
-    // 판매자 존재 확인
-    Member goodsSeller = memberRepository.findById(pointTradeRequest.getSellerId())
-        .orElseThrow(() -> new TradeException(SELLER_NOT_FOUND));
-
-    Goods goods = goodsRepository.findById(pointTradeRequest.getGoodsId())
-        .orElseThrow(() -> new GoodsException(GOODS_NOT_FOUND));
-
-    // 상품 판매자 일치 확인
-    if (!Objects.equals(goodsSeller.getId(), goods.getMember().getId())) {
-      throw new GoodsException(UNMATCHED_SELLER);
-    }
-
-    // 거래 금액 일치 확인
-    if (goods.getPrice() != Long.parseLong(pointTradeRequest.getPrice())) {
-      throw new TradeException(UNMATCHED_PRICE);
-    }
-
-    // 상품 이미 거래 완료된 SOLD OUT 상태인지 확인
-    if (goods.getGoodsStatus().equals(SOLDOUT)) {
-      throw new TradeException(ALREADY_SOLD);
-    }
-
-    // 거래
-    authenticatedUser.setBalance(
-        authenticatedUser.getBalance() - Long.parseLong(pointTradeRequest.getPrice()));
-    Trade buyer = Trade.builder()
-        .tradePoint(Long.parseLong(pointTradeRequest.getPrice()))
-        .tradePurpose(BUY)
-        .member(authenticatedUser)
-        .goods(goods)
-        .balanceAfterTrade(authenticatedUser.getBalance())
-        .build();
-    tradeRepository.save(buyer);
-    memberRepository.save(authenticatedUser);
-
-    goodsSeller.setBalance(goodsSeller.getBalance() + Long.parseLong(pointTradeRequest.getPrice()));
-    Trade seller = Trade.builder()
-        .tradePoint(Long.parseLong(pointTradeRequest.getPrice()))
-        .tradePurpose(SELL)
-        .member(goodsSeller)
-        .goods(goods)
-        .balanceAfterTrade(goodsSeller.getBalance())
-        .build();
-    tradeRepository.save(seller);
-    memberRepository.save(goodsSeller);
-
-    goods.setGoodsStatus(SOLDOUT);
-    goodsRepository.save(goods);
-    goodsSearchService.deleteGoodsDocument("keywords", String.valueOf(goods.getId()));
-
-    return PointTradeResponse.builder()
-        .paymentStatus(PaymentStatus.SUCCESS.getDescription())
-        .tradePoint(pointTradeRequest.getPrice())
-        .remainPoint(String.valueOf(authenticatedUser.getBalance()))
-        .build();
   }
 
   public Page<PointTradeHistoryResponse> getPointUsageHistory(UserDetailsImpl member, int page,
