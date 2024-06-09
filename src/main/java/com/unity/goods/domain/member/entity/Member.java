@@ -72,6 +72,9 @@ public class Member extends BaseEntity {
   @Builder.Default
   private Long balance = 0L;
 
+  @Column
+  private String fcmToken;
+
   @OneToMany(mappedBy = "member")
   @Builder.Default
   private List<Goods> goodsList = new ArrayList<>();
