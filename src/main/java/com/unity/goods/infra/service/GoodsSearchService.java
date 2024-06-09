@@ -72,7 +72,7 @@ public class GoodsSearchService {
     return new PageImpl<>(searchedGoods, pageable, total);
   }
 
-  public Page<SearchedGoods> findByGeoLocationOrderByLikes(double lng, double lat, Pageable pageable) {
+  public SearchHits<GoodsDocument> findByGeoLocationOrderByLikes(double lng, double lat, Pageable pageable) {
 
     GeoDistanceQueryBuilder queryBuilder = QueryBuilders.geoDistanceQuery("location")
         .point(lng, lat)
@@ -86,14 +86,8 @@ public class GoodsSearchService {
         .withPageable(pageable)
         .build();
 
-    SearchHits<GoodsDocument> searchHits = elasticsearchOperations.search(searchQuery,
+    return elasticsearchOperations.search(searchQuery,
         GoodsDocument.class);
-
-    List<SearchedGoods> searchedGoods = new ArrayList<>();
-    searchHits.getSearchHits().forEach(
-        searchHit -> searchedGoods.add(SearchedGoods.fromGoodsDocument(searchHit.getContent())));
-
-    return new PageImpl<>(searchedGoods, pageable, searchHits.getTotalHits());
   }
 
   public void updateGoodsLikes(Long goodsId, int change) {
