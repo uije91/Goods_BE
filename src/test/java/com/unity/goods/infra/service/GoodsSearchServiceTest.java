@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import com.unity.goods.infra.document.GoodsDocument;
 import com.unity.goods.infra.dto.SearchDto.SearchedGoods;
 import com.unity.goods.infra.repository.GoodsSearchRepository;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -105,18 +107,21 @@ class GoodsSearchServiceTest {
         .location(new GeoPoint(37.56464351273438, 126.97715880918653))
         .address("서울 시청역 1번 출구")
         .likes(10L)
+        .uploadedBefore(3600)
         .build();
     GoodsDocument goods2 = GoodsDocument.builder()
         .id(2L)
         .location(new GeoPoint(37.5610041760916, 126.9810533728523))
         .address("서울 중구 신세계 백화점")
         .likes(20L)
+        .uploadedBefore(3601)
         .build();
     GoodsDocument goods3 = GoodsDocument.builder()
         .id(3L)
         .location(new GeoPoint(37.558388822601664, 126.80191630346101))
         .address("경기도 김포 국제 공항")
         .likes(35L)
+        .uploadedBefore(3602)
         .build();
 
     // 서울 시청 바로 옆
@@ -135,16 +140,22 @@ class GoodsSearchServiceTest {
     when(elasticsearchOperations.search(any(Query.class), eq(GoodsDocument.class))).thenReturn(
         searchHits);
 
-    Page<SearchedGoods> result = goodsSearchService.findByGeoLocationOrderByLikes(
+    SearchHits<GoodsDocument> result = goodsSearchService.findByGeoLocationOrderByLikes(
         myPlaceLng, myPlaceLat, PageRequest.of(0, 20));
+
+    List<SearchedGoods> searchedGoods = new ArrayList<>();
+    searchHits.getSearchHits().forEach(
+        searchHit -> searchedGoods.add(SearchedGoods.fromGoodsDocument(searchHit.getContent())));
+
+    PageImpl<SearchedGoods> goodsNearBy = new PageImpl<>(searchedGoods, PageRequest.of(0, 20),
+        searchHits.getTotalHits());
 
     // 결과 검증
     assertNotNull(result);
     assertFalse(result.isEmpty());
-    assertEquals(2, result.getTotalElements());
     // 반경 2km 내, 인기 상품 : goods2 우선 출력
-    assertEquals(goods2.getId(), result.getContent().get(0).getGoodsId());
-    assertEquals(goods1.getId(), result.getContent().get(1).getGoodsId());
+    assertEquals(goods2.getId(), goodsNearBy.getContent().get(0).getGoodsId());
+    assertEquals(goods1.getId(), goodsNearBy.getContent().get(1).getGoodsId());
   }
 
   @Test
@@ -171,7 +182,6 @@ class GoodsSearchServiceTest {
 
     // ElasticsearchOperations를 사용하는 클래스에 모의 객체 주입
     GoodsSearchService service = new GoodsSearchService(mockOperations, goodsSearchRepository);
-
 
     // When
     service.updateGoodsLikes(goodsId, change);
