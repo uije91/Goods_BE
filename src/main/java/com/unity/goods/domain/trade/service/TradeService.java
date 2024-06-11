@@ -70,6 +70,8 @@ public class TradeService {
           String imageUrl =
               goods.getImageList().isEmpty() ? null : goods.getImageList().get(0).getImageUrl();
 
+          boolean reviewExists = goods.getStar() > 0;
+
           return PurchasedListResponse.builder()
               .memberId(member.getId())
               .goodsId(goods.getId())
@@ -77,6 +79,7 @@ public class TradeService {
               .goodsName(goods.getGoodsName())
               .price(String.valueOf(goods.getPrice()))
               .goodsThumbnail(imageUrl)
+              .reviewExist(reviewExists)
               .goodsStatus(goods.getGoodsStatus().getDescription())
               .tradedBefore(getTradedBeforeSeconds(trade.getTradedAt()))
               .build();

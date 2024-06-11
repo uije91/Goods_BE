@@ -19,6 +19,7 @@ public class PurchasedListDto {
     private String goodsName;
     private String price;
     private String goodsThumbnail;
+    private boolean reviewExist;
     private String goodsStatus;
     private Long tradedBefore;
 
