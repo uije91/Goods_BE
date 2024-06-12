@@ -125,9 +125,6 @@ public class TradeService {
 
     goods.setGoodsStatus(SOLDOUT);
 
-    if(authenticatedUser.getFcmToken() == null || goodsSeller.getFcmToken() == null){
-      throw new MemberException(FCM_TOKEN_NOT_FOUND);
-    }
     fcmService.sendTradeCompleteNotification(authenticatedUser);
     fcmService.sendTradeCompleteNotification(goodsSeller);
 

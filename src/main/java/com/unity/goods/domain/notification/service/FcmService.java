@@ -38,7 +38,7 @@ public class FcmService {
     log.info("[FcmService] : {} fcm 토큰 저장 완료", savedMember.getEmail());
   }
 
-  public void sendNotification(String token, String title, String body) throws FirebaseMessagingException {
+  public void sendNotification(String token, String title, String body) {
     Message message = Message.builder()
         .setToken(token)
         .setNotification(Notification.builder()
@@ -47,14 +47,21 @@ public class FcmService {
             .build())
         .build();
 
-    FirebaseMessaging.getInstance().send(message);
+    try{
+      FirebaseMessaging.getInstance().send(message);
+      log.info("[FcmService] : {} 메시지 수신 완료", token);
+    } catch (Exception e) {
+      log.error("[FcmService] : fcm 서버 메시지 요청 과정 중 에러 발생");
+      throw new RuntimeException("FCM 메시지 전송 실패", e);
+    }
   }
 
-  public void sendChatNotification(Long receiverId, String chatMessage) throws FirebaseMessagingException {
+  public void sendChatNotification(Long receiverId, String chatMessage) {
     Member member = memberRepository.findById(receiverId)
         .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
     if(member.getFcmToken() == null){
-      throw new MemberException(FCM_TOKEN_NOT_FOUND);
+      return;
+//      throw new MemberException(FCM_TOKEN_NOT_FOUND);
     }
 
     sendNotification(member.getFcmToken(), CHAT_RECEIVED.getTitle(), chatMessage);
@@ -66,9 +73,10 @@ public class FcmService {
     notificationRepository.save(notification);
   }
 
-  public void sendTradeCompleteNotification(Member receiver) throws FirebaseMessagingException {
+  public void sendTradeCompleteNotification(Member receiver) {
     if(receiver.getFcmToken() == null){
-      throw new MemberException(FCM_TOKEN_NOT_FOUND);
+      return;
+//      throw new MemberException(FCM_TOKEN_NOT_FOUND);
     }
 
     sendNotification(receiver.getFcmToken(), TRADE_COMPLETED.getTitle(), TRADE_COMPLETED.getBody());
@@ -80,9 +88,10 @@ public class FcmService {
     notificationRepository.save(notification);
   }
 
-  public void sendPointReceivedNotification(Member receiver) throws FirebaseMessagingException {
+  public void sendPointReceivedNotification(Member receiver) {
     if(receiver.getFcmToken() == null){
-      throw new MemberException(FCM_TOKEN_NOT_FOUND);
+      return;
+//      throw new MemberException(FCM_TOKEN_NOT_FOUND);
     }
 
     sendNotification(receiver.getFcmToken(), POINT_RECEIVED.getTitle(), POINT_RECEIVED.getBody());
