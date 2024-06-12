@@ -8,6 +8,7 @@ import static com.unity.goods.global.exception.ErrorCode.GOODS_NOT_FOUND;
 import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
 
 import com.unity.goods.domain.chat.chatType.ChatRole;
+import com.unity.goods.domain.chat.dto.ChatLogDto;
 import com.unity.goods.domain.chat.dto.ChatMessageDto;
 import com.unity.goods.domain.chat.dto.ChatRoomDto;
 import com.unity.goods.domain.chat.dto.ChatRoomDto.ChatRoomResponse;
@@ -32,6 +33,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -71,8 +75,11 @@ public class ChatService {
   }
 
   // 채팅방 목록 조회
-  public List<ChatRoomListDto> getChatRoomList(Long memberId) {
-    return chatRoomRepository.findAllByBuyerIdOrSellerId(memberId, memberId).stream()
+  public Page<ChatRoomListDto> getChatRoomList(Long memberId, Pageable pageable) {
+    Page<ChatRoom> chatRoomsPage =
+        chatRoomRepository.findAllByBuyerIdOrSellerId(memberId, memberId, pageable);
+
+    List<ChatRoomListDto> chatRoomList = chatRoomsPage.stream()
         .filter(room -> !room.getChatLogs().isEmpty() && !hasUserLeft(room, memberId))
         .map(m -> {
           int count = countChatLogNotRead(m.getChatLogs(), memberId);
@@ -80,6 +87,8 @@ public class ChatService {
         })
         .sorted(Comparator.comparing(ChatRoomListDto::getUpdatedAt, Comparator.reverseOrder()))
         .collect(Collectors.toList());
+
+    return new PageImpl<>(chatRoomList, pageable, chatRoomsPage.getTotalElements());
   }
 
   private ChatRoomListDto getChatRoomListDto(ChatRoom chatRoom, int count, Long memberId) {
@@ -132,7 +141,7 @@ public class ChatService {
   }
 
   // 채팅 내용 확인
-  public ChatRoomDto getChatLogs(Long roomId, Long memberId) {
+  public ChatRoomDto getChatLogs(Long roomId, Long memberId, Pageable pageable) {
 
     ChatRoom chatRoom = chatRoomRepository.findById(roomId)
         .orElseThrow(() -> new ChatException(CHAT_ROOM_NOT_FOUND));
@@ -145,8 +154,38 @@ public class ChatService {
         .orElseThrow(() -> new ChatException(USER_NOT_FOUND));
 
     ChatRole chatRole = (memberId.equals(chatRoom.getBuyerId())) ? BUYER : SELLER;
+    Page<ChatLog> chatLogPage = chatLogRepository.findByChatRoomId(roomId, pageable);
 
-    return ChatRoomDto.to(chatRoom, memberId, partner.getNickname(), chatRole);
+    return getChatRoomDto(chatRoom, memberId, partner.getNickname(), chatRole, chatLogPage);
+  }
+
+  private ChatRoomDto getChatRoomDto(ChatRoom chatRoom, Long memberId, String partner,
+      ChatRole chatRole, Page<ChatLog> chatLogsPage) {
+
+    String image = Optional.ofNullable(chatRoom)
+        .map(ChatRoom::getGoods)
+        .map(Goods::getImageList)
+        .filter(list -> !list.isEmpty())
+        .map(list -> list.get(0).getImageUrl())
+        .orElse(null);
+
+    List<ChatLogDto> chatLogList = chatLogsPage.getContent().stream()
+        .map(ChatLogDto::new)
+        .sorted(Comparator.comparing(ChatLogDto::getCreatedAt))
+        .collect(Collectors.toList());
+
+    return ChatRoomDto.builder()
+        .roomId(Objects.requireNonNull(chatRoom).getId())
+        .goodsId(chatRoom.getGoods().getId())
+        .memberId(memberId)
+        .partner(partner)
+        .memberType(chatRole)
+        .goodsName(chatRoom.getGoods().getGoodsName())
+        .goodsImage(image)
+        .goodsPrice(chatRoom.getGoods().getPrice())
+        .chatLogs(new PageImpl<>(chatLogList, chatLogsPage.getPageable(),
+            chatLogsPage.getTotalElements()))
+        .build();
   }
 
   private void changeChatLogAllRead(Long roomId, Long memberId) {
@@ -165,8 +204,7 @@ public class ChatService {
 
     Long senderId = memberRepository.findMemberByEmail(senderEmail).getId();
     Long receiverId =
-        (Objects.equals(senderId, chatRoom.getBuyerId())) ? chatRoom.getSellerId()
-            : chatRoom.getBuyerId();
+        (senderId.equals(chatRoom.getBuyerId())) ? chatRoom.getSellerId() : chatRoom.getBuyerId();
 
     LocalDateTime localDateTime = LocalDateTime.now();
 
@@ -183,7 +221,6 @@ public class ChatService {
     chatLogRepository.save(chatLog);
 
     fcmService.sendChatNotification(receiverId, chatMessageDto.getMessage());
-
     return senderId;
   }
 
