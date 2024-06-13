@@ -167,7 +167,7 @@ public class ChatService {
 
     List<ChatLogDto> chatLogList = chatLogsPage.getContent().stream()
         .map(ChatLogDto::new)
-        .sorted(Comparator.comparing(ChatLogDto::getCreatedAt))
+        .sorted(Comparator.comparing(ChatLogDto::getCreatedAt,Comparator.reverseOrder()))
         .collect(Collectors.toList());
 
     return ChatRoomDto.builder()
