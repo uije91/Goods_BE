@@ -11,6 +11,6 @@ public interface ChatLogRepository extends JpaRepository<ChatLog, Long> {
   List<ChatLog> findAllByChatRoomIdAndCheckedAndReceiverId(
       Long chatRoomId, boolean checked, Long receiverId);
 
-  Page<ChatLog> findByChatRoomId(Long chatRoomId, Pageable pageable);
+  Page<ChatLog> findByChatRoomIdOrderByCreatedAtDesc(Long chatRoomId, Pageable pageable);
 
 }

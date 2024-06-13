@@ -25,6 +25,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -72,7 +73,7 @@ public class ChatService {
   // 채팅방 목록 조회
   public Page<ChatRoomListDto> getChatRoomList(Long memberId, Pageable pageable) {
     Page<ChatRoom> chatRoomsPage =
-        chatRoomRepository.findAllByBuyerIdOrSellerId(memberId, memberId, pageable);
+        chatRoomRepository.findAllByBuyerIdOrSellerIdOrderByUpdatedAtDesc(memberId, memberId, pageable);
 
     List<ChatRoomListDto> chatRoomList = chatRoomsPage.stream()
         .filter(room -> !room.getChatLogs().isEmpty() && !hasUserLeft(room, memberId))
@@ -80,7 +81,6 @@ public class ChatService {
           int count = countChatLogNotRead(m.getChatLogs(), memberId);
           return getChatRoomListDto(m, count, memberId);
         })
-        .sorted(Comparator.comparing(ChatRoomListDto::getUpdatedAt, Comparator.reverseOrder()))
         .collect(Collectors.toList());
 
     return new PageImpl<>(chatRoomList, pageable, chatRoomsPage.getTotalElements());
@@ -92,10 +92,8 @@ public class ChatService {
         .orElseThrow(() -> new ChatException(USER_NOT_FOUND));
 
     String lastMessage = chatRoom.getChatLogs().get(chatRoom.getChatLogs().size() - 1).getMessage();
-    LocalDateTime lastMessageTime = chatRoom.getChatLogs().get(chatRoom.getChatLogs().size() - 1)
-        .getCreatedAt();
 
-    long uploadedBefore = Duration.between(lastMessageTime, LocalDateTime.now()).getSeconds();
+    long uploadedBefore = Duration.between(chatRoom.getUpdatedAt(), LocalDateTime.now()).getSeconds();
     String goodsImage = Optional.ofNullable(chatRoom.getGoods())
         .map(Goods::getImageList)
         .filter(list -> !list.isEmpty())
@@ -109,7 +107,7 @@ public class ChatService {
         .profileImage(partner.getProfileImage())
         .notRead(count)
         .lastMessage(lastMessage)
-        .updatedAt(lastMessageTime)
+        .updatedAt(chatRoom.getUpdatedAt())
         .uploadedBefore(uploadedBefore)
         .build();
   }
@@ -143,7 +141,7 @@ public class ChatService {
 
     changeChatLogAllRead(roomId, memberId);
 
-    Page<ChatLog> chatLogPage = chatLogRepository.findByChatRoomId(roomId, pageable);
+    Page<ChatLog> chatLogPage = chatLogRepository.findByChatRoomIdOrderByCreatedAtDesc(roomId, pageable);
 
     List<ChatLogDto> chatLogList = chatLogPage.getContent().stream()
         .map(chatLog -> ChatLogDto.builder()
