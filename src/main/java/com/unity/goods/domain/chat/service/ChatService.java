@@ -134,12 +134,31 @@ public class ChatService {
   }
 
   // 채팅 내용 확인
-  public ChatRoomDto getChatLogs(Long roomId, Long memberId, Pageable pageable) {
+  public Page<ChatLogDto> getChatLogs(Long roomId, Long memberId, Pageable pageable) {
 
-    ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+    chatRoomRepository.findById(roomId)
         .orElseThrow(() -> new ChatException(CHAT_ROOM_NOT_FOUND));
 
     changeChatLogAllRead(roomId, memberId);
+
+    Page<ChatLog> chatLogPage = chatLogRepository.findByChatRoomIdOrderByCreatedAtDesc(roomId, pageable);
+
+    List<ChatLogDto> chatLogList = chatLogPage.getContent().stream()
+        .map(chatLog -> ChatLogDto.builder()
+            .message(chatLog.getMessage())
+            .senderId(chatLog.getSenderId())
+            .receiverId(chatLog.getReceiverId())
+            .createdAt(chatLog.getCreatedAt())
+            .build()).collect(Collectors.toList());
+
+    return new PageImpl<>(chatLogList, pageable, chatLogPage.getTotalElements());
+  }
+
+  // 채팅방 정보 조회
+  public ChatRoomDto getChatRoom(Long roomId, Long memberId) {
+
+    ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+        .orElseThrow(() -> new ChatException(CHAT_ROOM_NOT_FOUND));
 
     Long partnerId = chatRoomRepository.findOppositeMemberId(roomId, memberId);
 
@@ -147,37 +166,25 @@ public class ChatService {
         .orElseThrow(() -> new ChatException(USER_NOT_FOUND));
 
     ChatRole chatRole = (memberId.equals(chatRoom.getBuyerId())) ? BUYER : SELLER;
-    Page<ChatLog> chatLogPage = chatLogRepository.findByChatRoomIdOrderByCreatedAtDesc(roomId, pageable);
 
-    return getChatRoomDto(chatRoom, memberId, partner.getNickname(), chatRole, chatLogPage);
-  }
+    Goods goods = chatRoom.getGoods();
 
-  private ChatRoomDto getChatRoomDto(ChatRoom chatRoom, Long memberId, String partner,
-      ChatRole chatRole, Page<ChatLog> chatLogsPage) {
-
-    String image = Optional.ofNullable(chatRoom)
+    String image = Optional.of(chatRoom)
         .map(ChatRoom::getGoods)
         .map(Goods::getImageList)
         .filter(list -> !list.isEmpty())
         .map(list -> list.get(0).getImageUrl())
         .orElse(null);
 
-    List<ChatLogDto> chatLogList = chatLogsPage.getContent().stream()
-        .map(ChatLogDto::new)
-        .sorted(Comparator.comparing(ChatLogDto::getCreatedAt,Comparator.reverseOrder()))
-        .collect(Collectors.toList());
-
     return ChatRoomDto.builder()
-        .roomId(Objects.requireNonNull(chatRoom).getId())
-        .goodsId(chatRoom.getGoods().getId())
+        .roomId(roomId)
+        .goodsId(goods.getId())
         .memberId(memberId)
-        .partner(partner)
+        .partner(partner.getNickname())
         .memberType(chatRole)
-        .goodsName(chatRoom.getGoods().getGoodsName())
+        .goodsName(goods.getGoodsName())
         .goodsImage(image)
-        .goodsPrice(chatRoom.getGoods().getPrice())
-        .chatLogs(new PageImpl<>(chatLogList, chatLogsPage.getPageable(),
-            chatLogsPage.getTotalElements()))
+        .goodsPrice(goods.getPrice())
         .build();
   }
 

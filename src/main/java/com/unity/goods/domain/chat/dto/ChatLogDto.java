@@ -2,13 +2,18 @@ package com.unity.goods.domain.chat.dto;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import com.unity.goods.domain.chat.entity.ChatLog;
 import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class ChatLogDto {
 
@@ -17,10 +22,4 @@ public class ChatLogDto {
   private Long receiverId;
   private LocalDateTime createdAt;
 
-  public ChatLogDto(ChatLog chatLog) {
-    this.message = chatLog.getMessage();
-    this.senderId = chatLog.getSenderId();
-    this.receiverId = chatLog.getReceiverId();
-    this.createdAt = chatLog.getCreatedAt();
-  }
 }
