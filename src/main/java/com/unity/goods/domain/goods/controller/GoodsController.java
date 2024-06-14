@@ -1,5 +1,6 @@
 package com.unity.goods.domain.goods.controller;
 
+import com.unity.goods.domain.goods.dto.ClusterDto;
 import com.unity.goods.domain.goods.dto.GoodsDetailDto;
 import com.unity.goods.domain.goods.dto.SellerSalesListDto.SellerSalesListResponse;
 import com.unity.goods.domain.goods.dto.UpdateGoodsInfoDto.UpdateGoodsInfoRequest;
@@ -60,6 +61,21 @@ public class GoodsController {
           searchHits.getTotalHits());
       return ResponseEntity.ok(goodsNearBy);
     }
+  }
+
+  @GetMapping("/cluster")
+  public ResponseEntity<?> getClusterGoodsPages(@RequestBody ClusterDto clusterDto,
+      @PageableDefault(value = 20) Pageable pageable) {
+    SearchHits<GoodsDocument> searchHits =
+        goodsSearchService.findByGeoLocationOrderByLikes(clusterDto, pageable);
+
+    List<SearchedGoods> searchedGoods = new ArrayList<>();
+    searchHits.getSearchHits().forEach(
+        searchHit -> searchedGoods.add(SearchedGoods.fromGoodsDocument(searchHit.getContent())));
+
+    PageImpl<SearchedGoods> goodsNearBy = new PageImpl<>(searchedGoods, pageable,
+        searchHits.getTotalHits());
+    return ResponseEntity.ok(goodsNearBy);
   }
 
   @PostMapping("/new")
