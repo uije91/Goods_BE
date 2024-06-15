@@ -60,8 +60,7 @@ public class FcmService {
     Member member = memberRepository.findById(receiverId)
         .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
     if(member.getFcmToken() == null){
-      return;
-//      throw new MemberException(FCM_TOKEN_NOT_FOUND);
+      throw new MemberException(FCM_TOKEN_NOT_FOUND);
     }
 
     sendNotification(member.getFcmToken(), CHAT_RECEIVED.getTitle(), chatMessage);
@@ -75,8 +74,7 @@ public class FcmService {
 
   public void sendTradeCompleteNotification(Member receiver) {
     if(receiver.getFcmToken() == null){
-      return;
-//      throw new MemberException(FCM_TOKEN_NOT_FOUND);
+      throw new MemberException(FCM_TOKEN_NOT_FOUND);
     }
 
     sendNotification(receiver.getFcmToken(), TRADE_COMPLETED.getTitle(), TRADE_COMPLETED.getBody());
@@ -90,8 +88,7 @@ public class FcmService {
 
   public void sendPointReceivedNotification(Member receiver) {
     if(receiver.getFcmToken() == null){
-      return;
-//      throw new MemberException(FCM_TOKEN_NOT_FOUND);
+      throw new MemberException(FCM_TOKEN_NOT_FOUND);
     }
 
     sendNotification(receiver.getFcmToken(), POINT_RECEIVED.getTitle(), POINT_RECEIVED.getBody());
