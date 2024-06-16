@@ -4,7 +4,6 @@ import static com.unity.goods.domain.goods.type.GoodsStatus.SOLDOUT;
 import static com.unity.goods.domain.trade.type.TradePurpose.BUY;
 import static com.unity.goods.domain.trade.type.TradePurpose.SELL;
 import static com.unity.goods.global.exception.ErrorCode.ALREADY_SOLD;
-import static com.unity.goods.global.exception.ErrorCode.FCM_TOKEN_NOT_FOUND;
 import static com.unity.goods.global.exception.ErrorCode.GOODS_NOT_FOUND;
 import static com.unity.goods.global.exception.ErrorCode.INSUFFICIENT_AMOUNT;
 import static com.unity.goods.global.exception.ErrorCode.OUT_RANGED_COST;
@@ -98,7 +97,7 @@ public class TradeService {
 
   @Transactional
   public PointTradeResponse transferPoint(UserDetailsImpl member,
-      PointTradeRequest pointTradeRequest) throws Exception {
+      PointTradeRequest pointTradeRequest) {
 
     Member authenticatedUser = memberRepository.findByEmail(member.getUsername())
         .orElseThrow(() -> new MemberException(USER_NOT_FOUND));

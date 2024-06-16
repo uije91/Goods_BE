@@ -3,6 +3,7 @@ package com.unity.goods.domain.notification.service;
 import static com.unity.goods.domain.notification.type.NotificationType.CHAT_RECEIVED;
 import static com.unity.goods.domain.notification.type.NotificationType.POINT_RECEIVED;
 import static com.unity.goods.global.exception.ErrorCode.FCM_TOKEN_NOT_FOUND;
+import static com.unity.goods.global.exception.ErrorCode.NOTIFICATION_SENDING_ERROR;
 import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
 
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -13,6 +14,7 @@ import com.unity.goods.domain.member.exception.MemberException;
 import com.unity.goods.domain.member.repository.MemberRepository;
 import com.unity.goods.domain.notification.dto.FcmTokenDto;
 import com.unity.goods.domain.notification.entity.NotificationLog;
+import com.unity.goods.domain.notification.exception.FCMException;
 import com.unity.goods.domain.notification.repository.NotificationRepository;
 import com.unity.goods.global.jwt.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
@@ -50,7 +52,7 @@ public class FcmService {
       log.info("[FcmService] : {} 메시지 수신 완료", token);
     } catch (Exception e) {
       log.error("[FcmService] : fcm 서버 메시지 요청 과정 중 에러 발생");
-      throw new RuntimeException("FCM 메시지 전송 실패", e);
+      throw new FCMException(NOTIFICATION_SENDING_ERROR);
     }
   }
 
