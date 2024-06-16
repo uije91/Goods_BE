@@ -2,7 +2,6 @@ package com.unity.goods.domain.notification.service;
 
 import static com.unity.goods.domain.notification.type.NotificationType.CHAT_RECEIVED;
 import static com.unity.goods.domain.notification.type.NotificationType.POINT_RECEIVED;
-import static com.unity.goods.global.exception.ErrorCode.FCM_TOKEN_NOT_FOUND;
 import static com.unity.goods.global.exception.ErrorCode.NOTIFICATION_SENDING_ERROR;
 import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
 
@@ -60,7 +59,7 @@ public class FcmService {
     Member member = memberRepository.findById(receiverId)
         .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
     if(member.getFcmToken() == null){
-      throw new MemberException(FCM_TOKEN_NOT_FOUND);
+      return;
     }
 
     sendNotification(member.getFcmToken(), CHAT_RECEIVED.getTitle(), chatMessage);
@@ -74,7 +73,7 @@ public class FcmService {
 
   public void sendPointReceivedNotification(Member receiver) {
     if(receiver.getFcmToken() == null){
-      throw new MemberException(FCM_TOKEN_NOT_FOUND);
+      return;
     }
 
     sendNotification(receiver.getFcmToken(), POINT_RECEIVED.getTitle(), POINT_RECEIVED.getBody());
