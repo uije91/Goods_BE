@@ -3,7 +3,6 @@ package com.unity.goods.domain.chat.service;
 import static com.unity.goods.domain.chat.chatType.ChatRole.BUYER;
 import static com.unity.goods.domain.chat.chatType.ChatRole.SELLER;
 import static com.unity.goods.global.exception.ErrorCode.CHAT_ROOM_NOT_FOUND;
-import static com.unity.goods.global.exception.ErrorCode.FCM_TOKEN_NOT_FOUND;
 import static com.unity.goods.global.exception.ErrorCode.GOODS_NOT_FOUND;
 import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
 
@@ -21,7 +20,6 @@ import com.unity.goods.domain.chat.repository.ChatRoomRepository;
 import com.unity.goods.domain.goods.entity.Goods;
 import com.unity.goods.domain.goods.repository.GoodsRepository;
 import com.unity.goods.domain.member.entity.Member;
-import com.unity.goods.domain.member.exception.MemberException;
 import com.unity.goods.domain.member.repository.MemberRepository;
 import com.unity.goods.domain.notification.service.FcmService;
 import java.time.Duration;
