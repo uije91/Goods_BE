@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 
-  Page<ChatRoom> findAllByBuyerIdOrSellerId(Long buyerId, Long sellerId, Pageable pageable);
+  Page<ChatRoom> findAllByBuyerIdOrSellerIdOrderByUpdatedAtDesc(Long buyerId, Long sellerId, Pageable pageable);
 
   Optional<ChatRoom> findByBuyerIdAndSellerIdAndGoods(Long buyerId, Long sellerId, Goods goods);
 
