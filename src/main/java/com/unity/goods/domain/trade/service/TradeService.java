@@ -128,9 +128,6 @@ public class TradeService {
 
     goods.setGoodsStatus(SOLDOUT);
 
-    fcmService.sendTradeCompleteNotification(authenticatedUser);
-    fcmService.sendTradeCompleteNotification(goodsSeller);
-
     fcmService.sendPointReceivedNotification(authenticatedUser);
     fcmService.sendPointReceivedNotification(goodsSeller);
 

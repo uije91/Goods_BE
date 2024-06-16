@@ -2,12 +2,10 @@ package com.unity.goods.domain.notification.service;
 
 import static com.unity.goods.domain.notification.type.NotificationType.CHAT_RECEIVED;
 import static com.unity.goods.domain.notification.type.NotificationType.POINT_RECEIVED;
-import static com.unity.goods.domain.notification.type.NotificationType.TRADE_COMPLETED;
 import static com.unity.goods.global.exception.ErrorCode.FCM_TOKEN_NOT_FOUND;
 import static com.unity.goods.global.exception.ErrorCode.USER_NOT_FOUND;
 
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import com.unity.goods.domain.member.entity.Member;
@@ -68,20 +66,6 @@ public class FcmService {
     NotificationLog notification = NotificationLog.builder()
         .receiverId(receiverId)
         .notificationType(CHAT_RECEIVED)
-        .build();
-    notificationRepository.save(notification);
-  }
-
-  public void sendTradeCompleteNotification(Member receiver) {
-    if(receiver.getFcmToken() == null){
-      throw new MemberException(FCM_TOKEN_NOT_FOUND);
-    }
-
-    sendNotification(receiver.getFcmToken(), TRADE_COMPLETED.getTitle(), TRADE_COMPLETED.getBody());
-
-    NotificationLog notification = NotificationLog.builder()
-        .receiverId(receiver.getId())
-        .notificationType(TRADE_COMPLETED)
         .build();
     notificationRepository.save(notification);
   }
