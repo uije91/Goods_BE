@@ -37,15 +37,6 @@ public class RabbitMqConfig {
   private static final String CHAT_QUEUE_NAME = "chat.queue";
   private static final String ROUTING_KEY = "room.*";
 
-  @Bean
-  public AmqpAdmin amqpAdmin() {
-    RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory());
-    rabbitAdmin.declareExchange(exchange());
-    rabbitAdmin.declareQueue(queue());
-    rabbitAdmin.declareBinding(binding(queue(), exchange()));
-    return rabbitAdmin;
-  }
-
   //Queue 등록
   @Bean
   public Queue queue() {
@@ -85,6 +76,14 @@ public class RabbitMqConfig {
     factory.setUsername(rabbitmqUsername);
     factory.setPassword(rabbitmqPassword);
     return factory;
+  }
+
+  @Bean
+  public SimpleMessageListenerContainer container(){
+    SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
+    container.setConnectionFactory(connectionFactory());
+    container.setQueueNames(CHAT_QUEUE_NAME);
+    return container;
   }
 
   // 메시지를 JSON형식으로 직렬화하고 역직렬화하는데 사용되는 변환기
