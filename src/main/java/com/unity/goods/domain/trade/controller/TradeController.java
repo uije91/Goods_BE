@@ -42,8 +42,8 @@ public class TradeController {
   @PostMapping("/point")
   public ResponseEntity<?> tradePoint(
       @AuthenticationPrincipal UserDetailsImpl member,
-      @Valid @RequestBody PointTradeDto.PointTradeRequest pointTradeRequest) {
-    PointTradeResponse pointTradeResponse = tradeService.tradePoint(member, pointTradeRequest);
+      @Valid @RequestBody PointTradeDto.PointTradeRequest pointTradeRequest) throws Exception {
+    PointTradeResponse pointTradeResponse = tradeService.transferPoint(member, pointTradeRequest);
     return ResponseEntity.ok(pointTradeResponse);
   }
 

@@ -2,6 +2,7 @@ package com.unity.goods.infra.service;
 
 import static com.unity.goods.global.exception.ErrorCode.GOODS_NOT_FOUND;
 
+import com.unity.goods.domain.goods.dto.ClusterDto;
 import com.unity.goods.domain.goods.entity.Goods;
 import com.unity.goods.domain.goods.exception.GoodsException;
 import com.unity.goods.infra.document.GoodsDocument;
@@ -114,4 +115,43 @@ public class GoodsSearchService {
     IndexCoordinates indexCoordinates = IndexCoordinates.of(index);
     elasticsearchOperations.delete(goodsId, indexCoordinates);
   }
+
+  public SearchHits<GoodsDocument> findByGeoLocationOrderByLikes(ClusterDto clusterDto, Pageable pageable) {
+
+    GeoDistanceQueryBuilder queryBuilder = QueryBuilders.geoDistanceQuery("location")
+        .point(clusterDto.getBaseLng(), clusterDto.getBaseLat())
+        .distance(distance(clusterDto), DistanceUnit.KILOMETERS);
+
+    SortBuilder<?> sortBuilder = SortBuilders.fieldSort("likes").order(SortOrder.DESC);
+
+    Query searchQuery = new NativeSearchQueryBuilder()
+        .withQuery(queryBuilder)
+        .withSort(sortBuilder)
+        .withPageable(pageable)
+        .build();
+
+    return elasticsearchOperations.search(searchQuery,
+        GoodsDocument.class);
+  }
+
+  private double distance(ClusterDto clusterDto){
+    final int EARTH_RADIUS = 6371;
+    double lat1 = clusterDto.getNeLat();
+    double lng1 = clusterDto.getNeLng();
+    double lat2 = clusterDto.getSwLat();
+    double lng2 = clusterDto.getSwLng();
+
+    double dLat = Math.toRadians(lat2 - lat1);
+    double dLng = Math.toRadians(lng2 - lng1);
+
+    double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+            Math.sin(dLng / 2) * Math.sin(dLng / 2);
+
+    double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return EARTH_RADIUS * c;
+  }
+
+
 }

@@ -21,6 +21,7 @@ import com.unity.goods.domain.goods.entity.Goods;
 import com.unity.goods.domain.goods.repository.GoodsRepository;
 import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.repository.MemberRepository;
+import com.unity.goods.domain.notification.service.FcmService;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -45,6 +46,7 @@ public class ChatService {
   private final ChatRoomRepository chatRoomRepository;
   private final ChatLogRepository chatLogRepository;
   private final MemberRepository memberRepository;
+  private final FcmService fcmService;
 
   // 채팅방 생성
   public ChatRoomResponse addChatRoom(Long goodsId, Long buyerId) {
@@ -197,7 +199,8 @@ public class ChatService {
 
   // 채팅로그 저장
   @Transactional
-  public Long addChatLog(Long roomId, ChatMessageDto chatMessageDto, String senderEmail) {
+  public Long addChatLog(Long roomId, ChatMessageDto chatMessageDto, String senderEmail)
+      throws Exception {
     ChatRoom chatRoom = chatRoomRepository.findById(roomId)
         .orElseThrow(() -> new ChatException(CHAT_ROOM_NOT_FOUND));
 
@@ -218,6 +221,8 @@ public class ChatService {
         .build();
 
     chatLogRepository.save(chatLog);
+
+    fcmService.sendChatNotification(receiverId, chatMessageDto.getMessage());
     return senderId;
   }
 

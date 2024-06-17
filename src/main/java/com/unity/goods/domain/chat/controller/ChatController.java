@@ -25,8 +25,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-// TODO 채팅 수신 알림 기능 구현
-
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -41,7 +39,7 @@ public class ChatController {
   @SendTo("/sub/message/{roomId}")
   public ChatMessageResponse messageHandler(@DestinationVariable Long roomId,
       ChatMessageDto message,
-      @Header("Authorization") String authorization) {
+      @Header("Authorization") String authorization) throws Exception {
     String token = authorization.substring(7);
     String senderEmail = jwtTokenProvider.getClaims(token).get("email").toString();
     chatService.inviteChatRoom(roomId);

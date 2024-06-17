@@ -63,7 +63,7 @@ class TradeServiceTest {
 
   @Test
   @DisplayName("거래 후 잔액 값 확인 테스트")
-  void afterTradePointCheckTest() {
+  void afterTradePointCheckTest() throws Exception {
     // given
     Member buyer = Member.builder()
         .id(1L)
@@ -100,7 +100,7 @@ class TradeServiceTest {
     when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
 
     // when
-    PointTradeResponse pointTradeResponse = tradeService.tradePoint(userDetails, pointTradeRequest);
+    PointTradeResponse pointTradeResponse = tradeService.transferPoint(userDetails, pointTradeRequest);
 
     ArgumentCaptor<Trade> captor = ArgumentCaptor.forClass(Trade.class);
     verify(tradeRepository, times(2)).save(captor.capture());

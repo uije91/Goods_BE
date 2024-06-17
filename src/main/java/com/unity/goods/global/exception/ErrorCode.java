@@ -61,7 +61,10 @@ public enum ErrorCode {
   INCORRECT_VERIFICATION_NUM(400, "인증 번호가 올바르지 않습니다."),
 
   // JwtFilterAuthenticationError
-  UNAUTHORIZED(401, "인증되지 않은 사용자입니다.");
+  UNAUTHORIZED(401, "인증되지 않은 사용자입니다."),
+
+  // FCMException
+  NOTIFICATION_SENDING_ERROR(500, "FCM 메시지 전송 실패");
 
   private final int status;
   private final String message;
