@@ -10,13 +10,14 @@ import com.unity.goods.global.jwt.JwtTokenProvider;
 import com.unity.goods.global.jwt.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +25,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+// TODO 채팅 수신 알림 기능 구현
 
 @Slf4j
 @RestController
@@ -33,28 +36,37 @@ public class ChatController {
 
   private final ChatService chatService;
   private final JwtTokenProvider jwtTokenProvider;
+  private final RabbitTemplate rabbitTemplate;
 
-  // 채팅 message 메서드 수정
-  @MessageMapping("/message/{roomId}")
-  @SendTo("/sub/message/{roomId}")
-  public ChatMessageResponse messageHandler(@DestinationVariable Long roomId,
-      ChatMessageDto message,
-      @Header("Authorization") String authorization) throws Exception {
+  private static final String CHAT_EXCHANGE_NAME = "chat.exchange";
+
+
+  //   채팅방 대화
+  @MessageMapping("chat.message.{roomId}")
+  public ChatMessageResponse talkUser(@DestinationVariable("roomId") Long roomId,
+      @Payload ChatMessageDto message, @Header("Authorization") String authorization)
+      throws Exception {
+
     String token = authorization.substring(7);
     String senderEmail = jwtTokenProvider.getClaims(token).get("email").toString();
     chatService.inviteChatRoom(roomId);
-    Long senderId = chatService.addChatLog(roomId, message, senderEmail);
-    log.info("[ChatController] Message sent to room {}", roomId);
 
-    return ChatMessageResponse.builder()
+    Long senderId = chatService.addChatLog(roomId, message, senderEmail);
+
+    ChatMessageResponse chatMessage = ChatMessageResponse.builder()
         .senderId(senderId)
         .message(message.getMessage())
         .build();
+
+    rabbitTemplate.convertAndSend(CHAT_EXCHANGE_NAME, "room." + roomId, chatMessage);
+
+    return chatMessage;
   }
 
   @PostMapping("/room/{goodsId}")
   public ResponseEntity<ChatRoomResponse> addChatRoom(@PathVariable Long goodsId,
       @AuthenticationPrincipal UserDetailsImpl user) {
+
     return ResponseEntity.ok(chatService.addChatRoom(goodsId, user.getId()));
   }
 
@@ -72,8 +84,8 @@ public class ChatController {
       @AuthenticationPrincipal UserDetailsImpl principal,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size) {
-    Pageable pageable = PageRequest.of(page,size);
-    return ResponseEntity.ok(chatService.getChatLogs(roomId, principal.getId(),pageable));
+    Pageable pageable = PageRequest.of(page, size);
+    return ResponseEntity.ok(chatService.getChatLogs(roomId, principal.getId(), pageable));
   }
 
   @GetMapping("/room/{roomId}")
@@ -84,8 +96,8 @@ public class ChatController {
 
   @PostMapping("room/leave/{roomId}")
   public ResponseEntity<?> leaveChatRoom(@PathVariable Long roomId,
-      @AuthenticationPrincipal UserDetailsImpl principal){
-    chatService.leaveChatRoom(roomId,principal.getId());
+      @AuthenticationPrincipal UserDetailsImpl principal) {
+    chatService.leaveChatRoom(roomId, principal.getId());
     return ResponseEntity.ok().build();
   }
 
