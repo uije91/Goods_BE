@@ -68,12 +68,18 @@ public class ChatController {
   }
 
   @GetMapping("/{roomId}")
-  public ResponseEntity<ChatRoomDto> getChatLogs(@PathVariable Long roomId,
+  public ResponseEntity<?> getChatLogs(@PathVariable Long roomId,
       @AuthenticationPrincipal UserDetailsImpl principal,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size) {
     Pageable pageable = PageRequest.of(page,size);
     return ResponseEntity.ok(chatService.getChatLogs(roomId, principal.getId(),pageable));
+  }
+
+  @GetMapping("/room/{roomId}")
+  public ResponseEntity<ChatRoomDto> getChatRoom(@PathVariable Long roomId,
+      @AuthenticationPrincipal UserDetailsImpl principal) {
+    return ResponseEntity.ok(chatService.getChatRoom(roomId, principal.getId()));
   }
 
   @PostMapping("room/leave/{roomId}")

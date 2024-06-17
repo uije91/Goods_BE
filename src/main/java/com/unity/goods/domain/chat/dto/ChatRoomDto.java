@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.unity.goods.domain.chat.chatType.ChatRole;
 import lombok.Builder;
 import lombok.Getter;
-import org.springframework.data.domain.Page;
 
 @Getter
 @Builder
@@ -20,7 +19,6 @@ public class ChatRoomDto {
   private final String goodsName;
   private final String goodsImage;
   private final Long goodsPrice;
-  private final Page<ChatLogDto> chatLogs;
 
   @Getter
   @Builder
