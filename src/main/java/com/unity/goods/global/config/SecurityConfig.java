@@ -56,7 +56,8 @@ public class SecurityConfig {
             .configurationSource(request -> {
               CorsConfiguration config = new CorsConfiguration();
 
-              config.setAllowedOrigins(List.of("https://goods-trade.vercel.app", "https://apic.app", "http://localhost:5173"));
+              config.setAllowedOrigins(List.of("https://goods-trade.vercel.app", "https://apic.app",
+                  "http://localhost:5173"));
               config.setAllowedMethods(Collections.singletonList("*"));
               config.setAllowCredentials(true);
               config.setAllowedHeaders(Collections.singletonList("*"));
@@ -111,7 +112,8 @@ public class SecurityConfig {
         antMatcher(GET, "/api/goods"), // 첫 화면
         antMatcher(GET, "/api/goods/**"), // 상품 상세 페이지
         antMatcher(GET, "/api/goods/sell-list/**"),
-        antMatcher("/api/chat/**")
+        antMatcher("/api/chat/**"),
+        antMatcher("/ws/**")
     );
     return requestMatchers.toArray(RequestMatcher[]::new);
   }
