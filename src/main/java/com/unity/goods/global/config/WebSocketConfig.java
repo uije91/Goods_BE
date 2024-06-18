@@ -26,7 +26,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     // 외부 브로커 사용
     registry.enableStompBrokerRelay("/exchange")
-        .setRelayHost("localhost")
+        .setRelayHost("ec2-13-124-41-239.ap-northeast-2.compute.amazonaws.com")
         .setVirtualHost("/")
         .setRelayPort(61613) // RabbitMQ STOMP 기본 포트
         .setSystemLogin("guest")
