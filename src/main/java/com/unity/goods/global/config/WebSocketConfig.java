@@ -3,6 +3,7 @@ package com.unity.goods.global.config;
 
 import com.unity.goods.domain.chat.handler.StompHandler;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -16,6 +17,9 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
+  @Value("${spring.rabbitmq.host}")
+  private String rabbitmqHost;
+
   private final StompHandler stompHandler;
 
   @Override
@@ -26,7 +30,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     // 외부 브로커 사용
     registry.enableStompBrokerRelay("/exchange")
-        .setRelayHost("ec2-13-124-41-239.ap-northeast-2.compute.amazonaws.com")
+        .setRelayHost(rabbitmqHost)
         .setVirtualHost("/")
         .setRelayPort(61613) // RabbitMQ STOMP 기본 포트
         .setSystemLogin("guest")
