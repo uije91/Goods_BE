@@ -26,7 +26,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     // 외부 브로커 사용
     registry.enableStompBrokerRelay("/exchange")
-        .setRelayPort(61613);
+        .setRelayHost("localhost")
+        .setVirtualHost("/")
+        .setRelayPort(61613) // RabbitMQ STOMP 기본 포트
+        .setSystemLogin("guest")
+        .setSystemPasscode("guest")
+        .setClientLogin("guest")
+        .setClientPasscode("guest");
   }
 
   @Override
