@@ -1,15 +1,12 @@
 package com.unity.goods.infra.rabbimq;
 
-import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
-import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -63,6 +60,7 @@ public class RabbitMqConfig {
   public RabbitTemplate rabbitTemplate() {
     RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory());
     rabbitTemplate.setMessageConverter(jsonMessageConverter());
+    rabbitTemplate.setRoutingKey(ROUTING_KEY);
     return rabbitTemplate;
   }
 
@@ -85,6 +83,7 @@ public class RabbitMqConfig {
     container.setQueueNames(CHAT_QUEUE_NAME);
     return container;
   }
+
 
   // 메시지를 JSON형식으로 직렬화하고 역직렬화하는데 사용되는 변환기
   // RabbitMQ 메시지를 JSON형식으로 보내고 받을 수 있음

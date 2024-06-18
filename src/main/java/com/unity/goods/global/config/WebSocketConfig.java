@@ -25,7 +25,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     registry.setApplicationDestinationPrefixes("/pub");
 
     // 외부 브로커 사용
-    registry.enableStompBrokerRelay("/exchange");
+    registry.enableStompBrokerRelay("/exchange")
+        .setRelayPort(61613);
   }
 
   @Override
