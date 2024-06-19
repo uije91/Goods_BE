@@ -50,7 +50,7 @@ public class FcmService {
       FirebaseMessaging.getInstance().send(message);
       log.info("[FcmService] : {} 메시지 수신 완료", token);
     } catch (Exception e) {
-      log.error("[FcmService] : fcm 서버 메시지 요청 과정 중 에러 발생");
+      log.error("[FcmService] : fcm 서버 메시지 요청 과정 중 에러 발생 {}", e.getMessage());
       throw new FCMException(NOTIFICATION_SENDING_ERROR);
     }
   }
