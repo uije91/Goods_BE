@@ -126,12 +126,11 @@ public class TradeService {
     memberRepository.save(goodsSeller);
 
     goods.setGoodsStatus(SOLDOUT);
+    goodsRepository.save(goods);
+    goodsSearchService.deleteGoodsDocument("keywords", String.valueOf(goods.getId()));
 
     fcmService.sendPointReceivedNotification(authenticatedUser);
     fcmService.sendPointReceivedNotification(goodsSeller);
-
-    goodsRepository.save(goods);
-    goodsSearchService.deleteGoodsDocument("keywords", String.valueOf(goods.getId()));
 
     return PointTradeResponse.builder()
         .paymentStatus(PaymentStatus.SUCCESS.getDescription())
