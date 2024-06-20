@@ -65,9 +65,10 @@ public class ChatController {
     return chatMessage;
   }
 
-//  @RabbitListener(queues = CHAT_QUEUE_NAME)
-//  public void receiveMessage() {
-//  }
+  @RabbitListener(queues = CHAT_QUEUE_NAME)
+  public void receiveMessage() {
+    log.info("{Message Complete}");
+  }
 
   @PostMapping("/room/{goodsId}")
   public ResponseEntity<ChatRoomResponse> addChatRoom(@PathVariable Long goodsId,
