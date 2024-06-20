@@ -63,7 +63,7 @@ public class GoodsController {
     }
   }
 
-  @GetMapping("/cluster")
+  @PostMapping()
   public ResponseEntity<?> getClusterGoodsPages(@RequestBody ClusterDto clusterDto,
       @PageableDefault(value = 20) Pageable pageable) {
     SearchHits<GoodsDocument> searchHits =
