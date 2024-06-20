@@ -116,26 +116,22 @@ public class GoodsSearchService {
     elasticsearchOperations.delete(goodsId, indexCoordinates);
   }
 
-  public SearchHits<GoodsDocument> findByGeoLocationOrderByLikes(ClusterDto clusterDto, Pageable pageable) {
-
-    GeoDistanceQueryBuilder queryBuilder = QueryBuilders.geoDistanceQuery("location")
-        .point(clusterDto.getBaseLng(), clusterDto.getBaseLat())
-        .distance(distance(clusterDto), DistanceUnit.KILOMETERS);
-
-    SortBuilder<?> sortBuilder = SortBuilders.fieldSort("likes").order(SortOrder.DESC);
+  public SearchHits<GoodsDocument> findByGeoLocationOrderByLikes(ClusterDto clusterDto,
+      Pageable pageable) {
 
     Query searchQuery = new NativeSearchQueryBuilder()
-        .withQuery(queryBuilder)
-        .withSort(sortBuilder)
+        .withQuery(QueryBuilders.geoDistanceQuery("location")
+            .point(clusterDto.getBaseLat(), clusterDto.getBaseLng())
+            .distance(calculateDistance(clusterDto), DistanceUnit.KILOMETERS))
+        .withSort(SortBuilders.fieldSort("likes").order(SortOrder.DESC))
         .withPageable(pageable)
         .build();
 
-    return elasticsearchOperations.search(searchQuery,
-        GoodsDocument.class);
+    return elasticsearchOperations.search(searchQuery, GoodsDocument.class);
   }
 
-  private double distance(ClusterDto clusterDto){
-    final int EARTH_RADIUS = 6371;
+  private double calculateDistance(ClusterDto clusterDto) {
+    final double EARTH_RADIUS = 6371.0;
     double lat1 = clusterDto.getNeLat();
     double lng1 = clusterDto.getNeLng();
     double lat2 = clusterDto.getSwLat();
@@ -150,8 +146,7 @@ public class GoodsSearchService {
 
     double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-    return EARTH_RADIUS * c;
+    return EARTH_RADIUS * c / 2;
   }
-
 
 }
