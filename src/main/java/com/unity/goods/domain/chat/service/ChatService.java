@@ -222,7 +222,7 @@ public class ChatService {
 
     chatLogRepository.save(chatLog);
 
-    fcmService.sendChatNotification(receiverId, chatMessageDto.getMessage());
+//    fcmService.sendChatNotification(receiverId, chatMessageDto.getMessage());
     return senderId;
   }
 
