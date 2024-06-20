@@ -10,6 +10,7 @@ import com.unity.goods.global.jwt.JwtTokenProvider;
 import com.unity.goods.global.jwt.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -39,6 +40,7 @@ public class ChatController {
   private final RabbitTemplate rabbitTemplate;
 
   private static final String CHAT_EXCHANGE_NAME = "chat.exchange";
+  private static final String CHAT_QUEUE_NAME = "chat.queue";
 
 
   //   채팅방 대화
@@ -61,6 +63,10 @@ public class ChatController {
     rabbitTemplate.convertAndSend(CHAT_EXCHANGE_NAME, "room." + roomId, chatMessage);
 
     return chatMessage;
+  }
+
+  @RabbitListener(queues = CHAT_QUEUE_NAME)
+  public void receiveMessage() {
   }
 
   @PostMapping("/room/{goodsId}")

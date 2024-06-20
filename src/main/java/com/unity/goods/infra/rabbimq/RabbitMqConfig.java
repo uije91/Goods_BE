@@ -76,14 +76,6 @@ public class RabbitMqConfig {
     return factory;
   }
 
-  @Bean
-  public SimpleMessageListenerContainer container(){
-    SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
-    container.setConnectionFactory(connectionFactory());
-    container.setQueueNames(CHAT_QUEUE_NAME);
-    return container;
-  }
-
 
   // 메시지를 JSON형식으로 직렬화하고 역직렬화하는데 사용되는 변환기
   // RabbitMQ 메시지를 JSON형식으로 보내고 받을 수 있음
