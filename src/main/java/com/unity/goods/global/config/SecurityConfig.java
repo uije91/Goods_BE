@@ -110,6 +110,7 @@ public class SecurityConfig {
         antMatcher(POST, "/api/member/find"), // 비밀번호 찾기
         antMatcher(POST, "/api/goods/search"), // 검색
         antMatcher(GET, "/api/goods"), // 첫 화면
+        antMatcher(POST, "/api/goods"), // 클러스터러
         antMatcher(GET, "/api/goods/**"), // 상품 상세 페이지
         antMatcher(GET, "/api/goods/sell-list/**"),
         antMatcher("/api/chat/**"),
