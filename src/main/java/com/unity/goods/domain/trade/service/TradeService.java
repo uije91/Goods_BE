@@ -116,7 +116,7 @@ public class TradeService {
     // 거래
     authenticatedUser.setBalance(
         authenticatedUser.getBalance() - Long.parseLong(pointTradeRequest.getPrice()));
-    Trade buyer = createTrade(goodsSeller, goods, pointTradeRequest.getPrice(), BUY);
+    Trade buyer = createTrade(authenticatedUser, goods, pointTradeRequest.getPrice(), BUY);
     tradeRepository.save(buyer);
     memberRepository.save(authenticatedUser);
 
