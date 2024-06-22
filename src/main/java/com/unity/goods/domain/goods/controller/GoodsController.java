@@ -54,7 +54,7 @@ public class GoodsController {
     searchHits.getSearchHits().forEach(
         searchHit -> searchedGoods.add(SearchedGoods.fromGoodsDocument(searchHit.getContent())));
 
-    if(responseType.equals("list")) {
+    if (responseType.equals("list")) {
       return ResponseEntity.ok(searchedGoods);
     } else {
       PageImpl<SearchedGoods> goodsNearBy = new PageImpl<>(searchedGoods, pageable,

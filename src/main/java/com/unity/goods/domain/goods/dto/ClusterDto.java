@@ -18,6 +18,9 @@ public class ClusterDto {
   private double baseLat;
   private double baseLng;
 
+  // 최대 갯수
+  private int quantity;
+
   // 북동쪽
   private double neLat;
   private double neLng;
