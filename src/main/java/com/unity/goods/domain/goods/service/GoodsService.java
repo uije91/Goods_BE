@@ -264,7 +264,7 @@ public class GoodsService {
     Member seller = memberRepository.findById(sellerId)
         .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
 
-    Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+    Pageable pageable = PageRequest.of(page, size, Sort.by("tradedAt").descending());
     Page<Trade> salesPage = tradeRepository.findByMemberIdAndTradePurpose(
         sellerId, BUY, pageable);
 
@@ -286,6 +286,7 @@ public class GoodsService {
               .build();
         }).collect(Collectors.toList());
 
+    pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
     return new PageImpl<>(salesList, pageable, salesPage.getTotalElements());
   }
 
