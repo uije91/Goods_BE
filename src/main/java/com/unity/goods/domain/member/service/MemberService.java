@@ -238,7 +238,7 @@ public class MemberService {
       mailSender.send(createFindPasswordEmail(findMember.getEmail(), tempPassword));
     } catch (MailException e) {
       log.error("[MemberService][findPasswordEmail] : 비밀번호 찾기 이메일 전송 과정 중 에러 발생");
-      throw new EmailException(EMAIL_SEND_ERROR.getMessage());
+      throw new EmailException(EMAIL_SEND_ERROR);
     }
 
     // db password 임시 비밀번호로 변경

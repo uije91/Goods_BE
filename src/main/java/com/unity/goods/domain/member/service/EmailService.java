@@ -45,7 +45,7 @@ public class EmailService {
 
     } catch (RuntimeException e) {
       log.error("[EmailService] : 이메일 전송 과정 중 에러 발생");
-      throw new EmailException(e.getMessage());
+      throw new EmailException(EMAIL_SEND_ERROR);
 
     }
 
@@ -79,14 +79,14 @@ public class EmailService {
 
     // redis에 존재하는지, 조회되는지
     if (!redisService.existData(checkRequest.getEmail())) {
-      throw new EmailException(EMAIL_VERIFICATION_NOT_EXISTS.getMessage());
+      throw new EmailException(EMAIL_VERIFICATION_NOT_EXISTS);
     }
 
     String redisCode = redisService.getData(checkRequest.getEmail());
 
     // 입력한 값과 redis에 저장된 값이 같은지
     if (!checkRequest.getVerificationNumber().equals(redisCode)) {
-      throw new EmailException(INCORRECT_VERIFICATION_NUM.getMessage());
+      throw new EmailException(INCORRECT_VERIFICATION_NUM);
     }
     log.info("[EmailService] : {} 이메일 인증 확인 ", checkRequest.getEmail());
 

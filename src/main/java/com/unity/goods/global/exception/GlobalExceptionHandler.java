@@ -86,7 +86,7 @@ public class GlobalExceptionHandler {
     log.error("Exception {} is occurred.", e.getMessage());
 
     return new ErrorResponse(
-        INTERNAL_SERVER_ERROR, 500, e.getMessage());
+        INTERNAL_SERVER_ERROR, 500, INTERNAL_SERVER_ERROR.getMessage());
   }
 
 }
