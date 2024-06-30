@@ -58,7 +58,7 @@ public class GlobalExceptionHandler {
     log.error("Exception \"{}({})\" is occurred.", e.getMessage(), e.getMessage());
 
     return new ErrorResponse(EMAIL_SEND_ERROR, 500,
-        e.getMessage());
+        e.getMessage() + "  " + e.getLocalizedMessage() + " " + e.getClass());
   }
 
   @ExceptionHandler(MemberException.class)
