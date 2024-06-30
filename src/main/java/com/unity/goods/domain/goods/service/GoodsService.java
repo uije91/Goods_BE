@@ -2,6 +2,8 @@ package com.unity.goods.domain.goods.service;
 
 import static com.unity.goods.domain.goods.type.GoodsStatus.SOLDOUT;
 import static com.unity.goods.domain.goods.type.GoodsStatus.fromDescription;
+import static com.unity.goods.domain.trade.type.TradePurpose.BUY;
+import static com.unity.goods.domain.trade.type.TradePurpose.SELL;
 import static com.unity.goods.global.exception.ErrorCode.ALREADY_SOLD_OUT_GOODS;
 import static com.unity.goods.global.exception.ErrorCode.CANNOT_DELETE_SOLD_ITEM;
 import static com.unity.goods.global.exception.ErrorCode.GOODS_NOT_FOUND;
@@ -28,7 +30,10 @@ import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.member.exception.MemberException;
 import com.unity.goods.domain.member.repository.BadgeRepository;
 import com.unity.goods.domain.member.repository.MemberRepository;
+import com.unity.goods.domain.trade.entity.Trade;
 import com.unity.goods.domain.trade.exception.TradeException;
+import com.unity.goods.domain.trade.repository.TradeRepository;
+import com.unity.goods.domain.trade.type.TradePurpose;
 import com.unity.goods.global.jwt.UserDetailsImpl;
 import com.unity.goods.infra.service.GoodsSearchService;
 import com.unity.goods.infra.service.S3Service;
@@ -55,6 +60,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class GoodsService {
 
+  private final TradeRepository tradeRepository;
   private final MemberRepository memberRepository;
   private final S3Service s3Service;
   private final ImageRepository imageRepository;
@@ -259,10 +265,13 @@ public class GoodsService {
         .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
 
     Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-    Page<Goods> salesPage = goodsRepository.findByMemberId(sellerId, pageable);
+    Page<Trade> salesPage = tradeRepository.findByMemberIdAndTradePurpose(
+        sellerId, BUY, pageable);
 
     List<SellerSalesListResponse> salesList = salesPage.getContent().stream()
-        .map(goods -> {
+        .map(trade -> {
+          Goods goods = trade.getGoods();
+
           String imageUrl =
               goods.getImageList().isEmpty() ? null : goods.getImageList().get(0).getImageUrl();
 
