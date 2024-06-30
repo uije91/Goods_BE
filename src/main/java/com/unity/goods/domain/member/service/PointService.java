@@ -47,7 +47,7 @@ public class PointService {
 //    }
 
     // 충전 포인트 저장
-    authenticatedUser.setBalance(Long.valueOf(pointChargeRequest.getPrice()));
+    authenticatedUser.setBalance(Long.valueOf(pointChargeRequest.getPrice() + authenticatedUser.getBalance()));
 
     return PointChargeResponse.builder()
         .paymentStatus(PaymentStatus.SUCCESS.getDescription())
