@@ -1,6 +1,7 @@
 package com.unity.goods.global.exception;
 
 import static com.unity.goods.global.exception.ErrorCode.BAD_REQUEST_VALID_ERROR;
+import static com.unity.goods.global.exception.ErrorCode.EMAIL_SEND_ERROR;
 import static com.unity.goods.global.exception.ErrorCode.INTERNAL_SERVER_ERROR;
 
 import com.unity.goods.domain.chat.exception.ChatException;
@@ -54,10 +55,10 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(EmailException.class)
   public ErrorResponse handleEmailException(EmailException e) {
-    log.error("Exception \"{}({})\" is occurred.", e.getErrorCode(), e.getErrorCode().getMessage());
+    log.error("Exception \"{}({})\" is occurred.", e.getMessage(), e.getMessage());
 
-    return new ErrorResponse(e.getErrorCode(), e.getErrorCode().getStatus(),
-        e.getErrorCode().getMessage());
+    return new ErrorResponse(EMAIL_SEND_ERROR, 500,
+        e.getMessage());
   }
 
   @ExceptionHandler(MemberException.class)

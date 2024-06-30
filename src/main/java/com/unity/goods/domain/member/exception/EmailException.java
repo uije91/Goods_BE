@@ -1,11 +1,14 @@
 package com.unity.goods.domain.member.exception;
 
-import com.unity.goods.global.exception.CustomException;
-import com.unity.goods.global.exception.ErrorCode;
+public class EmailException extends RuntimeException{
 
-public class EmailException extends CustomException {
+  public String message;
 
-  public EmailException(ErrorCode errorCode) {
-    super(errorCode);
+  public EmailException(String message) {
+    this.message = message;
+  }
+
+  public String getMessage() {
+    return this.message;
   }
 }
