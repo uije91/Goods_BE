@@ -266,7 +266,7 @@ public class GoodsService {
 
     Pageable pageable = PageRequest.of(page, size, Sort.by("tradedAt").descending());
     Page<Trade> salesPage = tradeRepository.findByMemberIdAndTradePurpose(
-        sellerId, BUY, pageable);
+        sellerId, SELL, pageable);
 
     List<SellerSalesListResponse> salesList = salesPage.getContent().stream()
         .map(trade -> {
