@@ -264,14 +264,11 @@ public class GoodsService {
     Member seller = memberRepository.findById(sellerId)
         .orElseThrow(() -> new MemberException(USER_NOT_FOUND));
 
-    Pageable pageable = PageRequest.of(page, size, Sort.by("tradedAt").descending());
-    Page<Trade> salesPage = tradeRepository.findByMemberIdAndTradePurpose(
-        sellerId, SELL, pageable);
+    Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+    Page<Goods> salesPage = goodsRepository.findByMemberId(sellerId, pageable);
 
     List<SellerSalesListResponse> salesList = salesPage.getContent().stream()
-        .map(trade -> {
-          Goods goods = trade.getGoods();
-
+        .map(goods -> {
           String imageUrl =
               goods.getImageList().isEmpty() ? null : goods.getImageList().get(0).getImageUrl();
 
@@ -286,7 +283,6 @@ public class GoodsService {
               .build();
         }).collect(Collectors.toList());
 
-    pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
     return new PageImpl<>(salesList, pageable, salesPage.getTotalElements());
   }
 

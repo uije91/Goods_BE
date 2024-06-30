@@ -62,14 +62,14 @@ public class FcmService {
       return;
     }
 
-    sendNotification(member.getFcmToken(), CHAT_RECEIVED.getTitle(), chatMessage);
-
     NotificationLog notification = NotificationLog.builder()
         .receiverId(receiverId)
         .notificationType(CHAT_RECEIVED)
         .member(member)
         .build();
     notificationRepository.save(notification);
+
+    sendNotification(member.getFcmToken(), CHAT_RECEIVED.getTitle(), chatMessage);
   }
 
   public void sendPointReceivedNotification(Member receiver) {
@@ -77,13 +77,13 @@ public class FcmService {
       return;
     }
 
-    sendNotification(receiver.getFcmToken(), POINT_RECEIVED.getTitle(), POINT_RECEIVED.getBody());
-
     NotificationLog notification = NotificationLog.builder()
         .receiverId(receiver.getId())
         .notificationType(POINT_RECEIVED)
         .member(receiver)
         .build();
     notificationRepository.save(notification);
+
+    sendNotification(receiver.getFcmToken(), POINT_RECEIVED.getTitle(), POINT_RECEIVED.getBody());
   }
 }
