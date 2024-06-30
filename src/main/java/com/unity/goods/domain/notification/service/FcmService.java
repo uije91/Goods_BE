@@ -67,6 +67,7 @@ public class FcmService {
     NotificationLog notification = NotificationLog.builder()
         .receiverId(receiverId)
         .notificationType(CHAT_RECEIVED)
+        .member(member)
         .build();
     notificationRepository.save(notification);
   }
@@ -81,6 +82,7 @@ public class FcmService {
     NotificationLog notification = NotificationLog.builder()
         .receiverId(receiver.getId())
         .notificationType(POINT_RECEIVED)
+        .member(receiver)
         .build();
     notificationRepository.save(notification);
   }
