@@ -4,6 +4,7 @@ import com.unity.goods.domain.member.entity.Member;
 import com.unity.goods.domain.notification.type.NotificationType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
@@ -18,12 +19,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Builder
+@EntityListeners(AuditingEntityListener.class)
 public class NotificationLog {
 
   @Id
