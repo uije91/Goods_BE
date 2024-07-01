@@ -78,6 +78,17 @@ public class GoodsController {
     return ResponseEntity.ok(goodsNearBy);
   }
 
+  @GetMapping("/point")
+  public ResponseEntity<?> getPointGoods(@RequestParam double lat, @RequestParam double lng) {
+    SearchHits<GoodsDocument> searchHits = goodsSearchService.findByGeoLocation(lat, lng);
+    if(!searchHits.isEmpty()){
+      return ResponseEntity.ok(
+          SearchedGoods.fromGoodsDocument(searchHits.getSearchHit(0).getContent()));
+    } else {
+      return ResponseEntity.notFound().build();
+    }
+  }
+
   @PostMapping("/new")
   public ResponseEntity<?> uploadGoods(
       @AuthenticationPrincipal UserDetailsImpl member,
