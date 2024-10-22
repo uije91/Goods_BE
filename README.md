@@ -1,11 +1,30 @@
 # 중고거래 플랫폼 굿즈(Goods)
+2024년 5월부터 7월 까지 약 2달간 진행한 팀프로젝트입니다.
+
+## 📝 프로젝트 기획
 물가 상승으로 인해 중고거래 수요가 증가하고 있습니다.<br>
 택배 거래는 배송 기간과 배송비가 추가된다는 점에서 근거리 거래를 희망하는 사람들이 많습니다.<br>
-럴 때 필요한 물건을 내 위치 기준 바로 이웃에게 구매할 수 있는 플랫폼을 만들고자 기획하게 되었습니다.
+그럴 때 필요한 물건을 내 위치 기준 바로 이웃에게 구매할 수 있는 플랫폼을 만들어보고자 프로젝트를 기획했습니다.
 
-### 📷 프로젝트 화면
+## 🔧 사용 기술
+<div>
+  <img src="https://img.shields.io/badge/Java-007396?style=flat-square&logo=Java&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Spring Boot-6DB33F?style=flat-square&logo=SpringBoot&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Spring JPA-6DB33F?style=flat-square&logo=SpringJPA&logoColor=white"/>
+</div>
+<div>
+  <img src="https://img.shields.io/badge/Oracle-F80000?style=flat-square&logo=Oracle&logoColor=white"/>
+  <img src="https://img.shields.io/badge/MySQL-4479A1?style=flat-square&logo=mysql&logoColor=white"/>
+  <img src="https://img.shields.io/badge/MariaDB-003545?style=flat-square&logo=MariaDB&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Redis-DC382D?style=flat-square&logo=Redis&logoColor=white"/>
+</div>
+<div>
+  <img src="https://img.shields.io/badge/Amazon S3-569A31?style=flat-square&logo=Amazon S3&logoColor=white"/>
+  <img src="https://img.shields.io/badge/elasticsearch-005571?style=flat-square&logo=elasticsearch&logoColor=white"/>
 
-![Goods 메인 화면](https://prod-files-secure.s3.us-west-2.amazonaws.com/d73a059d-ce15-4863-a9a2-7aab66d3fa5f/bfd0b4db-5201-4b27-b0c1-c0bcdc8d67fc/fedd878a-b942-42d4-b9fb-2e18d24fd567.png)
+</div>
+
+
 
 Goods 메인 화면
 
