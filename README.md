@@ -1,5 +1,6 @@
 # 중고거래 플랫폼 굿즈(Goods)
 2024년 5월부터 7월 까지 약 2달간 진행한 팀프로젝트입니다.
+<br><br>
 
 ## 📝 프로젝트 기획
 물가 상승으로 인해 중고거래 수요가 증가하고 있습니다.<br>
@@ -11,28 +12,21 @@
   <img src="https://img.shields.io/badge/Java-007396?style=flat-square&logo=Java&logoColor=white"/>
   <img src="https://img.shields.io/badge/Spring Boot-6DB33F?style=flat-square&logo=SpringBoot&logoColor=white"/>
   <img src="https://img.shields.io/badge/Spring Security-6DB33F?style=flat-square&logo=SpringSecurity&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Gradle-02303A?style=flat-square&logo=Gradle&logoColor=white"/>
 </div>
 <div>
-  <img src="https://img.shields.io/badge/Oracle-F80000?style=flat-square&logo=Oracle&logoColor=white"/>
-  <img src="https://img.shields.io/badge/MySQL-4479A1?style=flat-square&logo=mysql&logoColor=white"/>
-  <img src="https://img.shields.io/badge/MariaDB-003545?style=flat-square&logo=MariaDB&logoColor=white"/>
   <img src="https://img.shields.io/badge/Redis-DC382D?style=flat-square&logo=Redis&logoColor=white"/>
+  <img src="https://img.shields.io/badge/MySQL-4479A1?style=flat-square&logo=mysql&logoColor=white"/>
+  <img src="https://img.shields.io/badge/elasticsearch-005571?style=flat-square&logo=elasticsearch&logoColor=white"/>
 </div>
 <div>
+  <img src="https://img.shields.io/badge/Amazon EC2-FF9900?style=flat-square&logo=Amazon EC2&logoColor=white"/>
   <img src="https://img.shields.io/badge/Amazon S3-569A31?style=flat-square&logo=Amazon S3&logoColor=white"/>
-  <img src="https://img.shields.io/badge/elasticsearch-005571?style=flat-square&logo=elasticsearch&logoColor=white"/>
-
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=Docker&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Github Actions-2088FF?style=flat-square&logo=Github Actions&logoColor=white"/>
 </div>
 
-
-
-Goods 메인 화면
-
-### 🙋‍♂️ 주요 기능
-
-Pre 기획서 : [Pre 기획](https://www.notion.so/Pre-8b67d33251c240128f92bfb3a551df55?pvs=21) 
-
-### 🙋‍♂️ 나의 담당 역할
+## 🙋‍♂️ 나의 담당 역할
 
 **🙎‍♀ 회원**
 
